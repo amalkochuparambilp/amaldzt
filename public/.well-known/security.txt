@@ -1,0 +1,4 @@
+Contact: security@amalkp.online
+Expires: 2027-07-20T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://amalkp.online/.well-known/security.txt
