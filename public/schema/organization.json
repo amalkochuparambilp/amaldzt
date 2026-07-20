@@ -1,0 +1,56 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://amalkp.online/#organization",
+  "name": "Amal K P",
+  "alternateName": [
+    "AI Amal Studios",
+    "Amal Kochuparambil",
+    "Amal K P Personal Brand"
+  ],
+  "url": "https://amalkp.online",
+  "email": "contact@amalkp.online",
+  "logo": "https://amalkp.online/logo.png",
+  "image": "https://amalkp.online/banner.jpg",
+  "description": "Personal brand showcasing AI projects, full-stack web development expertise, innovative Blogger themes, and digital innovation from Kumily, Kerala.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Kumily",
+    "addressLocality": "Kumily",
+    "addressRegion": "Kerala",
+    "addressCountry": "IN",
+    "postalCode": "685553"
+  },
+  "telephone": "+91-XXXXXXXXXX",
+  "sameAs": [
+    "https://github.com/amalkochuparambilp",
+    "https://twitter.com/amalkochuparambil",
+    "https://linkedin.com/in/amal-k-p",
+    "https://instagram.com/amal_kp",
+    "https://youtube.com/@amalkp"
+  ],
+  "foundingDate": "2020",
+  "founder": {
+    "@type": "Person",
+    "@id": "https://amalkp.online/#person",
+    "name": "Amal K P"
+  },
+  "knowsAbout": [
+    "Artificial Intelligence",
+    "Web Development",
+    "Open Source",
+    "Blogger Themes",
+    "Digital Innovation",
+    "Technology Consulting"
+  ],
+  "areaServed": [
+    {
+      "@type": "Place",
+      "name": "India"
+    },
+    {
+      "@type": "Place",
+      "name": "Worldwide"
+    }
+  ]
+}

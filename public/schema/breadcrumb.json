@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://amalkp.online/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "About",
+      "item": "https://amalkp.online/about"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Portfolio",
+      "item": "https://amalkp.online/portfolio"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Projects",
+      "item": "https://amalkp.online/projects"
+    },
+    {
+      "@type": "ListItem",
+      "position": 5,
+      "name": "AI Projects",
+      "item": "https://amalkp.online/ai-projects"
+    },
+    {
+      "@type": "ListItem",
+      "position": 6,
+      "name": "Blogger Themes",
+      "item": "https://amalkp.online/blogger-themes"
+    },
+    {
+      "@type": "ListItem",
+      "position": 7,
+      "name": "Blog",
+      "item": "https://amalkp.online/blog"
+    },
+    {
+      "@type": "ListItem",
+      "position": 8,
+      "name": "Contact",
+      "item": "https://amalkp.online/contact"
+    }
+  ]
+}

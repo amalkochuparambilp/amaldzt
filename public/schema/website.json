@@ -1,0 +1,38 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://amalkp.online/#website",
+  "name": "Amal K P - AI Developer & Full Stack Web Developer Portfolio",
+  "url": "https://amalkp.online",
+  "description": "Personal portfolio of Amal K P showcasing AI projects, full-stack web development expertise, innovative Blogger themes, and digital creativity from Kumily, Kerala.",
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://amalkp.online/og-image.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://amalkp.online/#person",
+    "name": "Amal K P"
+  },
+  "creator": {
+    "@type": "Person",
+    "@id": "https://amalkp.online/#person",
+    "name": "Amal K P"
+  },
+  "inLanguage": "en-US",
+  "isAccessibleForFree": true,
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://amalkp.online/search?q={search_term_string}"
+    }
+  },
+  "mainEntity": {
+    "@type": "Person",
+    "@id": "https://amalkp.online/#person",
+    "name": "Amal K P"
+  }
+}

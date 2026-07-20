@@ -1,0 +1,86 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Who is Amal K P?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Amal K P is an AI developer, full-stack web developer, and digital creator from Kumily, Kerala, India. He specializes in artificial intelligence, web development, Blogger XML themes, UI/UX design, and open-source projects."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are Amal K P's areas of expertise?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Areas of expertise include: Artificial Intelligence, Machine Learning, Web Development, Full Stack Development, React, TypeScript, JavaScript, Node.js, Blogger XML Themes, UI/UX Design, SEO, Digital Marketing, and Open Source Development."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where is Amal K P located?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Amal K P is based in Kumily, Idukki, Kerala, India (Postal Code: 685553). However, he works with clients globally and provides remote services."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What projects has Amal K P created?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Amal K P has created multiple AI projects, full-stack web applications, innovative Blogger themes, and several open-source contributions. View his complete portfolio at https://amalkp.online/portfolio"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Amal K P offer consulting or development services?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, Amal K P offers AI development, full-stack web development, Blogger theme customization, and technology consulting services. Contact him at contact@amalkp.online for inquiries."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I contact Amal K P?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can contact Amal K P through: Email: contact@amalkp.online, GitHub: https://github.com/amalkochuparambilp, Twitter: https://twitter.com/amalkochuparambil, LinkedIn: https://linkedin.com/in/amal-k-p"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What programming languages does Amal K P use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Amal K P specializes in: TypeScript, JavaScript, Python, React, Node.js, Express.js, and various AI/ML frameworks. He also has expertise in HTML, CSS, and modern web development tools."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are Amal K P's Blogger themes about?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Amal K P creates responsive, SEO-optimized Blogger XML themes with modern designs, customizable features, and excellent performance. They are suitable for blogs, portfolios, and small business websites."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Amal K P active in open source?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, Amal K P actively contributes to open-source projects and maintains several repositories on GitHub. Check out his GitHub profile: https://github.com/amalkochuparambilp"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where can I find Amal K P's blog?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Amal K P's blog is available at https://amalkp.online/blog. He writes about AI, web development, technology trends, Blogger customization, and digital marketing."
+      }
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "https://amalkp.online/#person",
+  "name": "Amal K P",
+  "alternateName": [
+    "Amal KP",
+    "Amal K. P.",
+    "AI Amal",
+    "Amal Kochuparambil",
+    "Amal Kochuparambil P",
+    "Amal Kochuparambilp"
+  ],
+  "jobTitle": [
+    "AI Developer",
+    "Full Stack Web Developer",
+    "Digital Creator",
+    "Blogger Theme Designer",
+    "Open Source Contributor",
+    "Technology Consultant"
+  ],
+  "description": "AI enthusiast and full-stack web developer specializing in artificial intelligence, web development, Blogger XML themes, UI/UX design, and open-source projects from Kumily, Kerala, India.",
+  "url": "https://amalkp.online",
+  "email": "contact@amalkp.online",
+  "telephone": "+91-XXXXXXXXXX",
+  "image": "https://amalkp.online/profile-image.jpg",
+  "sameAs": [
+    "https://github.com/amalkochuparambilp",
+    "https://twitter.com/amalkochuparambil",
+    "https://linkedin.com/in/amal-k-p",
+    "https://instagram.com/amal_kp",
+    "https://youtube.com/@amalkp",
+    "https://dev.to/amalkp",
+    "https://medium.com/@amalkp"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Kumily",
+    "addressLocality": "Kumily",
+    "addressRegion": "Kerala",
+    "addressCountry": "IN",
+    "postalCode": "685553",
+    "coordinates": {
+      "@type": "GeoCoordinates",
+      "latitude": "10.3278",
+      "longitude": "77.0309"
+    }
+  },
+  "nationality": {
+    "@type": "Country",
+    "name": "India"
+  },
+  "knowsAbout": [
+    "Artificial Intelligence",
+    "Machine Learning",
+    "Deep Learning",
+    "Natural Language Processing",
+    "Web Development",
+    "Full Stack Development",
+    "React",
+    "TypeScript",
+    "JavaScript",
+    "Node.js",
+    "Blogger XML Themes",
+    "UI/UX Design",
+    "Responsive Design",
+    "SEO",
+    "Digital Marketing",
+    "Content Marketing",
+    "Open Source",
+    "Git & GitHub",
+    "Programming",
+    "Software Development",
+    "API Development",
+    "Database Design",
+    "Cloud Computing",
+    "DevOps"
+  ],
+  "award": [
+    "Expert Developer",
+    "AI Innovator",
+    "Open Source Contributor",
+    "Tech Influencer"
+  ],
+  "worksFor": {
+    "@type": "Organization",
+    "@id": "https://amalkp.online/#organization",
+    "name": "Amal K P Studios",
+    "url": "https://amalkp.online"
+  },
+  "alumniOf": [
+    {
+      "@type": "EducationalOrganization",
+      "name": "Self-taught Developer"
+    }
+  ],
+  "birthPlace": {
+    "@type": "Place",
+    "name": "Kumily, Kerala, India"
+  }
+}

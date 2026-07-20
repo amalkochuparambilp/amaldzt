@@ -1,0 +1,35 @@
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Amal K P",
+  "description": "AI Developer and Full Stack Web Developer from Kumily, Kerala, offering development services, consulting, and innovative Blogger themes.",
+  "url": "https://amalkp.online",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Kumily",
+    "addressLocality": "Kumily",
+    "addressRegion": "Kerala",
+    "postalCode": "685553",
+    "addressCountry": "IN"
+  },
+  "telephone": "+91-XXXXXXXXXX",
+  "email": "contact@amalkp.online",
+  "image": "https://amalkp.online/profile-image.jpg",
+  "sameAs": [
+    "https://github.com/amalkochuparambilp",
+    "https://twitter.com/amalkochuparambil",
+    "https://linkedin.com/in/amal-k-p"
+  ],
+  "areaServed": {
+    "@type": "Place",
+    "name": "Worldwide"
+  },
+  "serviceType": [
+    "Web Development",
+    "AI Development",
+    "Full Stack Development",
+    "Blogger Theme Design",
+    "UI/UX Design",
+    "Technology Consulting"
+  ]
+}
