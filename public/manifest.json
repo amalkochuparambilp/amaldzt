@@ -1,0 +1,81 @@
+{
+  "name": "Amal K P - AI & Web Developer Portfolio",
+  "short_name": "Amal K P",
+  "description": "Amal K P is an AI developer, full-stack web developer, and digital creator from Kumily, Kerala. Specializing in AI, web development, blogger themes, and open source.",
+  "start_url": "https://amalkp.online/",
+  "scope": "https://amalkp.online/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0066cc",
+  "categories": ["productivity", "developer-tools"],
+  "screenshots": [
+    {
+      "src": "https://amalkp.online/images/screenshot-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "https://amalkp.online/images/screenshot-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://amalkp.online/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "https://amalkp.online/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "https://amalkp.online/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://amalkp.online/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://amalkp.online/favicon-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Portfolio",
+      "short_name": "Portfolio",
+      "description": "View Amal K P's complete portfolio and projects",
+      "url": "https://amalkp.online/portfolio",
+      "icons": [
+        {
+          "src": "https://amalkp.online/icons/portfolio-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Read Blog",
+      "short_name": "Blog",
+      "description": "Read latest articles about AI, web development, and technology",
+      "url": "https://amalkp.online/blog",
+      "icons": [
+        {
+          "src": "https://amalkp.online/icons/blog-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
