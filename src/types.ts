@@ -3,7 +3,7 @@ export interface Project {
   title: string;
   description: string;
   longDescription?: string;
-  category: 'web' | 'mobile' | 'system' | 'design';
+  category: 'web' | 'django' | 'system' | 'portal';
   tech: string[];
   features?: string[];
   imageUrl?: string;
@@ -15,19 +15,17 @@ export interface Project {
 export interface Skill {
   name: string;
   level: number; // 0 to 100
-  category: 'Frontend' | 'Backend' | 'Design' | 'Tools';
-  icon: string; // lucide icon name
+  category: 'Frontend' | 'Backend' | 'Core & Tools' | 'Professional';
+  icon: string;
 }
 
-export interface TerminalCommand {
-  command: string;
-  description: string;
-  usage?: string;
-}
-
-export interface TerminalLog {
+export interface Collaboration {
   id: string;
-  type: 'input' | 'output' | 'error' | 'success' | 'system';
-  text: string;
-  timestamp: string;
+  role: string;
+  organization: string;
+  badge: string;
+  logoType: 'libcode' | 'hgema' | 'medialoom';
+  description: string;
+  highlights: string[];
+  tags: string[];
 }

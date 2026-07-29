@@ -1,6 +1,6 @@
 import { useRef } from 'react';
-import { Download, Mail, Github, MapPin, Award, BookOpen, Layers, Briefcase, ExternalLink, Printer } from 'lucide-react';
-import { AMAL_INFO, PROJECTS, SKILLS } from '../data';
+import { AMAL_INFO, PROJECTS } from '../data';
+import { Printer, Mail, MapPin, Linkedin, Phone, GraduationCap, Award, Languages, Code2 } from 'lucide-react';
 
 export default function Resume() {
   const resumeRef = useRef<HTMLDivElement>(null);
@@ -10,187 +10,152 @@ export default function Resume() {
   };
 
   return (
-    <section id="resume-section" className="py-20 px-4 max-w-4xl mx-auto space-y-8">
+    <section id="resume-section" className="py-12 md:py-20 px-4 sm:px-6 max-w-4xl mx-auto space-y-8">
       {/* Upper header action controls */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-white/10 pb-6 no-print">
-        <div className="space-y-1.5 text-center sm:text-left">
-          <h2 className="text-3xl font-display font-bold text-white tracking-tight">Curriculum Vitae</h2>
-          <p className="text-gray-400 font-light text-sm font-sans">
-            A printable, high-symmetry overview of academic qualifications and project logs.
+        <div className="space-y-1 text-center sm:text-left">
+          <h2 className="text-3xl font-bold tracking-tight text-white uppercase">Curriculum Vitae</h2>
+          <p className="text-xs text-white/50 font-sans">
+            Formal resume record derived from academic & project telemetry.
           </p>
         </div>
-
         <button
-          id="btn-print-resume"
           onClick={handlePrint}
-          className="px-5 py-3 rounded-sm bg-white text-black text-xs font-mono font-medium hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-white/5 cursor-pointer uppercase tracking-wider font-bold"
+          className="px-5 py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-white/90 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg rounded-xs glitch-button"
         >
           <Printer className="w-4 h-4" />
-          Print / Download PDF Resume
+          Print / Save PDF
         </button>
       </div>
 
       {/* Printable Sheet */}
       <div 
         ref={resumeRef}
-        className="bg-cyber-card border border-white/10 rounded-sm p-6 sm:p-10 text-gray-300 font-sans space-y-8 shadow-2xl relative overflow-hidden"
+        className="bg-[#111] border border-white/10 rounded-sm p-6 sm:p-10 text-gray-200 font-sans space-y-8 shadow-2xl relative overflow-hidden"
       >
-        {/* Dynamic Glow Accents (Hidden on Print) */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-[80px] no-print pointer-events-none" />
-
-        {/* CV Header: Name, Title, Contacts */}
-        <div className="border-b border-white/10 pb-6 flex flex-col sm:flex-row justify-between items-start gap-4">
-          <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">{AMAL_INFO.name}</h1>
-            <p className="text-white font-mono text-sm tracking-wide uppercase">{AMAL_INFO.title}</p>
-            <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-gray-500 pt-1.5">
-              <span className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-white" />
-                {AMAL_INFO.location}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <BookOpen className="w-3.5 h-3.5 text-white/60" />
-                BCA Student @ JNIAS Balagram
-              </span>
-            </div>
+        {/* Header Block */}
+        <div className="border-b border-white/10 pb-6 space-y-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{AMAL_INFO.name}</h1>
+            <p className="text-xs font-mono text-white/60 tracking-wider uppercase mt-1">
+              BCA Candidate • Jawaharlal Nehru Institute of Art and Science
+            </p>
           </div>
 
-          <div className="flex flex-col gap-1.5 font-mono text-xs text-gray-400 sm:text-right w-full sm:w-auto">
-            <a href={`mailto:${AMAL_INFO.email}`} className="hover:text-white flex items-center gap-1.5 sm:justify-end">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-white/70">
+            <a href={`mailto:${AMAL_INFO.email}`} className="hover:text-white flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-white/50" />
               <span>{AMAL_INFO.email}</span>
-              <Mail className="w-3.5 h-3.5" />
             </a>
-            <a href={AMAL_INFO.github} target="_blank" rel="noreferrer" className="hover:text-white flex items-center gap-1.5 sm:justify-end">
-              <span>github.com/amalkp</span>
-              <Github className="w-3.5 h-3.5" />
+            <span className="text-white/20">|</span>
+            <span className="flex items-center gap-1.5">
+              <Phone className="w-3.5 h-3.5 text-white/50" />
+              <span>{AMAL_INFO.phone}</span>
+            </span>
+            <span className="text-white/20">|</span>
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-white/50" />
+              <span>{AMAL_INFO.location}</span>
+            </span>
+            <span className="text-white/20">|</span>
+            <a href={AMAL_INFO.linkedin} target="_blank" rel="noreferrer" className="hover:text-white flex items-center gap-1.5">
+              <Linkedin className="w-3.5 h-3.5 text-white/50" />
+              <span>linkedin.com/in/amalkochuparambilp</span>
             </a>
           </div>
         </div>
 
-        {/* CV Bio Statement */}
+        {/* Professional Summary */}
         <div className="space-y-2">
-          <h3 className="text-xs font-mono uppercase text-white/60 tracking-wider">Professional Profile</h3>
-          <p className="text-sm font-light leading-relaxed text-gray-400">
-            {AMAL_INFO.bio} Focused on engineering responsive user interface architectures and modular web tools under the DZt initiative.
+          <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-white/40 border-b border-white/5 pb-1">
+            PROFESSIONAL SUMMARY
+          </h3>
+          <p className="text-sm text-white/80 leading-relaxed font-light">
+            Recent BCA graduate seeking entry-level opportunity to apply foundational skills and grow professionally. Passionate developer specializing in high-performance user interfaces, Python/Django health analytics platforms, and co-operative bank portal solutions.
           </p>
         </div>
 
-        {/* 2-Column Split: Experience/Education on Left, Skills/Ecosystem on Right */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pt-2">
-          
-          {/* Left Column: Academics & Projects (7 Columns) */}
-          <div className="md:col-span-7 space-y-6">
-            
-            {/* Education section */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-mono uppercase text-white/60 tracking-wider flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                Academic Background
-              </h3>
-              <div className="border-l border-white/10 pl-4 space-y-3 relative">
-                <div className="space-y-1 relative">
-                  {/* Visual Node Bullet */}
-                  <span className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-white border-2 border-cyber-card" />
-                  <div className="flex justify-between items-center text-sm font-semibold text-white">
-                    <h4>Bachelor of Computer Applications (BCA)</h4>
-                    <span className="text-xs font-mono text-gray-500">2024 - 2027</span>
-                  </div>
-                  <p className="text-xs font-mono text-gray-400">Jawaharlal Nehru Institute of Advanced Studies (JNIAS), Balagram</p>
-                  <p className="text-xs text-gray-500 font-light mt-1">Acquiring strong foundations in computer networks, relational databases, data structures, and responsive software application lifecycles.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Experience / Leadership section */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-mono uppercase text-white/60 tracking-wider flex items-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                Leadership & Initiative
-              </h3>
-              <div className="border-l border-white/10 pl-4 space-y-4 relative">
-                <div className="space-y-1 relative">
-                  <span className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-white border-2 border-cyber-card" />
-                  <div className="flex justify-between items-center text-sm font-semibold text-white">
-                    <h4>Founder & Lead Architect</h4>
-                    <span className="text-xs font-mono text-gray-500">2024 - Present</span>
-                  </div>
-                  <p className="text-xs font-mono text-gray-400">DZt Digital Ecosystem Initiative</p>
-                  <p className="text-xs text-gray-500 font-light mt-1">Conceived, designed, and maintains DZt, an autonomous ecosystem of minimalist web components, interactive utilities, and offline-first proxies designed for rapid, low-latency client compilation.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Key Project Logs */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-mono uppercase text-white/60 tracking-wider flex items-center gap-2">
-                <Award className="w-4 h-4" />
-                Featured Project Logs
-              </h3>
-              <div className="space-y-3">
-                {PROJECTS.slice(0, 3).map((proj) => (
-                  <div key={proj.id} className="bg-cyber-dark/40 border border-white/10 rounded-sm p-4 space-y-1">
-                    <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-mono font-semibold text-white">{proj.title}</h4>
-                      <span className="text-[10px] font-mono text-gray-500 uppercase">{proj.category}</span>
-                    </div>
-                    <p className="text-xs text-gray-400 font-light leading-relaxed">{proj.description}</p>
-                    <p className="text-[10px] font-mono text-gray-500 pt-1">Stack: {proj.tech.slice(0, 4).join(', ')}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+        {/* Skills */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-white/40 border-b border-white/5 pb-1">
+            SKILLS
+          </h3>
+          <div className="flex flex-wrap gap-2 text-xs font-mono">
+            {['Team Work', 'Computer Literacy', 'PHP', 'React', 'Python', 'Django', 'SQLite', 'JavaScript', 'TypeScript', 'Tailwind CSS'].map((skill) => (
+              <span key={skill} className="px-3 py-1 bg-white/5 border border-white/10 text-white">
+                {skill}
+              </span>
+            ))}
           </div>
-
-          {/* Right Column: Skills & DZt Ecosystem Details (5 Columns) */}
-          <div className="md:col-span-5 space-y-6">
-            
-            {/* Tech Stack List */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-mono uppercase text-white/60 tracking-wider flex items-center gap-2">
-                <Layers className="w-4 h-4" />
-                Technical Competence
-              </h3>
-              <div className="space-y-3.5">
-                {['Frontend', 'Backend', 'Tools'].map((cat) => {
-                  const filtered = SKILLS.filter(s => s.category === cat);
-                  return (
-                    <div key={cat} className="space-y-1.5">
-                      <h4 className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">{cat} Stack</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {filtered.map((s) => (
-                          <span key={s.name} className="px-2 py-0.5 rounded-sm bg-cyber-dark text-[10px] font-mono text-white border border-white/10">
-                            {s.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* DZt Core Philosophy */}
-            <div className="bg-cyber-dark/30 border border-white/10 rounded-sm p-5 space-y-3">
-              <h4 className="text-xs font-mono uppercase text-white/60 tracking-wider">The DZt Philosophy</h4>
-              <p className="text-xs text-gray-400 font-light leading-relaxed">
-                "Symmetry. Simplicity. Speed." Aligned strictly to modular grids, removing unnecessary UI decorations, and maintaining GPU-accelerated fluid motion transitions.
-              </p>
-              <div className="grid grid-cols-3 gap-1.5 text-center pt-1 text-[10px] font-mono text-gray-500">
-                <div className="border border-white/10 py-1 bg-cyber-dark/40">SYMMETRY</div>
-                <div className="border border-white/10 py-1 bg-cyber-dark/40">SIMPLICITY</div>
-                <div className="border border-white/10 py-1 bg-cyber-dark/40">SPEED</div>
-              </div>
-            </div>
-
-          </div>
-
         </div>
 
-        {/* Resume Footer (Print Stamp) */}
-        <div className="border-t border-white/10 pt-6 flex justify-between items-center text-xs font-mono text-gray-500">
-          <span>DZt_OS_VERIFY://Amal_K_P_Resume</span>
-          <span className="text-right">Balagram, Kerala, India</span>
+        {/* Projects */}
+        <div className="space-y-4">
+          <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-white/40 border-b border-white/5 pb-1">
+            PROJECTS
+          </h3>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <div className="flex justify-between items-baseline">
+                <h4 className="text-sm font-bold text-white">Co-operative bank Exam Portal</h4>
+                <span className="text-xs font-mono text-white/40">PHP, MySQL, HTML/CSS</span>
+              </div>
+              <ul className="list-disc list-inside text-xs text-white/70 space-y-1 font-light">
+                <li>Complete Exam portal engineered for Co-operative Bank with auto-grading, randomized question pools, and timing modules.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between items-baseline">
+                <h4 className="text-sm font-bold text-white">Hrdiya · Python, Django, Sqlite</h4>
+                <span className="text-xs font-mono text-white/40">Python, Django, SQLite</span>
+              </div>
+              <ul className="list-disc list-inside text-xs text-white/70 space-y-1 font-light">
+                <li>Web application made with Python & Django used to analyze heart disease risk parameters and consult cardiologists directly.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between items-baseline">
+                <h4 className="text-sm font-bold text-white">DZt Ecosystem & Interactive Web OS</h4>
+                <span className="text-xs font-mono text-white/40">Founder & Lead Architect</span>
+              </div>
+              <ul className="list-disc list-inside text-xs text-white/70 space-y-1 font-light">
+                <li>Command shell, web tools, and modular React component design systems created under the DZt initiative.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Education */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-white/40 border-b border-white/5 pb-1">
+            EDUCATION
+          </h3>
+          <div className="flex justify-between items-start text-xs">
+            <div>
+              <h4 className="text-sm font-bold text-white">Bachelor of Computer Application (BCA)</h4>
+              <p className="text-white/60 font-mono mt-0.5">Jawaharlal Nehru Institute of Art and Science</p>
+            </div>
+            <div className="text-right font-mono text-white/50">
+              <p>Mar 2026</p>
+              <p>Balagram, Idukki</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Languages */}
+        <div className="space-y-2">
+          <h3 className="text-xs font-mono uppercase tracking-[0.2em] text-white/40 border-b border-white/5 pb-1">
+            LANGUAGES
+          </h3>
+          <p className="text-xs font-mono text-white/80">English, Malayalam</p>
+        </div>
+
+        {/* Resume Footer */}
+        <div className="border-t border-white/10 pt-4 flex justify-between items-center text-[10px] font-mono text-white/40">
+          <span>AMAL K P — RESUME DOCUMENT</span>
+          <span>BALAGRAM, IDUKKI, KERALA</span>
         </div>
       </div>
     </section>

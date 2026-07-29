@@ -1,232 +1,197 @@
-import React, { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Send, Github, Linkedin, MapPin, Check, Loader2, MessageSquare } from 'lucide-react';
 import { AMAL_INFO } from '../data';
+import { Mail, Phone, MapPin, Linkedin, Github, Send, Check, MessageSquare } from 'lucide-react';
 
 export default function Contact() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
 
-  const validateEmail = (email: string) => {
-    return email.includes('@') && email.includes('.');
-  };
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success'>('idle');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name.trim()) {
-      setStatus('error');
-      setErrorMessage('Please provide your name.');
-      return;
-    }
-    if (!formData.email.trim() || !validateEmail(formData.email)) {
-      setStatus('error');
-      setErrorMessage('Please provide a valid email address.');
-      return;
-    }
-    if (!formData.message.trim()) {
-      setStatus('error');
-      setErrorMessage('Message cannot be empty.');
-      return;
-    }
+    if (!formData.name || !formData.email || !formData.message) return;
 
     setStatus('sending');
-    setErrorMessage('');
-
-    // Simulate sending message
     setTimeout(() => {
       setStatus('success');
       setFormData({ name: '', email: '', message: '' });
-    }, 1500);
+    }, 1000);
   };
 
   return (
-    <section id="contact" className="py-20 px-4 max-w-6xl mx-auto space-y-12">
-      <div className="space-y-4 text-center sm:text-left">
-        <h2 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight flex items-center justify-center sm:justify-start gap-3">
-          <span className="w-8 h-[1px] bg-neon-cyan hidden sm:block"></span>
-          Connect With Me
-        </h2>
-        <p className="text-gray-400 font-light max-w-xl font-sans">
-          Have an exciting project, research, or query? Fill out the contact terminal or reach out directly via standard relays.
+    <section id="contact-section" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-white/10 pb-6">
+        <div className="space-y-1">
+          <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Transmission Relay</span>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase">
+            GET IN TOUCH
+          </h2>
+        </div>
+        <p className="text-xs text-white/50 max-w-sm font-sans leading-relaxed">
+          Reach out for collaborations, project inquiries, or software discussions.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left 5 Columns: Direct Relays & Location Cards */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-cyber-card border border-white/10 rounded-sm p-6 sm:p-8 space-y-6">
-            <h3 className="text-lg font-display font-semibold text-white">Direct Channels</h3>
-            
-            <div className="space-y-4">
-              {/* Mail card */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left 5 cols: Info Cards */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="bg-[#111] border border-white/10 p-6 space-y-6">
+            <h3 className="text-lg font-bold text-white uppercase tracking-tight">Direct Channels</h3>
+
+            <div className="space-y-4 text-xs font-mono">
               <a 
                 href={`mailto:${AMAL_INFO.email}`}
-                className="flex items-center gap-4 p-4 rounded-sm bg-white/5 border border-white/10 hover:border-white/30 hover:bg-white/[0.04] transition-all group"
+                className="flex items-center gap-4 p-4 bg-black/60 border border-white/10 hover:border-white/30 transition-all group"
               >
-                <div className="p-3 rounded-sm bg-black border border-white/10 group-hover:border-white/30">
-                  <Mail className="w-5 h-5 text-white" />
+                <div className="p-2.5 bg-white/5 border border-white/10">
+                  <Mail className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs font-mono text-gray-500 uppercase">Primary Email</p>
-                  <p className="text-sm font-semibold text-white mt-0.5">{AMAL_INFO.email}</p>
+                  <span className="text-[10px] text-white/40 uppercase block">Email Address</span>
+                  <span className="text-white group-hover:underline">{AMAL_INFO.email}</span>
                 </div>
               </a>
 
-              {/* Location card */}
-              <div className="flex items-center gap-4 p-4 rounded-sm bg-white/5 border border-white/10">
-                <div className="p-3 rounded-sm bg-black border border-white/10">
-                  <MapPin className="w-5 h-5 text-white/70" />
+              <a 
+                href={`tel:${AMAL_INFO.phone}`}
+                className="flex items-center gap-4 p-4 bg-black/60 border border-white/10 hover:border-white/30 transition-all group"
+              >
+                <div className="p-2.5 bg-white/5 border border-white/10">
+                  <Phone className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs font-mono text-gray-500 uppercase">Location</p>
-                  <p className="text-sm font-semibold text-white mt-0.5">{AMAL_INFO.location}, Kerala, India</p>
+                  <span className="text-[10px] text-white/40 uppercase block">Phone / Mobile</span>
+                  <span className="text-white group-hover:underline">{AMAL_INFO.phone}</span>
+                </div>
+              </a>
+
+              <div className="flex items-center gap-4 p-4 bg-black/60 border border-white/10">
+                <div className="p-2.5 bg-white/5 border border-white/10">
+                  <MapPin className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <span className="text-[10px] text-white/40 uppercase block">Location</span>
+                  <span className="text-white">{AMAL_INFO.location}</span>
                 </div>
               </div>
             </div>
 
-            {/* Social handles */}
-            <div className="space-y-3 pt-2">
-              <h4 className="text-xs font-mono text-gray-500 uppercase tracking-wider">Social Relays</h4>
-              <div className="flex gap-2">
-                <a 
-                  href={AMAL_INFO.github} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="p-3 rounded-sm border border-white/10 bg-white/5 hover:border-white/40 hover:text-white transition-all text-gray-400 cursor-pointer"
-                >
-                  <Github className="w-4 h-4" />
-                </a>
-                <a 
-                  href={AMAL_INFO.linkedin} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="p-3 rounded-sm border border-white/10 bg-white/5 hover:border-white/40 hover:text-white transition-all text-gray-400 cursor-pointer"
-                >
-                  <Linkedin className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-          </div>
+            {/* Social links */}
+            <div className="pt-2 border-t border-white/10 flex gap-3">
+              <a 
+                href={AMAL_INFO.github}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 py-2.5 border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-mono text-center text-white transition-colors flex items-center justify-center gap-2"
+              >
+                <Github className="w-4 h-4" />
+                <span>GitHub</span>
+              </a>
 
-          {/* DZt Core OS terminal status block */}
-          <div className="bg-cyber-card/30 border border-white/10 rounded-sm p-6 flex items-center justify-between font-mono text-xs text-gray-500">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <span>DZt_OS://mail_relay_active</span>
+              <a 
+                href={AMAL_INFO.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 py-2.5 border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-mono text-center text-white transition-colors flex items-center justify-center gap-2"
+              >
+                <Linkedin className="w-4 h-4" />
+                <span>LinkedIn</span>
+              </a>
             </div>
-            <span>v1.4.2</span>
           </div>
         </div>
 
-        {/* Right 7 Columns: Form Container */}
-        <div className="lg:col-span-7 bg-cyber-card border border-white/10 rounded-sm p-6 sm:p-8 relative">
+        {/* Right 7 cols: Interactive Form */}
+        <div className="lg:col-span-7 bg-[#111] border border-white/10 p-6 sm:p-8 space-y-6">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <h3 className="text-lg font-bold text-white uppercase tracking-tight flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-white/60" />
+              <span>SEND DIRECT MESSAGE</span>
+            </h3>
+            <span className="text-[10px] font-mono text-white/40">RELAY ACTIVE</span>
+          </div>
+
           <AnimatePresence mode="wait">
             {status === 'success' ? (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="py-12 text-center space-y-4"
               >
                 <div className="w-12 h-12 rounded-full bg-white/10 border border-white mx-auto flex items-center justify-center">
-                  <Check className="w-6 h-6 text-white animate-[bounce_1s_infinite]" />
+                  <Check className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-display font-semibold text-white">Message Transmitted</h3>
-                <p className="text-gray-400 text-xs sm:text-sm font-light max-w-sm mx-auto font-sans leading-relaxed">
-                  Your message has been processed and securely synchronized. I will review it and reply as soon as possible. Thank you!
+                <h4 className="text-xl font-bold text-white">Message Transmitted</h4>
+                <p className="text-xs text-white/60 max-w-sm mx-auto font-sans leading-relaxed">
+                  Thank you for reaching out to Amal K P. I will respond to your email as soon as possible.
                 </p>
                 <button
-                  id="btn-send-another"
                   onClick={() => setStatus('idle')}
-                  className="mt-4 px-4 py-2 rounded-sm bg-white/10 border border-white/20 text-xs font-mono text-white hover:bg-white/20 transition-colors cursor-pointer"
+                  className="mt-4 px-4 py-2 border border-white/20 bg-white/10 text-xs font-mono text-white hover:bg-white/20 transition-colors cursor-pointer"
                 >
                   Send Another Message
                 </button>
               </motion.div>
             ) : (
-              <motion.form 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onSubmit={handleSubmit}
-                className="space-y-6"
-              >
-                <div className="space-y-1 border-b border-white/10 pb-4 flex items-center gap-2 text-xs font-mono text-gray-500">
-                  <MessageSquare className="w-4 h-4 text-white/50" />
-                  <span>TRANSMIT_SECURE_PAYLOAD</span>
+              <form onSubmit={handleSubmit} className="space-y-4 text-xs font-mono">
+                <div className="space-y-1">
+                  <label className="text-white/60 uppercase">Your Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. John Doe"
+                    className="w-full p-3 bg-black border border-white/10 rounded-sm text-white focus:outline-none focus:border-white/40"
+                  />
                 </div>
 
-                {errorMessage && (
-                  <div className="p-3.5 bg-red-500/5 border border-red-500/20 text-red-400 text-xs font-mono rounded-sm">
-                    [ERROR]: {errorMessage}
-                  </div>
-                )}
+                <div className="space-y-1">
+                  <label className="text-white/60 uppercase">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="e.g. john@example.com"
+                    className="w-full p-3 bg-black border border-white/10 rounded-sm text-white focus:outline-none focus:border-white/40"
+                  />
+                </div>
 
-                <div className="space-y-4">
-                  {/* Name field */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-name" className="block text-xs font-mono text-gray-500 uppercase tracking-wider">Your Name</label>
-                    <input
-                      id="input-name"
-                      type="text"
-                      disabled={status === 'sending'}
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Enter full name"
-                      className="w-full px-4 py-3 bg-black border border-white/10 rounded-sm text-sm text-white focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/30 disabled:opacity-50 transition-all font-sans"
-                    />
-                  </div>
-
-                  {/* Email field */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-email" className="block text-xs font-mono text-gray-500 uppercase tracking-wider">Email Address</label>
-                    <input
-                      id="input-email"
-                      type="email"
-                      disabled={status === 'sending'}
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="name@domain.com"
-                      className="w-full px-4 py-3 bg-black border border-white/10 rounded-sm text-sm text-white focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/30 disabled:opacity-50 transition-all font-sans"
-                    />
-                  </div>
-
-                  {/* Message field */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="input-message" className="block text-xs font-mono text-gray-500 uppercase tracking-wider">Your Message</label>
-                    <textarea
-                      id="input-message"
-                      rows={5}
-                      disabled={status === 'sending'}
-                      value={formData.message}
-                      onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                      placeholder="State your project, proposal, or general query..."
-                      className="w-full px-4 py-3 bg-black border border-white/10 rounded-sm text-sm text-white focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/30 disabled:opacity-50 transition-all font-sans resize-none"
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-white/60 uppercase">Message / Proposal</label>
+                  <textarea
+                    required
+                    rows={5}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    placeholder="Write your message here..."
+                    className="w-full p-3 bg-black border border-white/10 rounded-sm text-white focus:outline-none focus:border-white/40 resize-none"
+                  />
                 </div>
 
                 <button
-                  id="btn-submit-contact"
                   type="submit"
                   disabled={status === 'sending'}
-                  className="w-full px-5 py-3.5 rounded-sm bg-white text-black hover:bg-neutral-200 disabled:bg-neutral-500 disabled:opacity-50 font-mono text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg"
+                  className="w-full py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {status === 'sending' ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin text-black" />
-                      Relaying Message Package...
-                    </>
+                    <span>Transmitting...</span>
                   ) : (
                     <>
-                      <Send className="w-4 h-4" />
-                      Transmit Payload
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Transmit Message</span>
                     </>
                   )}
                 </button>
-              </motion.form>
+              </form>
             )}
           </AnimatePresence>
         </div>

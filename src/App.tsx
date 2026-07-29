@@ -1,107 +1,234 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Terminal, Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Code2 } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, ShieldCheck, Activity, Terminal, UserCheck, Handshake, Battery, BatteryCharging } from 'lucide-react';
 
 import Hero from './components/Hero';
+import About from './components/About';
+import Collaborate from './components/Collaborate';
 import Projects from './components/Projects';
 import Skills from './components/Skills';
-import DZtEcosystem from './components/DZtEcosystem';
-import TerminalComponent from './components/Terminal';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import { AMAL_INFO } from './data';
 
-type Tab = 'home' | 'projects' | 'skills' | 'os' | 'resume' | 'contact';
+type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'contact';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSystemBooted, setIsSystemBooted] = useState(false);
+  const [bootProgress, setBootProgress] = useState(0);
+  const [bootStep, setBootStep] = useState(0);
 
-  // Mock initial booting loader sequence to "make it gasp" right away
+  const [batteryStatus, setBatteryStatus] = useState<{
+    level: number | null;
+    charging: boolean | null;
+    supported: boolean;
+  }>({
+    level: null,
+    charging: null,
+    supported: false,
+  });
+
+  const bootLogs = [
+    { label: 'LIBRARY CORE', text: 'Initializing LibCode JNIAS Database & Barcode Engines...' },
+    { label: 'CYBERSECURITY', text: 'Loading Hgema Exploit Analysis Visual Infographic Modules...' },
+    { label: 'BROADCAST MEDIA', text: 'Syncing MediaLoom YouTube Graphic & Design Workflow Suite...' },
+    { label: 'SYSTEM READY', text: 'Launching Amal K P DZt Digital Workspace...' }
+  ];
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsSystemBooted(true);
-    }, 1200);
-    return () => clearTimeout(timer);
+    const progressInterval = setInterval(() => {
+      setBootProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          setTimeout(() => setIsSystemBooted(true), 300);
+          return 100;
+        }
+        const next = prev + Math.floor(Math.random() * 18 + 12);
+        if (next > 25 && next <= 50) setBootStep(1);
+        if (next > 50 && next <= 75) setBootStep(2);
+        if (next > 75) setBootStep(3);
+        return Math.min(next, 100);
+      });
+    }, 180);
+
+    return () => clearInterval(progressInterval);
+  }, []);
+
+  // Battery Status API listener for real-time tracking
+  useEffect(() => {
+    let batteryObj: any = null;
+
+    const initBattery = async () => {
+      if ('getBattery' in navigator) {
+        try {
+          // @ts-ignore
+          batteryObj = await navigator.getBattery();
+          const update = () => {
+            setBatteryStatus({
+              level: Math.round(batteryObj.level * 100),
+              charging: batteryObj.charging,
+              supported: true,
+            });
+          };
+          update();
+          batteryObj.addEventListener('levelchange', update);
+          batteryObj.addEventListener('chargingchange', update);
+        } catch {
+          setBatteryStatus({ level: 100, charging: true, supported: false });
+        }
+      } else {
+        setBatteryStatus({ level: 100, charging: true, supported: false });
+      }
+    };
+
+    initBattery();
   }, []);
 
   const handleNavigate = (tab: string) => {
     setActiveTab(tab as Tab);
     setIsMobileMenuOpen(false);
-    // Smooth scroll to top when changing tabs
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Sparkles },
+    { id: 'about', label: 'About', icon: UserCheck },
+    { id: 'collaborate', label: 'Collaborate', icon: Handshake },
     { id: 'projects', label: 'Projects', icon: Layers },
     { id: 'skills', label: 'Skills', icon: Cpu },
-    { id: 'os', label: 'DZt OS', icon: Terminal },
     { id: 'resume', label: 'Resume', icon: BookOpen },
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 
   return (
-    <div className="min-h-screen bg-cyber-dark text-gray-100 flex flex-col font-sans selection:bg-neon-cyan/25 selection:text-white relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#050505] text-[#e0e0e0] flex flex-col font-sans selection:bg-white/20 selection:text-white relative overflow-x-hidden">
       
-      {/* OS Booting Screen animation */}
+      {/* Tech & AI Level Bootscreen Loader Animation */}
       <AnimatePresence>
         {!isSystemBooted && (
           <motion.div 
-            id="os-boot-loader"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
-            className="fixed inset-0 bg-[#050508] z-50 flex flex-col items-center justify-center p-4 font-mono text-xs text-neon-cyan space-y-4 select-none"
+            exit={{ opacity: 0, scale: 1.02 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            className="fixed inset-0 bg-[#050505] z-50 flex flex-col items-center justify-center p-6 font-mono text-xs text-white select-none overflow-hidden"
           >
-            <div className="space-y-1 text-center">
-              <p className="text-gray-600">--- DZT DIGITAL ECOSYSTEM BOOT SEQUENCE ---</p>
-              <p className="animate-pulse text-sm font-semibold tracking-widest text-white mt-1">D Z T _ O S  v 1 . 4 . 2</p>
-            </div>
-            
-            <div className="w-48 h-1 bg-cyber-border rounded-full overflow-hidden border border-cyber-border/40 relative">
-              <motion.div 
-                initial={{ left: '-100%' }}
-                animate={{ left: '100%' }}
-                transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
-                className="absolute top-0 bottom-0 w-24 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-full"
-              />
-            </div>
+            {/* Ambient Background Tech Grid & Pulse */}
+            <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+            <div className="absolute w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-3xl pointer-events-none animate-pulse" />
 
-            <div className="text-[10px] text-gray-500 uppercase flex items-center gap-1.5 pt-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-ping" />
-              <span>Initializing secure core kernels ...</span>
+            <div className="relative z-10 max-w-lg w-full bg-[#0a0a0a] border border-white/15 rounded-sm p-6 sm:p-8 space-y-6 shadow-2xl">
+              
+              {/* Header HUD Bar */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-4 text-[10px] text-white/50">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-white animate-pulse" />
+                  <span className="font-bold uppercase tracking-widest text-white">AMAL_AI_KERNEL_BOOT</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>LATENCY: 1.2ms</span>
+                </div>
+              </div>
+
+              {/* Central Visual Neural Radar */}
+              <div className="flex flex-col items-center justify-center py-4 relative">
+                <div className="relative w-24 h-24 flex items-center justify-center">
+                  <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 6, ease: 'linear' }}
+                    className="absolute inset-0 rounded-full border border-dashed border-white/30"
+                  />
+                  <motion.div 
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+                    className="w-16 h-16 rounded-full bg-white/5 border border-white/20 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                  >
+                    <Bot className="w-8 h-8 text-white" />
+                  </motion.div>
+                </div>
+                <div className="mt-3 text-center space-y-0.5">
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 block">AI INITIALIZATION SEQUENCE</span>
+                  <span className="text-xl font-bold tracking-widest text-white font-display">
+                    {bootProgress}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[10px] font-mono text-white/50 uppercase">
+                  <span>Progress</span>
+                  <span>{bootProgress < 100 ? 'Compiling Weights...' : 'Boot Complete'}</span>
+                </div>
+                <div className="w-full h-1.5 bg-black border border-white/10 rounded-xs overflow-hidden p-0.5">
+                  <motion.div 
+                    className="h-full bg-white"
+                    style={{ width: `${bootProgress}%` }}
+                    transition={{ ease: 'easeOut', duration: 0.2 }}
+                  />
+                </div>
+              </div>
+
+              {/* Telemetry Step Log Display */}
+              <div className="bg-black/60 border border-white/10 p-3 rounded-xs font-mono text-[11px] space-y-1.5">
+                <div className="flex items-center justify-between text-[9px] text-white/30 uppercase tracking-wider pb-1 border-b border-white/5">
+                  <span>Log Channel 01</span>
+                  <span className="text-emerald-400">ACTIVE</span>
+                </div>
+                <div className="text-white font-medium flex items-start gap-2">
+                  <Zap className="w-3.5 h-3.5 text-white/70 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] text-white/40 uppercase tracking-widest block">
+                      [{bootLogs[bootStep].label}]
+                    </span>
+                    <span className="text-white text-xs leading-tight block">
+                      {bootLogs[bootStep].text}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer System Spec Bar */}
+              <div className="pt-2 border-t border-white/10 flex justify-between items-center text-[9px] text-white/40 uppercase tracking-widest">
+                <span>JNIAS_BALAGRAM_NODE</span>
+                <span>STATUS: OPERATIONAL</span>
+              </div>
+
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Global Ambient grid layers */}
-      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none z-0" />
-      
-      {/* Print only Header (Hidden on screen) */}
+      {/* Global Ambient grid background */}
+      <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none z-0" />
+
+      {/* Printable Header */}
       <div className="hidden print-only text-black p-4 font-mono text-xs border-b border-gray-300">
-        AMAL K P // DZT ECOSYSTEM PORTFOLIO
+        AMAL K P // PORTFOLIO & RESUME DOCUMENT
       </div>
 
-      {/* Global Navigation Header (Hidden on Print) */}
-      <header className="sticky top-0 z-40 bg-cyber-dark/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-10 h-20 flex items-center justify-between no-print select-none">
-        {/* Brand Logo - High Density Signature */}
+      {/* Top Header Navigation */}
+      <header className="sticky top-0 z-40 bg-[#050505]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-10 h-20 flex items-center justify-between no-print select-none">
+        {/* Brand Logo - High Density Signature with Glitch Hover */}
         <button
           id="btn-nav-brand-logo"
           onClick={() => handleNavigate('home')}
-          className="flex items-center gap-3 py-1 text-white hover:opacity-90 transition-all cursor-pointer text-left"
+          className="flex items-center gap-3 py-1 text-white hover:opacity-90 transition-all cursor-pointer text-left glitch-hover group"
         >
-          <div className="w-9 h-9 bg-white text-black flex items-center justify-center rounded-sm font-black text-lg shadow-sm">
+          <div className="w-9 h-9 bg-white text-black flex items-center justify-center rounded-sm font-black text-lg shadow-sm glitch-icon transition-transform group-hover:scale-105">
             <span>A</span>
           </div>
           <div className="space-y-0.5">
-            <span className="block font-display font-bold text-sm uppercase tracking-tight leading-none">Amal K P</span>
-            <span className="block font-sans text-[9px] text-white/40 uppercase tracking-[0.1em] leading-none">Founder / Lead at DZt</span>
+            <h1 className="text-sm font-bold tracking-tight uppercase leading-none text-white flex items-center gap-1.5">
+              <span>Amal K P</span>
+              <span className="text-[9px] font-mono text-white/30 border border-white/20 px-1 py-0.2 rounded-xs font-normal">DZt</span>
+            </h1>
+            <p className="text-[10px] text-white/40 tracking-[0.1em] uppercase leading-none">BCA Candidate • JNIAS Balagram</p>
           </div>
         </button>
 
-        {/* Desktop minimalist tab bar */}
+        {/* Desktop Minimalist Navigation Bar */}
         <nav className="hidden md:flex items-center gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -130,49 +257,62 @@ export default function App() {
           })}
         </nav>
 
-        {/* Quick launch terminal toggle */}
+        {/* Header CTA Right */}
         <div className="flex items-center gap-3 no-print">
-          <button
-            id="btn-header-quick-terminal"
-            onClick={() => handleNavigate('os')}
-            className={`px-4 py-2 border text-xs font-mono transition-all items-center gap-1.5 hidden lg:flex cursor-pointer ${
-              activeTab === 'os'
-                ? 'bg-white/10 border-white text-white'
-                : 'border-white/10 hover:border-white/30 text-white/60 hover:text-white'
-            }`}
+          {/* Header Battery Status Tracker */}
+          <div 
+            id="header-battery-tracker"
+            className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-xs font-mono text-[11px] text-white/80 select-none hover:bg-white/10 transition-colors"
+            title={batteryStatus.charging ? 'Battery: Charging' : 'Battery: Discharging'}
           >
-            <Terminal className="w-3.5 h-3.5" />
-            <span className="uppercase tracking-wider">DZt_OS Console</span>
-          </button>
+            {batteryStatus.charging ? (
+              <BatteryCharging className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+            ) : (
+              <Battery className="w-3.5 h-3.5 text-white/70" />
+            )}
+            <span className="font-bold">{batteryStatus.level !== null ? `${batteryStatus.level}%` : '100%'}</span>
+            {batteryStatus.charging && (
+              <span className="hidden sm:inline-block text-[9px] font-semibold text-emerald-400 bg-emerald-500/20 px-1 py-0.2 rounded-2xs border border-emerald-500/30">
+                CHG
+              </span>
+            )}
+          </div>
 
-          {/* Quick Resume Button */}
+          <div className="hidden lg:flex items-center text-right pr-1">
+            <div>
+              <span className="block text-[10px] text-white/30 uppercase tracking-widest font-mono">Ecosystem</span>
+              <span className="text-xs font-medium tracking-tight text-white">Founder / Lead at <span className="italic font-serif">DZt</span></span>
+            </div>
+          </div>
+
           <button
+            id="btn-nav-resume-pdf"
             onClick={() => handleNavigate('resume')}
-            className="hidden sm:inline-block px-4 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-white/90 transition-colors cursor-pointer rounded-xs"
+            className="hidden sm:inline-block px-5 py-2.5 bg-white text-black text-xs font-bold font-mono uppercase tracking-widest hover:bg-white/90 transition-colors cursor-pointer rounded-xs glitch-button"
           >
-            Resume
+            Resume.pdf
           </button>
 
-          {/* Mobile hamburger menu toggle button */}
+          {/* Mobile hamburger menu toggle */}
           <button
             id="btn-mobile-menu-toggle"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-sm border border-white/10 hover:bg-white/5 text-white/60 hover:text-white transition-all cursor-pointer"
+            className="md:hidden min-w-[44px] min-h-[44px] p-2.5 rounded-sm border border-white/10 hover:bg-white/5 text-white/60 hover:text-white transition-all cursor-pointer flex items-center justify-center"
+            aria-label="Toggle Navigation Menu"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </header>
 
-      {/* Mobile Drawer Navigation (Hidden on Print) */}
+      {/* Mobile Drawer Navigation */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            id="mobile-nav-drawer"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-cyber-dark/95 border-b border-cyber-border/85 px-4 py-4 z-30 space-y-2 no-print relative"
+            className="md:hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/10 px-4 py-4 z-30 space-y-2 no-print relative"
           >
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -180,15 +320,14 @@ export default function App() {
               return (
                 <button
                   key={item.id}
-                  id={`mobile-tab-btn-${item.id}`}
                   onClick={() => handleNavigate(item.id)}
-                  className={`w-full px-4 py-3 rounded-lg text-sm font-mono flex items-center gap-3 transition-colors cursor-pointer ${
+                  className={`w-full min-h-[44px] px-4 py-3 rounded-sm text-xs font-mono uppercase tracking-wider flex items-center gap-3 transition-colors cursor-pointer ${
                     isActive 
-                      ? 'bg-cyber-border/50 text-white border border-white/5' 
-                      : 'text-gray-400 hover:bg-cyber-card/40 hover:text-white'
+                      ? 'bg-white/10 text-white border border-white/20 font-bold' 
+                      : 'text-white/60 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-neon-cyan' : 'text-gray-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-white/40'}`} />
                   <span>{item.label}</span>
                 </button>
               );
@@ -202,25 +341,25 @@ export default function App() {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             {activeTab === 'home' && (
-              <>
-                <Hero onNavigate={handleNavigate} onLaunchTerminal={() => handleNavigate('os')} />
-                <DZtEcosystem />
-              </>
+              <Hero onNavigate={handleNavigate} />
+            )}
+            {activeTab === 'about' && (
+              <About />
+            )}
+            {activeTab === 'collaborate' && (
+              <Collaborate onNavigate={handleNavigate} />
             )}
             {activeTab === 'projects' && (
-              <Projects onLaunchTerminal={() => handleNavigate('os')} />
+              <Projects />
             )}
             {activeTab === 'skills' && (
               <Skills />
-            )}
-            {activeTab === 'os' && (
-              <TerminalComponent />
             )}
             {activeTab === 'resume' && (
               <Resume />
@@ -232,18 +371,20 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Master Global Footer (Hidden on Print) */}
-      <footer className="border-t border-cyber-border/80 py-8 px-4 text-center text-xs font-mono text-gray-500 no-print select-none">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="flex items-center justify-center gap-1">
-            <span>© 2026</span>
-            <span className="text-white font-medium">{AMAL_INFO.name}</span>
-            <span>// Founder & Leader of DZt</span>
-          </p>
-          <div className="flex items-center gap-1 text-gray-600 text-[11px]">
-            <Code2 className="w-3.5 h-3.5 text-neon-cyan" />
-            <span>SYMMETRY // SIMPLICITY // SPEED</span>
-          </div>
+      {/* Footer */}
+      <footer className="h-20 px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between bg-[#080808] border-t border-white/10 gap-4 no-print select-none">
+        <div className="flex gap-6 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
+          <a href={AMAL_INFO.github} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
+          <a href={AMAL_INFO.linkedin} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+          <a href={`mailto:${AMAL_INFO.email}`} className="hover:text-white transition-colors">Email</a>
+        </div>
+        <div className="text-[10px] uppercase tracking-[0.1em] text-white/30 text-center">
+          © 2026 {AMAL_INFO.name} — Founder of DZt — All Rights Reserved
+        </div>
+        <div className="flex items-center gap-4 text-xs font-mono text-white/40 hidden md:flex">
+          <span>BALAGRAM_NODE</span>
+          <span className="text-white/10">|</span>
+          <span>STABLE_BUILD_v2.0</span>
         </div>
       </footer>
 

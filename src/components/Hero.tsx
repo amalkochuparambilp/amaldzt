@@ -1,56 +1,59 @@
 import { motion } from 'motion/react';
-import { Terminal, ArrowRight, Sparkles, MapPin, Code2 } from 'lucide-react';
+import { ArrowRight, Cpu, FileText, Mail, UserCheck } from 'lucide-react';
 import { AMAL_INFO } from '../data';
+import HeroTelemetry from './HeroTelemetry';
 
 interface HeroProps {
   onNavigate: (tab: string) => void;
-  onLaunchTerminal: () => void;
 }
 
-export default function Hero({ onNavigate, onLaunchTerminal }: HeroProps) {
+export default function Hero({ onNavigate }: HeroProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
+        staggerChildren: 0.1,
+        delayChildren: 0.1
+      }
+    }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
-    },
+    hidden: { y: 15, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }
   };
 
   return (
-    <section id="hero" className="relative min-h-[90vh] flex flex-col justify-center items-center px-4 py-16 overflow-hidden">
-      {/* Absolute Ambient Background Lights */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] rounded-full bg-neon-cyan/5 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/3 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] rounded-full bg-neon-purple/5 blur-[80px] pointer-events-none" />
-
+    <section className="relative py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-4xl w-full text-center z-10 space-y-8"
+        className="space-y-8"
       >
-        {/* DZt Core Badge */}
-        <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyber-border bg-cyber-card/60 backdrop-blur-md text-xs font-mono text-neon-cyan select-none">
-          <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-          <span>DZt ECOSYSTEM FOUNDER & LEAD</span>
+        {/* Status badges bar */}
+        <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 text-xs font-mono">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse" />
+            <span className="text-white/90">AVAILABLE FOR COLLABORATIONS</span>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-sm text-white/60">
+            <Cpu className="w-3.5 h-3.5 text-white" />
+            <span>JNIAS BALAGRAM (BCA 2026)</span>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-3 py-1 border border-white/20 text-[10px] uppercase tracking-widest text-white/80">
+            Founder / Lead @ DZt
+          </div>
         </motion.div>
 
-        {/* Main Heading Typography */}
+        {/* Hero Display Typography */}
         <div className="space-y-4">
           <motion.h1
             variants={itemVariants}
-            className="text-4xl sm:text-6xl md:text-7.5xl font-display font-light leading-tight tracking-tight text-white"
+            className="text-4xl sm:text-6xl md:text-7xl font-display font-light leading-tight tracking-tight text-white"
           >
             Crafting digital <span className="italic font-serif text-white/95">ecosystems</span> <br className="hidden sm:inline" />
             with precision & purpose.
@@ -58,82 +61,92 @@ export default function Hero({ onNavigate, onLaunchTerminal }: HeroProps) {
 
           <motion.p
             variants={itemVariants}
-            className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto font-sans font-light leading-relaxed"
+            className="text-gray-400 text-base sm:text-lg max-w-2xl font-sans font-light leading-relaxed"
           >
-            Hi, I'm <span className="text-white font-medium">{AMAL_INFO.name}</span>. A passionate developer from Balagram building beautifully aligned, high-density digital architectures.
+            Hi, I'm <span className="text-white font-medium">{AMAL_INFO.name}</span>. Founder & Lead of DZt. A full-stack developer and BCA candidate passionate about building high-performance web systems, intuitive interfaces, and scalable digital platforms.
           </motion.p>
         </div>
 
-        {/* Info Grid (Location & College) */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-wrap justify-center gap-4 text-sm text-gray-500 font-mono"
-        >
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-cyber-card/30 border border-cyber-border/40">
-            <MapPin className="w-3.5 h-3.5 text-neon-cyan" />
-            <span>{AMAL_INFO.location}</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-cyber-card/30 border border-cyber-border/40">
-            <Code2 className="w-3.5 h-3.5 text-neon-purple" />
-            <span>BCA Student @ JNIAS, Balagram</span>
-          </div>
-        </motion.div>
-
-        {/* Call to Actions */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4"
-        >
+        {/* Action button CTA cluster */}
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
           <button
-            id="btn-explore-projects"
+            id="btn-hero-projects"
             onClick={() => onNavigate('projects')}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-lg font-mono text-sm font-medium bg-white text-black hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/5 cursor-pointer"
+            className="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-white/90 transition-colors flex items-center justify-center gap-2 cursor-pointer rounded-xs"
           >
-            Explore Projects
+            <span>Explore Projects</span>
             <ArrowRight className="w-4 h-4" />
           </button>
 
           <button
-            id="btn-launch-terminal"
-            onClick={onLaunchTerminal}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-lg font-mono text-sm font-medium border border-cyber-border hover:bg-cyber-card text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+            id="btn-hero-about"
+            onClick={() => onNavigate('about')}
+            className="w-full sm:w-auto min-h-[44px] px-6 py-3 border border-white/20 bg-white/5 text-white text-xs font-mono font-medium hover:bg-white/10 hover:border-white/40 transition-colors flex items-center justify-center gap-2 cursor-pointer rounded-xs"
           >
-            <Terminal className="w-4 h-4 text-neon-cyan" />
-            DZt OS Terminal
+            <UserCheck className="w-4 h-4" />
+            <span>About Me</span>
+          </button>
+
+          <button
+            id="btn-hero-resume"
+            onClick={() => onNavigate('resume')}
+            className="w-full sm:w-auto min-h-[44px] px-6 py-3 border border-white/10 text-gray-300 hover:text-white text-xs font-mono transition-colors flex items-center justify-center gap-2 cursor-pointer rounded-xs"
+          >
+            <FileText className="w-4 h-4" />
+            <span>View CV</span>
+          </button>
+
+          <button
+            id="btn-hero-contact"
+            onClick={() => onNavigate('contact')}
+            className="w-full sm:w-auto min-h-[44px] px-6 py-3 border border-white/10 text-gray-400 hover:text-white text-xs font-mono transition-colors flex items-center justify-center gap-2 cursor-pointer rounded-xs"
+          >
+            <Mail className="w-4 h-4" />
+            <span>Get In Touch</span>
           </button>
         </motion.div>
 
-        {/* Live System Status Ticker */}
-        <motion.div
-          variants={itemVariants}
-          className="pt-12 flex justify-center items-center gap-6"
-        >
-          <div className="flex items-center gap-2 text-xs font-mono text-gray-600">
-            <span className="w-2 h-2 rounded-full bg-neon-cyan animate-ping" />
-            <span>DZt_OS v1.4 LIVE</span>
+        {/* Flagship DZt Core Ecosystem Highlights Strip */}
+        <motion.div variants={itemVariants} className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div 
+            onClick={() => onNavigate('projects')}
+            className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
+          >
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-emerald-400 font-bold">01. LIBCODE JNIAS</span>
+              <span className="text-white/40 group-hover:text-white transition-colors">PHP / MySQL</span>
+            </div>
+            <p className="text-xs text-white/80 font-mono">College Library Automation System with Barcode Scanning</p>
           </div>
-          <div className="h-4 w-[1px] bg-cyber-border" />
-          <div className="flex items-center gap-2 text-xs font-mono text-gray-600">
-            <span className="w-2 h-2 rounded-full bg-neon-purple animate-pulse" />
-            <span>JNIAS PORTAL DEPLOYED</span>
+
+          <div 
+            onClick={() => onNavigate('projects')}
+            className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
+          >
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-amber-400 font-bold">02. HGEMA VISUALIZER</span>
+              <span className="text-white/40 group-hover:text-white transition-colors">Cybersecurity</span>
+            </div>
+            <p className="text-xs text-white/80 font-mono">Interactive Infographic Exploit Vector Analysis</p>
+          </div>
+
+          <div 
+            onClick={() => onNavigate('projects')}
+            className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
+          >
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-cyan-400 font-bold">03. MEDIALOOM SUITE</span>
+              <span className="text-white/40 group-hover:text-white transition-colors">Broadcast Eng</span>
+            </div>
+            <p className="text-xs text-white/80 font-mono">Automated YouTube Graphic & Banner Layout Suite</p>
           </div>
         </motion.div>
+
+        {/* Live Interactive Telemetry Dashboard */}
+        <motion.div variants={itemVariants} className="pt-2">
+          <HeroTelemetry />
+        </motion.div>
       </motion.div>
-
-      {/* Decorative Cybernetic Side Borders */}
-      <div className="absolute left-6 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-3 select-none">
-        <span className="text-[10px] font-mono text-gray-700 tracking-widest uppercase rotate-90 my-8">
-          DZt_CORE_INITIATIVE
-        </span>
-        <div className="w-[1px] h-20 bg-cyber-border" />
-      </div>
-
-      <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-3 select-none">
-        <div className="w-[1px] h-20 bg-cyber-border" />
-        <span className="text-[10px] font-mono text-gray-700 tracking-widest uppercase -rotate-90 my-8">
-          BALAGRAM_LABS_99
-        </span>
-      </div>
     </section>
   );
 }
