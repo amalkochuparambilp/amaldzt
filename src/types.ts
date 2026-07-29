@@ -24,7 +24,7 @@ export interface Collaboration {
   role: string;
   organization: string;
   badge: string;
-  logoType: 'libcode' | 'hgema' | 'medialoom';
+  logoType: 'libcode' | 'bank' | 'hrdiya' | 'hgema' | 'medialoom';
   description: string;
   highlights: string[];
   tags: string[];

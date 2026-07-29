@@ -124,10 +124,10 @@ export default function Hero({ onNavigate }: HeroProps) {
             className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
           >
             <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-amber-400 font-bold">02. HGEMA VISUALIZER</span>
-              <span className="text-white/40 group-hover:text-white transition-colors">Cybersecurity</span>
+              <span className="text-amber-400 font-bold">02. BANK EXAM PORTAL</span>
+              <span className="text-white/40 group-hover:text-white transition-colors">PHP / MySQL</span>
             </div>
-            <p className="text-xs text-white/80 font-mono">Interactive Infographic Exploit Vector Analysis</p>
+            <p className="text-xs text-white/80 font-mono">Co-operative Bank Online Examination & Grading Engine</p>
           </div>
 
           <div 
@@ -135,10 +135,10 @@ export default function Hero({ onNavigate }: HeroProps) {
             className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
           >
             <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-cyan-400 font-bold">03. MEDIALOOM SUITE</span>
-              <span className="text-white/40 group-hover:text-white transition-colors">Broadcast Eng</span>
+              <span className="text-cyan-400 font-bold">03. HRDIYA HEALTH</span>
+              <span className="text-white/40 group-hover:text-white transition-colors">Python / Django</span>
             </div>
-            <p className="text-xs text-white/80 font-mono">Automated YouTube Graphic & Banner Layout Suite</p>
+            <p className="text-xs text-white/80 font-mono">Cardiac Disease Risk Analysis & Consultation Platform</p>
           </div>
         </motion.div>
 

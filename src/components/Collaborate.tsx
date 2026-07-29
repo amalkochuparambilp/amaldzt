@@ -5,8 +5,8 @@ import { Collaboration } from '../types';
 import { 
   Heart, 
   BookOpen, 
-  ShieldAlert, 
-  Tv, 
+  Building2, 
+  Activity, 
   CheckCircle2, 
   ChevronRight, 
   Sparkles, 
@@ -37,21 +37,19 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
         </div>
       );
     }
-    if (logoType === 'hgema') {
+    if (logoType === 'bank') {
       return (
         <div className="w-16 h-16 rounded-sm bg-gradient-to-br from-amber-900/80 to-black border border-amber-500/40 flex flex-col items-center justify-center p-2 text-amber-400 shadow-xl relative group-hover:border-amber-400 transition-colors">
-          <ShieldAlert className="w-6 h-6 text-amber-400" />
-          <span className="text-[9px] font-mono text-amber-300 font-bold tracking-tighter mt-1 uppercase">HGEMA</span>
+          <Building2 className="w-6 h-6 text-amber-400" />
+          <span className="text-[9px] font-mono text-amber-300 font-bold tracking-tighter mt-1 uppercase">CO-OP</span>
         </div>
       );
     }
-    if (logoType === 'medialoom') {
+    if (logoType === 'hrdiya') {
       return (
-        <div className="w-16 h-16 rounded-sm bg-gradient-to-br from-red-900/80 to-black border border-red-500/40 flex flex-col items-center justify-center p-2 text-red-400 shadow-xl relative group-hover:border-red-400 transition-colors">
-          <div className="flex items-center gap-1">
-            <Tv className="w-6 h-6 text-red-500" />
-          </div>
-          <span className="text-[9px] font-mono text-red-300 font-black tracking-widest mt-1 uppercase">MEDIA<span className="text-white">LOOM</span></span>
+        <div className="w-16 h-16 rounded-sm bg-gradient-to-br from-cyan-900/80 to-black border border-cyan-500/40 flex flex-col items-center justify-center p-2 text-cyan-400 shadow-xl relative group-hover:border-cyan-400 transition-colors">
+          <Activity className="w-6 h-6 text-cyan-400" />
+          <span className="text-[9px] font-mono text-cyan-300 font-black tracking-widest mt-1 uppercase">HRDIYA</span>
         </div>
       );
     }

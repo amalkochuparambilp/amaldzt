@@ -399,7 +399,7 @@ export default function HeroTelemetry() {
       case 'help':
         addOut('Available commands:');
         addOut('  whoami    - Display founder bio & qualifications');
-        addOut('  projects  - List active core platforms (LibCode, Hgema, MediaLoom)');
+        addOut('  projects  - List active platforms (LibCode, Bank Exam Portal, Hrdiya)');
         addOut('  skills    - Print key technical stack matrix');
         addOut('  ip        - Output visitor IP geolocation details');
         addOut('  ping      - Measure system network response latency');
@@ -414,13 +414,13 @@ export default function HeroTelemetry() {
         break;
       case 'projects':
         addOut('1. LibCode JNIAS — College Library Automation System (PHP/MySQL/Barcode)');
-        addOut('2. Hgema Exploit Visualizer — Cybersecurity Exploit Vector Analysis');
-        addOut('3. MediaLoom Broadcast Suite — YouTube Graphic & Banner Design Engine');
-        addOut('4. DZt Terminal Shell — Developer Workbench & Console');
+        addOut('2. Co-operative Bank Exam Portal — Online Recruitment & Testing Engine (PHP/MySQL)');
+        addOut('3. Hrdiya Healthcare Platform — Cardiac Disease Risk Analysis (Python/Django)');
+        addOut('4. DZt Platform — Developer Portfolio Suite & Ecosystem Engine');
         break;
       case 'skills':
-        addOut('STACK: React 18, TypeScript, Python, Django, PHP, MySQL, Tailwind CSS');
-        addOut('FOCUS: College Library Software, Cybersecurity Visuals, Media Workflows');
+        addOut('STACK: React 18, TypeScript, Python, Django, PHP, MySQL, SQLite, Tailwind CSS');
+        addOut('FOCUS: Library Systems, Recruitment Testing Engines, Health Diagnostic Platforms');
         break;
       case 'ip':
         addOut(`VISITOR IP: ${userLocation.ip || 'Local Node'}`);

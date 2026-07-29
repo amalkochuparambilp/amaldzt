@@ -9,7 +9,7 @@ export const AMAL_INFO = {
   phone: '+91 7510211318',
   linkedin: 'https://linkedin.com/in/amalkochuparambilp',
   github: 'https://github.com/amalkp',
-  summary: 'BCA candidate at Jawaharlal Nehru Institute of Arts and Science (JNIAS) with strong technical expertise in React, Python, Django, PHP, and modern web architectures. Founder and Lead at DZt digital ecosystem, developer of LibCode JNIAS, cybersecurity content designer, and visual lead for MediaLoom news channel.',
+  summary: 'BCA candidate at Jawaharlal Nehru Institute of Arts and Science (JNIAS) with strong technical expertise in React, Python, Django, PHP, MySQL, and modern web architectures. Founder and Lead at DZt digital platform, developer of LibCode JNIAS, Co-operative Bank Exam Portal, and Hrdiya health analytics application.',
   education: {
     degree: 'Bachelor of Computer Application (BCA)',
     institution: 'Jawaharlal Nehru Institute of Arts and Science (JNIAS)',
@@ -39,50 +39,50 @@ export const PROJECTS: Project[] = [
     featured: true
   },
   {
-    id: 'hgema-exploit-visualizer',
-    title: 'Hgema Exploit Security Visualizer',
-    description: 'Interactive security research tool providing a clear visual breakdown of hgema exploit attack vectors, memory payloads, and mitigation guides.',
-    longDescription: 'Designed for cybersecurity educational research, this platform transforms complex hgema exploit vectors into step-by-step visual infographics and animated memory buffer diagrams for technical audiences and threat analysts.',
+    id: 'bank-exam-portal',
+    title: 'Co-operative Bank Exam Portal',
+    description: 'Complete online examination & testing portal engineered for Co-operative Bank with auto-grading, randomized question pools, and timing modules.',
+    longDescription: 'A robust web application designed for conducting candidate recruitment and evaluation exams for Co-operative Banks. Built with PHP and MySQL, featuring timed assessment tests, randomized question randomization, instant auto-scoring, and secure candidate log audit trails.',
     category: 'system',
-    tech: ['React', 'TypeScript', 'Tailwind CSS', 'Cybersecurity', 'Canvas'],
+    tech: ['PHP', 'MySQL', 'JavaScript', 'HTML/CSS', 'Security Auditing'],
     features: [
-      'Interactive memory buffer allocation & payload simulation',
-      'Step-by-step visual exploit attack tree breakdown',
-      'Security patch verification & mitigation checklist export',
-      'High-contrast threat analysis documentation layout'
+      'Randomized question bank generator for leak-proof test papers',
+      'Countdown timer engine with auto-submission on expiration',
+      'Instant grading and score calculation algorithms',
+      'Admin portal for candidate management, question creation, and score export'
     ],
-    githubUrl: 'https://github.com/amalkp/hgema-exploit-visualizer',
+    githubUrl: 'https://github.com/amalkp/co-operative-bank-exam-portal',
     featured: true
   },
   {
-    id: 'medialoom-broadcast-suite',
-    title: 'MediaLoom Broadcast & Design Suite',
-    description: 'Digital media design and broadcast workflow hub powering high-CTR YouTube thumbnails, news banners, and media automation for MediaLoom channel.',
-    longDescription: 'A tailored web design suite built for MediaLoom news channel workflows. Features asset management, automated lower-third graphics generation, thumbnail contrast auditing, and YouTube publishing template pipelines.',
+    id: 'hrdiya-health-analysis',
+    title: 'Hrdiya — Cardiac Risk Analysis Platform',
+    description: 'Web application built with Python & Django to analyze heart disease risk parameters and consult cardiologists directly.',
+    longDescription: 'Hrdiya is a healthcare diagnostic & consultation platform developed in Python and Django. It evaluates key physiological risk factors (blood pressure, cholesterol, ECG indicators) using medical assessment logic, offering user risk stratification and direct communication channels with cardiologists.',
     category: 'django',
-    tech: ['Python', 'Django', 'React', 'Tailwind CSS', 'Canvas API'],
+    tech: ['Python', 'Django', 'SQLite', 'React', 'Tailwind CSS'],
     features: [
-      'High-CTR news thumbnail generator with live preview',
-      'MediaLoom brand asset vault and lower-thirds overlay suite',
-      'Typographic contrast & readability compliance checking',
-      'Multi-format export for YouTube and social media publishing'
+      'Automated cardiac risk calculation engine based on clinical parameters',
+      'Patient health metric logging & historical trend visualization',
+      'Direct message & consultation request routing to cardiologists',
+      'Responsive patient portal and admin medical record panel'
     ],
-    githubUrl: 'https://github.com/amalkp/medialoom-broadcast-suite',
+    githubUrl: 'https://github.com/amalkp/hrdiya-health-analysis',
     featured: true
   },
   {
-    id: 'dzt-terminal-shell',
-    title: 'DZt Command Terminal Shell',
-    description: 'Lightweight web-based developer console and ecosystem diagnostic dashboard built for the DZt initiative.',
-    longDescription: 'An interactive browser terminal interface providing rapid dev environment tools, system health monitoring, and modular UI component debugging.',
+    id: 'dzt-developer-platform',
+    title: 'DZt Developer Platform & Ecosystem',
+    description: 'Modern developer suite, portfolio engine, and diagnostic console built for the DZt initiative.',
+    longDescription: 'The central digital platform for DZt, featuring interactive live system diagnostics, developer CLI shell, portfolio showcases, and responsive web component design systems.',
     category: 'system',
-    tech: ['React', 'TypeScript', 'Tailwind CSS', 'Node.js'],
+    tech: ['React', 'TypeScript', 'Tailwind CSS', 'Vite', 'Node.js'],
     features: [
-      'Browser command-line interface with custom command parsers',
-      'Real-time system node latency monitor',
-      'Keyboard-navigable developer workbench'
+      'Interactive CLI shell with command parser and typewriter output',
+      'Real-time IP & network latency diagnostic telemetry',
+      'High-contrast accessible dark theme design system'
     ],
-    githubUrl: 'https://github.com/amalkp/dzt-terminal-shell',
+    githubUrl: 'https://github.com/amalkp/dzt-platform',
     featured: false
   }
 ];
@@ -104,9 +104,9 @@ export const SKILLS: Skill[] = [
 
 export const ECOSYSTEM_NODES = [
   { id: 'libcode-node', name: 'LibCode JNIAS Core', status: 'ACTIVE', type: 'Library Engine', latency: '3ms' },
-  { id: 'hgema-node', name: 'Hgema Exploit Visualizer', status: 'ONLINE', type: 'Security Engine', latency: '6ms' },
-  { id: 'medialoom-node', name: 'MediaLoom Broadcast Suite', status: 'OPERATIONAL', type: 'Media Hub', latency: '5ms' },
-  { id: 'dzt-core', name: 'DZt Command Kernel', status: 'READY', type: 'Interface', latency: '1ms' }
+  { id: 'bankexam-node', name: 'Co-op Bank Exam Portal', status: 'ONLINE', type: 'Exam Engine', latency: '4ms' },
+  { id: 'hrdiya-node', name: 'Hrdiya Health Analytics', status: 'OPERATIONAL', type: 'Django Hub', latency: '5ms' },
+  { id: 'dzt-core', name: 'DZt Platform Kernel', status: 'READY', type: 'Interface', latency: '1ms' }
 ];
 
 export const COLLABORATIONS: Collaboration[] = [
@@ -126,33 +126,33 @@ export const COLLABORATIONS: Collaboration[] = [
     tags: ['Library Management', 'JNIAS', 'PHP / MySQL', 'Barcode Scanning', 'System Automation']
   },
   {
-    id: 'creative-content-hgema',
-    role: 'Creative Content Designer & Security Explainer Visualist',
-    organization: 'Creative Content Design — Hgema Exploit Analysis',
-    badge: 'SECURITY & TECH GRAPHICS',
-    logoType: 'hgema',
-    description: 'Specialized in creating high-impact technical visual assets, infographic diagrams, and vulnerability breakdown graphics explaining the hgema exploit mechanics.',
+    id: 'coop-bank-portal',
+    role: 'Lead Developer & Examination Systems Specialist',
+    organization: 'Co-operative Bank Exam Portal',
+    badge: 'EXAMINATION & TESTING PLATFORM',
+    logoType: 'bank',
+    description: 'Engineered a secure online candidate evaluation and exam portal for Co-operative Bank recruitment drives.',
     highlights: [
-      'Simple, highly accessible visual breakdown of the hgema exploit attack vectors & memory payloads',
-      'Created step-by-step security patch guides and threat model diagrams',
-      'Designed technical social media visual cards & community security advisories',
-      'Combined cybersecurity research with modern graphic communication'
+      'Randomized question pool generation and auto-grading algorithms',
+      'Timed assessment engine with automatic submission safeguard',
+      'Candidate verification, score audit trails, and result export options',
+      'High-concurrency PHP & MySQL database architecture'
     ],
-    tags: ['Cybersecurity Graphics', 'Hgema Exploit Breakdown', 'Infographic Design', 'Visual Explainer']
+    tags: ['Bank Recruitment', 'PHP / MySQL', 'Exam Automation', 'Auto Grading', 'Security Audit']
   },
   {
-    id: 'yt-graphic-medialoom',
-    role: 'YT Graphic Designer & Visual Branding Lead',
-    organization: 'MediaLoom News Channel',
-    badge: 'NEWS BROADCAST MEDIA',
-    logoType: 'medialoom',
-    description: 'Lead YouTube Graphic Designer for MediaLoom, an influential digital news channel. Responsible for high-CTR YouTube thumbnails, broadcast overlays, and news branding identity.',
+    id: 'hrdiya-health',
+    role: 'Full-Stack Python & Django Developer',
+    organization: 'Hrdiya Cardiac Risk Platform',
+    badge: 'HEALTHCARE ANALYTICS',
+    logoType: 'hrdiya',
+    description: 'Developed Hrdiya, a Python Django web application for evaluating cardiac health risk factors and connecting patients with cardiologists.',
     highlights: [
-      'Crafted 100+ high-CTR news YouTube thumbnails optimized for mobile and desktop feeds',
-      'Designed news broadcast lower-thirds, headline banners, and breaking news graphics',
-      'Maintained consistent visual style guidelines across MediaLoom digital publishing channels',
-      'Boosted audience engagement through bold typographic hierarchy and news art direction'
+      'Algorithmic assessment of physiological health metrics',
+      'Historical health metric logs and user trend visualization',
+      'Doctor appointment and consultation message routing',
+      'Secure healthcare data handling and responsive user dashboard'
     ],
-    tags: ['MediaLoom News', 'YouTube Thumbnails', 'Broadcast Graphics', 'Visual Identity', 'News Media']
+    tags: ['Python', 'Django', 'Healthcare Tech', 'Cardiac Risk Analysis', 'SQLite']
   }
 ];
