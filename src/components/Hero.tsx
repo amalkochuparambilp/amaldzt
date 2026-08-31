@@ -88,6 +88,15 @@ export default function Hero({ onNavigate }: HeroProps) {
           </button>
 
           <button
+            id="btn-hero-vc"
+            onClick={() => onNavigate('vc')}
+            className="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/30 text-white text-xs font-mono font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer rounded-xs shadow-[0_0_15px_rgba(255,255,255,0.08)]"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>P2P Video Call (/vc)</span>
+          </button>
+
+          <button
             id="btn-hero-resume"
             onClick={() => onNavigate('resume')}
             className="w-full sm:w-auto min-h-[44px] px-6 py-3 border border-white/10 text-gray-300 hover:text-white text-xs font-mono transition-colors flex items-center justify-center gap-2 cursor-pointer rounded-xs"
@@ -107,7 +116,7 @@ export default function Hero({ onNavigate }: HeroProps) {
         </motion.div>
 
         {/* Flagship DZt Core Ecosystem Highlights Strip */}
-        <motion.div variants={itemVariants} className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <motion.div variants={itemVariants} className="pt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div 
             onClick={() => onNavigate('projects')}
             className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
@@ -139,6 +148,20 @@ export default function Hero({ onNavigate }: HeroProps) {
               <span className="text-white/40 group-hover:text-white transition-colors">Python / Django</span>
             </div>
             <p className="text-xs text-white/80 font-mono">Cardiac Disease Risk Analysis & Consultation Platform</p>
+          </div>
+
+          <div 
+            onClick={() => onNavigate('vc')}
+            className="p-3.5 bg-white/10 border border-white/20 hover:border-cyan-400/50 rounded-xs transition-all cursor-pointer group space-y-1 relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-white font-bold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                04. P2P VIDEO CALL
+              </span>
+              <span className="text-cyan-300 font-mono text-[10px] bg-cyan-500/20 px-1.5 py-0.2 rounded-2xs">/vc</span>
+            </div>
+            <p className="text-xs text-white/80 font-mono">Real-time WebRTC Mesh Video Call & In-Room Collaboration</p>
           </div>
         </motion.div>
 

@@ -29,3 +29,38 @@ export interface Collaboration {
   highlights: string[];
   tags: string[];
 }
+
+export interface VCPeer {
+  id: string;
+  name: string;
+  stream?: MediaStream;
+  connectionState: RTCPeerConnectionState | 'new' | 'connecting' | 'connected' | 'disconnected' | 'failed' | 'closed';
+  isAudioMuted?: boolean;
+  isVideoMuted?: boolean;
+  isScreenSharing?: boolean;
+  isHandRaised?: boolean;
+  audioLevel?: number;
+  joinedAt?: number;
+}
+
+export interface VCChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: number;
+  isSelf: boolean;
+}
+
+export interface VCReaction {
+  id: string;
+  senderName: string;
+  emoji: string;
+  x: number;
+}
+
+export interface MediaDeviceInfoOption {
+  deviceId: string;
+  label: string;
+}
+

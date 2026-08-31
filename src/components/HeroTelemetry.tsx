@@ -400,11 +400,21 @@ export default function HeroTelemetry() {
         addOut('Available commands:');
         addOut('  whoami    - Display founder bio & qualifications');
         addOut('  projects  - List active platforms (LibCode, Bank Exam Portal, Hrdiya)');
+        addOut('  vc        - Launch P2P Encrypted Video Call Room (/vc)');
         addOut('  skills    - Print key technical stack matrix');
         addOut('  ip        - Output visitor IP geolocation details');
         addOut('  ping      - Measure system network response latency');
         addOut('  contact   - Display direct email & communication channels');
         addOut('  clear     - Wipe terminal screen buffer');
+        break;
+      case 'vc':
+      case 'call':
+      case 'video':
+        addOut('INITIATING P2P VIDEO TRANSMISSION...');
+        addOut('Opening /vc Video Call Suite in 1.2s...');
+        setTimeout(() => {
+          window.location.href = '/vc';
+        }, 1200);
         break;
       case 'whoami':
         addOut('NAME: Amal K P');

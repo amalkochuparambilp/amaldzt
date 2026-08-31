@@ -162,13 +162,22 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
           </p>
         </div>
         {onNavigate && (
-          <button
-            onClick={() => onNavigate('contact')}
-            className="px-6 py-3 bg-white text-black text-xs font-bold font-mono uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Get In Touch</span>
-          </button>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <button
+              onClick={() => onNavigate('vc')}
+              className="w-full sm:w-auto px-6 py-3 bg-white/10 border border-white/30 text-white text-xs font-bold font-mono uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Instant Video Call (/vc)</span>
+            </button>
+            <button
+              onClick={() => onNavigate('contact')}
+              className="w-full sm:w-auto px-6 py-3 bg-white text-black text-xs font-bold font-mono uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Get In Touch</span>
+            </button>
+          </div>
         )}
       </div>
 

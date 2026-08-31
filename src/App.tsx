@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, ShieldCheck, Activity, Terminal, UserCheck, Handshake, Battery, BatteryCharging } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Video, Radio } from 'lucide-react';
 
 import Hero from './components/Hero';
 import About from './components/About';
@@ -9,12 +9,38 @@ import Projects from './components/Projects';
 import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
+import VideoCallRoom from './components/vc/VideoCallRoom';
 import { AMAL_INFO } from './data';
 
-type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'contact';
+type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'contact' | 'vc';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('home');
+  const getInitialTab = (): Tab => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search;
+      if (path.startsWith('/vc') || hash.startsWith('#vc') || search.includes('room=')) {
+        return 'vc';
+      }
+    }
+    return 'home';
+  };
+
+  const [activeTab, setActiveTab] = useState<Tab>(getInitialTab);
+  const [initialRoomId, setInitialRoomId] = useState<string | undefined>(() => {
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const r = searchParams.get('room');
+      if (r) return r;
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      if (pathParts[0] === 'vc' && pathParts[1]) {
+        return pathParts[1];
+      }
+    }
+    return undefined;
+  });
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSystemBooted, setIsSystemBooted] = useState(false);
   const [bootProgress, setBootProgress] = useState(0);
@@ -32,10 +58,35 @@ export default function App() {
 
   const bootLogs = [
     { label: 'LIBRARY CORE', text: 'Initializing LibCode JNIAS Database & Barcode Engines...' },
-    { label: 'CYBERSECURITY', text: 'Loading Hgema Exploit Analysis Visual Infographic Modules...' },
-    { label: 'BROADCAST MEDIA', text: 'Syncing MediaLoom YouTube Graphic & Design Workflow Suite...' },
-    { label: 'SYSTEM READY', text: 'Launching Amal K P DZt Digital Workspace...' }
+    { label: 'P2P WEBRTC', text: 'Binding /vc Mesh Video Signaling Socket & STUN Gateways...' },
+    { label: 'EXAM PLATFORM', text: 'Syncing Co-operative Bank Testing Suite & Hrdiya Hub...' },
+    { label: 'SYSTEM READY', text: 'Launching Amal K P DZt Digital Workspace & VC Suite...' }
   ];
+
+  // URL sync and popstate listener
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.toLowerCase();
+      const search = window.location.search;
+      if (path.startsWith('/vc') || search.includes('room=')) {
+        setActiveTab('vc');
+        const params = new URLSearchParams(window.location.search);
+        const r = params.get('room');
+        if (r) setInitialRoomId(r);
+      } else {
+        const hash = window.location.hash.replace('#', '') as Tab;
+        const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact', 'vc'];
+        if (validTabs.includes(hash)) {
+          setActiveTab(hash);
+        } else {
+          setActiveTab('home');
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     const progressInterval = setInterval(() => {
@@ -51,7 +102,7 @@ export default function App() {
         if (next > 75) setBootStep(3);
         return Math.min(next, 100);
       });
-    }, 180);
+    }, 160);
 
     return () => clearInterval(progressInterval);
   }, []);
@@ -86,10 +137,24 @@ export default function App() {
     initBattery();
   }, []);
 
-  const handleNavigate = (tab: string) => {
-    setActiveTab(tab as Tab);
+  const handleNavigate = (tab: string, customRoomId?: string) => {
+    const targetTab = tab as Tab;
+    setActiveTab(targetTab);
     setIsMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (targetTab === 'vc') {
+      if (customRoomId) {
+        setInitialRoomId(customRoomId);
+        window.history.pushState(null, '', `/vc?room=${encodeURIComponent(customRoomId)}`);
+      } else {
+        const search = window.location.search;
+        const targetUrl = search.includes('room=') ? `/vc${search}` : '/vc';
+        window.history.pushState(null, '', targetUrl);
+      }
+    } else {
+      window.history.pushState(null, '', `/#${targetTab}`);
+    }
   };
 
   const navItems = [
@@ -99,6 +164,7 @@ export default function App() {
     { id: 'projects', label: 'Projects', icon: Layers },
     { id: 'skills', label: 'Skills', icon: Cpu },
     { id: 'resume', label: 'Resume', icon: BookOpen },
+    { id: 'vc', label: 'VC Room', icon: Video, isLive: true },
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 
@@ -238,14 +304,17 @@ export default function App() {
                 key={item.id}
                 id={`tab-btn-${item.id}`}
                 onClick={() => handleNavigate(item.id)}
-                className={`px-4 py-2 border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative ${
+                className={`px-3.5 py-2 border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative ${
                   isActive 
                     ? 'text-white font-semibold bg-white/5 border-white/20 shadow-sm' 
                     : 'text-white/50 border-transparent hover:text-white hover:bg-white/[0.02]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-white/40'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : item.id === 'vc' ? 'text-cyan-400' : 'text-white/40'}`} />
                 <span className="uppercase tracking-wider">{item.label}</span>
+                {item.id === 'vc' && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                )}
                 {isActive && (
                   <motion.span 
                     layoutId="active-tab-glow"
@@ -327,8 +396,13 @@ export default function App() {
                       : 'text-white/60 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-white/40'}`} />
-                  <span>{item.label}</span>
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : item.id === 'vc' ? 'text-cyan-400' : 'text-white/40'}`} />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.id === 'vc' && (
+                    <span className="text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-xs border border-emerald-500/30">
+                      P2P LIVE
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -363,6 +437,9 @@ export default function App() {
             )}
             {activeTab === 'resume' && (
               <Resume />
+            )}
+            {activeTab === 'vc' && (
+              <VideoCallRoom initialRoomId={initialRoomId} onExit={() => handleNavigate('home')} />
             )}
             {activeTab === 'contact' && (
               <Contact />
