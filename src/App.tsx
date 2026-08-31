@@ -14,6 +14,19 @@ import { AMAL_INFO } from './data';
 type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'contact';
 
 export default function App() {
+  const isRandomCall = typeof window !== 'undefined' && (window.location.pathname === '/randomcall' || window.location.pathname.startsWith('/randomcall'));
+
+  if (isRandomCall) {
+    return (
+      <iframe
+        src="/randomcall/index.html"
+        title="Free video chat CooMeet"
+        className="w-full h-screen border-0 fixed inset-0 z-50 bg-black"
+        allow="camera; microphone; display-capture; autoplay; clipboard-write"
+      />
+    );
+  }
+
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSystemBooted, setIsSystemBooted] = useState(false);
