@@ -24,9 +24,16 @@ export default function App() {
         path.startsWith('/apps') ||
         path.startsWith('/miniapp') ||
         path.startsWith('/dzt-app') ||
+        path.startsWith('/drop') ||
+        path.startsWith('/share') ||
+        path.startsWith('/send') ||
+        path.startsWith('/files') ||
         hash.startsWith('#apps') ||
         hash.startsWith('#miniapp') ||
-        hash.includes('/apps')
+        hash.startsWith('#drop') ||
+        hash.startsWith('#share') ||
+        hash.includes('/apps') ||
+        hash.includes('/drop')
       ) {
         return 'apps';
       }
@@ -58,6 +65,17 @@ export default function App() {
 
       const path = window.location.pathname.toLowerCase();
       if (
+        path.startsWith('/drop') ||
+        path.startsWith('/share') ||
+        path.startsWith('/send') ||
+        path.startsWith('/files') ||
+        path.startsWith('/p2p') ||
+        window.location.hash.includes('drop') ||
+        window.location.hash.includes('share')
+      ) {
+        return 'drop';
+      }
+      if (
         path.startsWith('/meet') ||
         path.startsWith('/call') ||
         path.startsWith('/room') ||
@@ -77,7 +95,7 @@ export default function App() {
       const r = searchParams.get('room');
       if (r) return r;
 
-      // Also check hash query params like #meet?room=abc or #apps?room=abc
+      // Also check hash query params like #meet?room=abc or #apps?room=abc or #drop?room=abc
       if (window.location.hash.includes('room=')) {
         const hashQuery = window.location.hash.split('?')[1];
         if (hashQuery) {
@@ -87,9 +105,9 @@ export default function App() {
         }
       }
 
-      // Check path parts e.g. /meet/jnias-lab-473 or /call/jnias-lab-473 or /vc/jnias-lab-473
+      // Check path parts e.g. /meet/jnias-lab-473 or /drop/dzt-drop-101
       const pathParts = window.location.pathname.split('/').filter(Boolean);
-      const prefixes = ['meet', 'call', 'room', 'join', 'vc'];
+      const prefixes = ['meet', 'call', 'room', 'join', 'vc', 'drop', 'share', 'send'];
       if (prefixes.includes(pathParts[0]?.toLowerCase()) && pathParts[1]) {
         return pathParts[1];
       }

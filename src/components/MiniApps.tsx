@@ -20,11 +20,13 @@ import {
   Layers,
   Cpu,
   Share2,
+  HardDriveDownload,
   Sliders,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 import VideoCallRoom from './vc/VideoCallRoom';
+import FileShareRoom from './p2p/FileShareRoom';
 
 interface MiniAppsProps {
   initialAppId?: string;
@@ -92,6 +94,20 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
   };
 
   const miniAppsList: MiniAppItem[] = [
+    {
+      id: 'drop',
+      title: 'DZt Drop (P2P File Transfer)',
+      tagline: 'Encrypted Browser-to-Browser File & Clipboard Beam',
+      category: 'communication',
+      categoryLabel: 'Communication',
+      badge: 'DataChannel • Live',
+      badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+      icon: Share2,
+      description: 'Direct browser-to-browser P2P file sharing with zero file size limits, end-to-end DTLS encryption, instant QR phone pairing, and realtime speed gauges.',
+      features: ['WebRTC DataChannel Mesh', 'Zero Cloud File Storage', 'Live Speed & ETA Monitor', 'QR Code Phone Connect'],
+      techStack: ['WebRTC DataChannel', 'DTLS/SCTP', 'Binary Chunks', 'Web Audio API'],
+      directUrl: '/apps?app=drop'
+    },
     {
       id: 'meet',
       title: 'DZt Meet (P2P Video Call)',
@@ -214,6 +230,12 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
           </div>
 
           {/* Render Active MiniApp Container */}
+          {(activeApp === 'drop' || activeApp === 'share' || activeApp === 'fileshare') && (
+            <div className="border border-white/10 rounded-xs bg-[#080808]">
+              <FileShareRoom initialRoomId={initialRoomId} onExit={() => setActiveApp(null)} />
+            </div>
+          )}
+
           {activeApp === 'meet' && (
             <div className="border border-white/10 rounded-xs bg-[#080808]">
               <VideoCallRoom initialRoomId={initialRoomId} onExit={() => setActiveApp(null)} />

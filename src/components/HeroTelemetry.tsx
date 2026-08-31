@@ -400,8 +400,9 @@ export default function HeroTelemetry() {
         addOut('Available commands:');
         addOut('  whoami    - Display founder bio & qualifications');
         addOut('  apps      - Open DZt MiniApp Suite & Tools (/apps)');
-        addOut('  projects  - List active platforms (LibCode, Bank Exam Portal, Hrdiya)');
+        addOut('  drop      - Launch DZt Drop P2P Encrypted File Sharing (/apps?app=drop)');
         addOut('  meet / vc - Launch DZt Meet Video Call (/apps?app=meet)');
+        addOut('  projects  - List active platforms (LibCode, Bank Exam Portal, Hrdiya)');
         addOut('  skills    - Print key technical stack matrix');
         addOut('  ip        - Output visitor IP geolocation details');
         addOut('  ping      - Measure system network response latency');
@@ -415,6 +416,16 @@ export default function HeroTelemetry() {
         setTimeout(() => {
           window.location.href = '/apps';
         }, 800);
+        break;
+      case 'drop':
+      case 'share':
+      case 'send':
+      case 'fileshare':
+        addOut('INITIALIZING DZT DROP P2P DATACHANNEL ENGINE...');
+        addOut('Opening DZt Drop File Transfer in 1.0s...');
+        setTimeout(() => {
+          window.location.href = '/apps?app=drop';
+        }, 1000);
         break;
       case 'vc':
       case 'meet':

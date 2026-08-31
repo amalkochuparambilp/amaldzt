@@ -1,6 +1,6 @@
 {
   "name": "Amal K P - DZt Portfolio & MiniApps Hub",
-  "description": "High density portfolio, interactive DZt MiniApp ecosystem, OS terminal, and P2P Video Call platform for Amal K P.",
+  "description": "High density portfolio, interactive DZt MiniApp ecosystem, P2P encrypted file sharing (DZt Drop), OS terminal, and Video Call platform for Amal K P.",
   "requestFramePermissions": ["camera", "microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
