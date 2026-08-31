@@ -15,7 +15,7 @@ export const AMAL_INFO = {
     institution: 'Jawaharlal Nehru Institute of Arts and Science (JNIAS)',
     location: 'Balagram, Idukki, Kerala',
     period: 'Mar 2026',
-    status: 'Graduating Batch 2026'
+    status: 'Graduated in Batch 2026'
   },
   skillsList: ['Team Work', 'Computer Literacy', 'PHP', 'React', 'Python', 'Django', 'SQLite', 'JavaScript', 'TypeScript', 'Tailwind CSS', 'Git', 'Node.js'],
   languages: ['English', 'Malayalam']
