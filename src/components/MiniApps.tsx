@@ -264,7 +264,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
                   DZt MiniApps Hub
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-400 max-w-2xl font-sans">
-                  Interactive real-time web applications, P2P video communication rooms, and engineering calculators developed by Amal K P.
+                  Interactive real-time web applications, video communication rooms, and engineering calculators developed by Amal K P.
                 </p>
               </div>
 
