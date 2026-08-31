@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, ShieldCheck, Activity, Terminal, UserCheck, Handshake, Battery, BatteryCharging } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, ShieldCheck, Activity, Terminal, UserCheck, Handshake, Battery, BatteryCharging, Video } from 'lucide-react';
 
 import Hero from './components/Hero';
 import About from './components/About';
@@ -9,29 +9,45 @@ import Projects from './components/Projects';
 import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
+import RandomCall from './components/RandomCall';
 import { AMAL_INFO } from './data';
 
-type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'contact';
+type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'contact' | 'randomcall';
 
 export default function App() {
-  const isRandomCall = typeof window !== 'undefined' && (window.location.pathname === '/randomcall' || window.location.pathname.startsWith('/randomcall'));
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      if (path.includes('randomcall') || hash.includes('randomcall')) {
+        return 'randomcall';
+      }
+    }
+    return 'home';
+  });
 
-  if (isRandomCall) {
-    return (
-      <iframe
-        src="/randomcall/index.html"
-        title="Free video chat CooMeet"
-        className="w-full h-screen border-0 fixed inset-0 z-50 bg-black"
-        allow="camera; microphone; display-capture; autoplay; clipboard-write"
-      />
-    );
-  }
-
-  const [activeTab, setActiveTab] = useState<Tab>('home');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSystemBooted, setIsSystemBooted] = useState(false);
   const [bootProgress, setBootProgress] = useState(0);
   const [bootStep, setBootStep] = useState(0);
+
+  // Hash & URL synchronization
+  useEffect(() => {
+    const checkRoute = () => {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      if (path.includes('randomcall') || hash.includes('randomcall')) {
+        setActiveTab('randomcall');
+      }
+    };
+
+    window.addEventListener('hashchange', checkRoute);
+    window.addEventListener('popstate', checkRoute);
+    return () => {
+      window.removeEventListener('hashchange', checkRoute);
+      window.removeEventListener('popstate', checkRoute);
+    };
+  }, []);
 
   const [batteryStatus, setBatteryStatus] = useState<{
     level: number | null;
@@ -112,7 +128,8 @@ export default function App() {
     { id: 'projects', label: 'Projects', icon: Layers },
     { id: 'skills', label: 'Skills', icon: Cpu },
     { id: 'resume', label: 'Resume', icon: BookOpen },
-    { id: 'contact', label: 'Contact', icon: Mail }
+    { id: 'contact', label: 'Contact', icon: Mail },
+    { id: 'randomcall', label: 'Random Call', icon: Video, highlight: true }
   ];
 
   return (
@@ -242,23 +259,29 @@ export default function App() {
         </button>
 
         {/* Desktop Minimalist Navigation Bar */}
-        <nav className="hidden md:flex items-center gap-2">
+        <nav className="hidden md:flex items-center gap-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
+            const isCall = item.id === 'randomcall';
             return (
               <button
                 key={item.id}
                 id={`tab-btn-${item.id}`}
                 onClick={() => handleNavigate(item.id)}
-                className={`px-4 py-2 border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative ${
+                className={`px-3 py-2 border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative ${
                   isActive 
                     ? 'text-white font-semibold bg-white/5 border-white/20 shadow-sm' 
-                    : 'text-white/50 border-transparent hover:text-white hover:bg-white/[0.02]'
+                    : isCall
+                      ? 'text-rose-400 border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500/40'
+                      : 'text-white/50 border-transparent hover:text-white hover:bg-white/[0.02]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-white/40'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : isCall ? 'text-rose-400' : 'text-white/40'}`} />
                 <span className="uppercase tracking-wider">{item.label}</span>
+                {isCall && !isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping ml-0.5" />
+                )}
                 {isActive && (
                   <motion.span 
                     layoutId="active-tab-glow"
@@ -379,6 +402,9 @@ export default function App() {
             )}
             {activeTab === 'contact' && (
               <Contact />
+            )}
+            {activeTab === 'randomcall' && (
+              <RandomCall onBack={() => handleNavigate('home')} />
             )}
           </motion.div>
         </AnimatePresence>
