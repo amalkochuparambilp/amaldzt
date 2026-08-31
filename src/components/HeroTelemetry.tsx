@@ -403,15 +403,8 @@ export default function HeroTelemetry() {
         addOut('  skills    - Print key technical stack matrix');
         addOut('  ip        - Output visitor IP geolocation details');
         addOut('  ping      - Measure system network response latency');
-        addOut('  call      - Launch CooMeet Live Random Video Chat (/randomcall)');
         addOut('  contact   - Display direct email & communication channels');
         addOut('  clear     - Wipe terminal screen buffer');
-        break;
-      case 'call':
-      case 'randomcall':
-      case 'video':
-        addOut('CONNECTING: Launching CooMeet Live Random Video Chat Session...');
-        window.location.hash = '#/randomcall';
         break;
       case 'whoami':
         addOut('NAME: Amal K P');

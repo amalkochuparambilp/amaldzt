@@ -5,29 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [
-      react(), 
-      tailwindcss(),
-      {
-        name: 'randomcall-rewrite',
-        configureServer(server) {
-          server.middlewares.use((req, _res, next) => {
-            if (req.url === '/randomcall' || req.url === '/randomcall/') {
-              req.url = '/randomcall/index.html';
-            }
-            next();
-          });
-        }
-      }
-    ],
-    build: {
-      rollupOptions: {
-        input: {
-          main: path.resolve(__dirname, 'index.html'),
-          randomcall: path.resolve(__dirname, 'randomcall/index.html'),
-        },
-      },
-    },
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
