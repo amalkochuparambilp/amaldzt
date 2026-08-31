@@ -96,7 +96,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
   const miniAppsList: MiniAppItem[] = [
     {
       id: 'drop',
-      title: 'DZt Drop (P2P File Transfer)',
+      title: 'DZt Drop (File Transfer)',
       tagline: 'Encrypted Browser-to-Browser File & Clipboard Beam',
       category: 'communication',
       categoryLabel: 'Communication',
@@ -110,7 +110,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
     },
     {
       id: 'meet',
-      title: 'DZt Meet (P2P Video Call)',
+      title: 'DZt Meet (Video Call)',
       tagline: 'Encrypted Multi-Peer Video & Audio Transmission Hub',
       category: 'communication',
       categoryLabel: 'Communication',
