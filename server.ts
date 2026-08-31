@@ -165,6 +165,33 @@ wss.on('connection', (ws: WebSocket) => {
           break;
         }
 
+        case 'file-header':
+        case 'file-chunk':
+        case 'file-cancel':
+        case 'file-ack': {
+          const { roomId, targetId, senderId } = data;
+          if (!roomId) return;
+
+          const room = rooms.get(roomId);
+          if (room) {
+            const rawPayload = JSON.stringify(data);
+            if (targetId) {
+              const targetClient = room.get(targetId);
+              if (targetClient && targetClient.ws.readyState === WebSocket.OPEN) {
+                targetClient.ws.send(rawPayload);
+              }
+            } else {
+              // Broadcast to all other peers in the room
+              room.forEach((client, pid) => {
+                if (pid !== (senderId || currentPeerId) && client.ws.readyState === WebSocket.OPEN) {
+                  client.ws.send(rawPayload);
+                }
+              });
+            }
+          }
+          break;
+        }
+
         case 'leave': {
           cleanUpPeer(currentRoomId, currentPeerId);
           currentRoomId = null;

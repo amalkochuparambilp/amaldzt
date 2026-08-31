@@ -28,6 +28,9 @@ export interface SignalingCallbacks {
   onReaction: (senderId: string, senderName: string, emoji: string) => void;
   onConnected: (peerId: string) => void;
   onError: (error: string) => void;
+  onFileHeader?: (senderId: string, meta: any) => void;
+  onFileChunk?: (senderId: string, chunkPayload: { fileId: string; chunkIndex: number; data: string; totalChunks: number; bytes: number }) => void;
+  onFileCancel?: (senderId: string, fileId: string, reason?: string) => void;
 }
 
 export class SignalingClient {
@@ -310,6 +313,27 @@ export class SignalingClient {
         }
         break;
       }
+
+      case 'file-header': {
+        if (data.meta && (!data.targetId || data.targetId === this.peerId)) {
+          this.callbacks.onFileHeader?.(data.senderId, data.meta);
+        }
+        break;
+      }
+
+      case 'file-chunk': {
+        if (data.chunkPayload && (!data.targetId || data.targetId === this.peerId)) {
+          this.callbacks.onFileChunk?.(data.senderId, data.chunkPayload);
+        }
+        break;
+      }
+
+      case 'file-cancel': {
+        if (data.fileId && (!data.targetId || data.targetId === this.peerId)) {
+          this.callbacks.onFileCancel?.(data.senderId, data.fileId, data.reason);
+        }
+        break;
+      }
     }
   }
 
@@ -381,6 +405,43 @@ export class SignalingClient {
       senderId: this.peerId,
       senderName: this.displayName,
       emoji
+    });
+  }
+
+  public sendFileHeader(meta: any, targetId?: string) {
+    const msgId = `fh-${meta.id}-${Date.now()}`;
+    this.broadcast({
+      type: 'file-header',
+      msgId,
+      roomId: this.roomId,
+      senderId: this.peerId,
+      targetId,
+      meta
+    });
+  }
+
+  public sendFileChunk(chunkPayload: { fileId: string; chunkIndex: number; data: string; totalChunks: number; bytes: number }, targetId?: string) {
+    const msgId = `fc-${chunkPayload.fileId}-${chunkPayload.chunkIndex}`;
+    this.broadcast({
+      type: 'file-chunk',
+      msgId,
+      roomId: this.roomId,
+      senderId: this.peerId,
+      targetId,
+      chunkPayload
+    });
+  }
+
+  public sendFileCancel(fileId: string, reason?: string, targetId?: string) {
+    const msgId = `fcan-${fileId}-${Date.now()}`;
+    this.broadcast({
+      type: 'file-cancel',
+      msgId,
+      roomId: this.roomId,
+      senderId: this.peerId,
+      targetId,
+      fileId,
+      reason
     });
   }
 
