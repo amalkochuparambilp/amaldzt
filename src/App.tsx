@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Video, Radio } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Video, Radio, LayoutGrid, Boxes, AppWindow } from 'lucide-react';
 
 import Hero from './components/Hero';
 import About from './components/About';
@@ -9,10 +9,10 @@ import Projects from './components/Projects';
 import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
-import VideoCallRoom from './components/vc/VideoCallRoom';
+import MiniApps from './components/MiniApps';
 import { AMAL_INFO } from './data';
 
-type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'contact' | 'vc';
+type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact' | 'meet' | 'vc';
 
 export default function App() {
   const getInitialTab = (): Tab => {
@@ -20,11 +20,55 @@ export default function App() {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search;
-      if (path.startsWith('/vc') || hash.startsWith('#vc') || hash.includes('/vc') || search.includes('room=')) {
-        return 'vc';
+      if (
+        path.startsWith('/apps') ||
+        path.startsWith('/miniapp') ||
+        path.startsWith('/dzt-app') ||
+        hash.startsWith('#apps') ||
+        hash.startsWith('#miniapp') ||
+        hash.includes('/apps')
+      ) {
+        return 'apps';
+      }
+      if (
+        path.startsWith('/meet') ||
+        path.startsWith('/call') ||
+        path.startsWith('/room') ||
+        path.startsWith('/join') ||
+        path.startsWith('/vc') ||
+        hash.startsWith('#meet') ||
+        hash.startsWith('#call') ||
+        hash.startsWith('#vc') ||
+        hash.includes('/meet') ||
+        hash.includes('/vc') ||
+        search.includes('room=') ||
+        search.includes('app=')
+      ) {
+        return 'apps';
       }
     }
     return 'home';
+  };
+
+  const getInitialApp = (): string | undefined => {
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const appParam = searchParams.get('app');
+      if (appParam) return appParam;
+
+      const path = window.location.pathname.toLowerCase();
+      if (
+        path.startsWith('/meet') ||
+        path.startsWith('/call') ||
+        path.startsWith('/room') ||
+        path.startsWith('/join') ||
+        path.startsWith('/vc') ||
+        window.location.search.includes('room=')
+      ) {
+        return 'meet';
+      }
+    }
+    return undefined;
   };
 
   const getInitialRoom = (): string | undefined => {
@@ -33,7 +77,7 @@ export default function App() {
       const r = searchParams.get('room');
       if (r) return r;
 
-      // Also check hash query params like #vc?room=abc or #/vc?room=abc
+      // Also check hash query params like #meet?room=abc or #apps?room=abc
       if (window.location.hash.includes('room=')) {
         const hashQuery = window.location.hash.split('?')[1];
         if (hashQuery) {
@@ -43,8 +87,10 @@ export default function App() {
         }
       }
 
+      // Check path parts e.g. /meet/jnias-lab-473 or /call/jnias-lab-473 or /vc/jnias-lab-473
       const pathParts = window.location.pathname.split('/').filter(Boolean);
-      if (pathParts[0] === 'vc' && pathParts[1]) {
+      const prefixes = ['meet', 'call', 'room', 'join', 'vc'];
+      if (prefixes.includes(pathParts[0]?.toLowerCase()) && pathParts[1]) {
         return pathParts[1];
       }
     }
@@ -53,12 +99,13 @@ export default function App() {
 
   const initialTabState = getInitialTab();
   const [activeTab, setActiveTab] = useState<Tab>(initialTabState);
+  const [initialAppId, setInitialAppId] = useState<string | undefined>(getInitialApp);
   const [initialRoomId, setInitialRoomId] = useState<string | undefined>(getInitialRoom);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // If user opens a direct VC link, boot immediately
-  const [isSystemBooted, setIsSystemBooted] = useState<boolean>(() => initialTabState === 'vc');
-  const [bootProgress, setBootProgress] = useState<number>(() => initialTabState === 'vc' ? 100 : 0);
+  // If user opens a direct Apps / Meet link, boot immediately
+  const [isSystemBooted, setIsSystemBooted] = useState<boolean>(() => initialTabState === 'apps' || initialTabState === 'meet' || initialTabState === 'vc');
+  const [bootProgress, setBootProgress] = useState<number>(() => (initialTabState === 'apps' || initialTabState === 'meet' || initialTabState === 'vc') ? 100 : 0);
   const [bootStep, setBootStep] = useState(0);
 
   const [batteryStatus, setBatteryStatus] = useState<{
@@ -71,11 +118,11 @@ export default function App() {
     supported: false,
   });
 
-  const bootLogs = [
-    { label: 'LIBRARY CORE', text: 'Initializing LibCode JNIAS Database & Barcode Engines...' },
-    { label: 'P2P WEBRTC', text: 'Binding /vc Mesh Video Signaling Socket & STUN Gateways...' },
-    { label: 'EXAM PLATFORM', text: 'Syncing Co-operative Bank Testing Suite & Hrdiya Hub...' },
-    { label: 'SYSTEM READY', text: 'Launching Amal K P DZt Digital Workspace & VC Suite...' }
+  const appLoadingSteps = [
+    { text: 'Loading application modules & UI core...', sub: 'Fetching dynamic components' },
+    { text: 'Connecting DZt MiniApp Hub & services...', sub: 'Initializing interactive apps' },
+    { text: 'Configuring interactive terminal & workspace...', sub: 'Setting up client state' },
+    { text: 'Application workspace ready', sub: 'Welcome to Amal K P Portfolio' }
   ];
 
   // URL sync and popstate listener
@@ -85,14 +132,41 @@ export default function App() {
       const search = window.location.search;
       const hash = window.location.hash.toLowerCase();
 
-      if (path.startsWith('/vc') || hash.startsWith('#vc') || hash.includes('/vc') || search.includes('room=')) {
-        setActiveTab('vc');
+      if (
+        path.startsWith('/apps') ||
+        path.startsWith('/miniapp') ||
+        path.startsWith('/dzt-app') ||
+        hash.startsWith('#apps') ||
+        hash.startsWith('#miniapp') ||
+        hash.includes('/apps')
+      ) {
+        setActiveTab('apps');
+        setIsSystemBooted(true);
+        const app = getInitialApp();
+        if (app) setInitialAppId(app);
+        const room = getInitialRoom();
+        if (room) setInitialRoomId(room);
+      } else if (
+        path.startsWith('/meet') ||
+        path.startsWith('/call') ||
+        path.startsWith('/room') ||
+        path.startsWith('/join') ||
+        path.startsWith('/vc') ||
+        hash.startsWith('#meet') ||
+        hash.startsWith('#call') ||
+        hash.startsWith('#vc') ||
+        hash.includes('/meet') ||
+        hash.includes('/vc') ||
+        search.includes('room=')
+      ) {
+        setActiveTab('apps');
+        setInitialAppId('meet');
         setIsSystemBooted(true);
         const room = getInitialRoom();
         if (room) setInitialRoomId(room);
       } else {
         const cleanHash = window.location.hash.replace('#', '') as Tab;
-        const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact', 'vc'];
+        const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'apps', 'contact'];
         if (validTabs.includes(cleanHash)) {
           setActiveTab(cleanHash);
         } else {
@@ -155,19 +229,29 @@ export default function App() {
   }, []);
 
   const handleNavigate = (tab: string, customRoomId?: string) => {
-    const targetTab = tab as Tab;
+    let targetTab = tab as Tab;
+    if (tab === 'vc' || tab === 'meet') {
+      targetTab = 'apps';
+      setInitialAppId('meet');
+      if (customRoomId) setInitialRoomId(customRoomId);
+    } else if (tab === 'miniapp' || tab === 'apps') {
+      targetTab = 'apps';
+      setInitialAppId(undefined);
+    }
+
     setActiveTab(targetTab);
     setIsMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (targetTab === 'vc') {
-      if (customRoomId) {
-        setInitialRoomId(customRoomId);
-        window.history.pushState(null, '', `/vc?room=${encodeURIComponent(customRoomId)}`);
+    if (targetTab === 'apps') {
+      if (tab === 'meet' || tab === 'vc') {
+        if (customRoomId) {
+          window.history.pushState(null, '', `/apps?app=meet&room=${encodeURIComponent(customRoomId)}`);
+        } else {
+          window.history.pushState(null, '', '/apps?app=meet');
+        }
       } else {
-        const search = window.location.search;
-        const targetUrl = search.includes('room=') ? `/vc${search}` : '/vc';
-        window.history.pushState(null, '', targetUrl);
+        window.history.pushState(null, '', '/apps');
       }
     } else {
       window.history.pushState(null, '', `/#${targetTab}`);
@@ -181,102 +265,87 @@ export default function App() {
     { id: 'projects', label: 'Projects', icon: Layers },
     { id: 'skills', label: 'Skills', icon: Cpu },
     { id: 'resume', label: 'Resume', icon: BookOpen },
-    { id: 'vc', label: 'VC Room', icon: Video, isLive: true },
+    { id: 'apps', label: 'DZt MiniApp', icon: LayoutGrid, isLive: true },
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#e0e0e0] flex flex-col font-sans selection:bg-white/20 selection:text-white relative overflow-x-hidden">
       
-      {/* Tech & AI Level Bootscreen Loader Animation */}
+      {/* Modern Web Application Splash / Loading Screen */}
       <AnimatePresence>
         {!isSystemBooted && (
           <motion.div 
-            exit={{ opacity: 0, scale: 1.02 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="fixed inset-0 bg-[#050505] z-50 flex flex-col items-center justify-center p-6 font-mono text-xs text-white select-none overflow-hidden"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 bg-[#080808] z-50 flex flex-col items-center justify-center p-6 text-white select-none overflow-hidden"
           >
-            {/* Ambient Background Tech Grid & Pulse */}
-            <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
-            <div className="absolute w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-3xl pointer-events-none animate-pulse" />
+            {/* Subtle Ambient Background Gradients */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-cyan-500/5 via-white/[0.03] to-transparent rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
 
-            <div className="relative z-10 max-w-lg w-full bg-[#0a0a0a] border border-white/15 rounded-sm p-6 sm:p-8 space-y-6 shadow-2xl">
+            <div className="relative z-10 max-w-sm w-full flex flex-col items-center text-center space-y-7">
               
-              {/* Header HUD Bar */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-4 text-[10px] text-white/50">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-4 h-4 text-white animate-pulse" />
-                  <span className="font-bold uppercase tracking-widest text-white">AMAL_AI_KERNEL_BOOT</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>LATENCY: 1.2ms</span>
+              {/* App Brand Emblem */}
+              <div className="relative">
+                <motion.div 
+                  animate={{ scale: [1, 1.04, 1] }}
+                  transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
+                  className="w-16 h-16 bg-white text-black flex items-center justify-center rounded-xs shadow-[0_0_30px_rgba(255,255,255,0.15)] font-black text-2xl"
+                >
+                  <span>A</span>
+                </motion.div>
+                <div className="absolute -bottom-2 -right-2 bg-neutral-900 border border-white/20 px-1.5 py-0.5 rounded-2xs text-[9px] font-mono text-cyan-400 font-bold uppercase tracking-wider">
+                  DZt
                 </div>
               </div>
 
-              {/* Central Visual Neural Radar */}
-              <div className="flex flex-col items-center justify-center py-4 relative">
-                <div className="relative w-24 h-24 flex items-center justify-center">
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 6, ease: 'linear' }}
-                    className="absolute inset-0 rounded-full border border-dashed border-white/30"
-                  />
-                  <motion.div 
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-                    className="w-16 h-16 rounded-full bg-white/5 border border-white/20 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                  >
-                    <Bot className="w-8 h-8 text-white" />
-                  </motion.div>
-                </div>
-                <div className="mt-3 text-center space-y-0.5">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 block">AI INITIALIZATION SEQUENCE</span>
-                  <span className="text-xl font-bold tracking-widest text-white font-display">
-                    {bootProgress}%
+              {/* Title and Tagline */}
+              <div className="space-y-1">
+                <h1 className="text-lg font-bold uppercase tracking-tight text-white font-mono">
+                  Amal K P
+                </h1>
+                <p className="text-xs text-white/50 font-sans">
+                  Digital Workspace & MiniApp Ecosystem
+                </p>
+              </div>
+
+              {/* Progress Bar & Status */}
+              <div className="w-full space-y-3 bg-[#0f0f0f] border border-white/10 p-4 rounded-xs">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-white/60 truncate pr-2 text-left text-[11px]">
+                    {appLoadingSteps[bootStep]?.text || 'Loading application...'}
                   </span>
+                  <span className="text-white font-bold">{bootProgress}%</span>
                 </div>
-              </div>
 
-              {/* Progress Bar */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-[10px] font-mono text-white/50 uppercase">
-                  <span>Progress</span>
-                  <span>{bootProgress < 100 ? 'Compiling Weights...' : 'Boot Complete'}</span>
-                </div>
-                <div className="w-full h-1.5 bg-black border border-white/10 rounded-xs overflow-hidden p-0.5">
+                <div className="w-full h-1.5 bg-black/60 rounded-full overflow-hidden border border-white/10">
                   <motion.div 
-                    className="h-full bg-white"
+                    className="h-full bg-gradient-to-r from-white/70 via-cyan-400 to-white"
                     style={{ width: `${bootProgress}%` }}
-                    transition={{ ease: 'easeOut', duration: 0.2 }}
+                    transition={{ ease: 'easeOut', duration: 0.15 }}
                   />
                 </div>
-              </div>
 
-              {/* Telemetry Step Log Display */}
-              <div className="bg-black/60 border border-white/10 p-3 rounded-xs font-mono text-[11px] space-y-1.5">
-                <div className="flex items-center justify-between text-[9px] text-white/30 uppercase tracking-wider pb-1 border-b border-white/5">
-                  <span>Log Channel 01</span>
-                  <span className="text-emerald-400">ACTIVE</span>
-                </div>
-                <div className="text-white font-medium flex items-start gap-2">
-                  <Zap className="w-3.5 h-3.5 text-white/70 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] text-white/40 uppercase tracking-widest block">
-                      [{bootLogs[bootStep].label}]
-                    </span>
-                    <span className="text-white text-xs leading-tight block">
-                      {bootLogs[bootStep].text}
-                    </span>
-                  </div>
+                {/* Sub-status modules */}
+                <div className="flex items-center justify-between text-[9px] font-mono text-white/40 pt-1 border-t border-white/5">
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Web App Suite
+                  </span>
+                  <span>v2.4 • Ready</span>
                 </div>
               </div>
 
-              {/* Footer System Spec Bar */}
-              <div className="pt-2 border-t border-white/10 flex justify-between items-center text-[9px] text-white/40 uppercase tracking-widest">
-                <span>JNIAS_BALAGRAM_NODE</span>
-                <span>STATUS: OPERATIONAL</span>
-              </div>
+              {/* Quick Launch Skip Button */}
+              <button
+                onClick={() => setIsSystemBooted(true)}
+                className="text-[11px] font-mono text-white/40 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 pt-1"
+              >
+                <span>Entering workspace...</span>
+                <span className="text-white/70 hover:underline font-bold">Skip</span>
+              </button>
 
             </div>
           </motion.div>
@@ -327,9 +396,9 @@ export default function App() {
                     : 'text-white/50 border-transparent hover:text-white hover:bg-white/[0.02]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : item.id === 'vc' ? 'text-cyan-400' : 'text-white/40'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : item.isLive ? 'text-cyan-400' : 'text-white/40'}`} />
                 <span className="uppercase tracking-wider">{item.label}</span>
-                {item.id === 'vc' && (
+                {item.isLive && (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
                 )}
                 {isActive && (
@@ -402,7 +471,7 @@ export default function App() {
           >
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
+              const isActive = activeTab === item.id || (item.id === 'meet' && activeTab === 'vc');
               return (
                 <button
                   key={item.id}
@@ -413,9 +482,9 @@ export default function App() {
                       : 'text-white/60 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : item.id === 'vc' ? 'text-cyan-400' : 'text-white/40'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : item.isLive ? 'text-cyan-400' : 'text-white/40'}`} />
                   <span className="flex-1 text-left">{item.label}</span>
-                  {item.id === 'vc' && (
+                  {item.isLive && (
                     <span className="text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-xs border border-emerald-500/30">
                       P2P LIVE
                     </span>
@@ -455,8 +524,8 @@ export default function App() {
             {activeTab === 'resume' && (
               <Resume />
             )}
-            {activeTab === 'vc' && (
-              <VideoCallRoom initialRoomId={initialRoomId} onExit={() => handleNavigate('home')} />
+            {(activeTab === 'apps' || activeTab === 'meet' || activeTab === 'vc') && (
+              <MiniApps initialAppId={initialAppId} initialRoomId={initialRoomId} onExitToHome={() => handleNavigate('home')} />
             )}
             {activeTab === 'contact' && (
               <Contact />

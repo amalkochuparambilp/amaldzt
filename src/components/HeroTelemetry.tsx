@@ -399,21 +399,31 @@ export default function HeroTelemetry() {
       case 'help':
         addOut('Available commands:');
         addOut('  whoami    - Display founder bio & qualifications');
+        addOut('  apps      - Open DZt MiniApp Suite & Tools (/apps)');
         addOut('  projects  - List active platforms (LibCode, Bank Exam Portal, Hrdiya)');
-        addOut('  vc        - Launch P2P Encrypted Video Call Room (/vc)');
+        addOut('  meet / vc - Launch DZt Meet Video Call (/apps?app=meet)');
         addOut('  skills    - Print key technical stack matrix');
         addOut('  ip        - Output visitor IP geolocation details');
         addOut('  ping      - Measure system network response latency');
         addOut('  contact   - Display direct email & communication channels');
         addOut('  clear     - Wipe terminal screen buffer');
         break;
+      case 'apps':
+      case 'miniapp':
+      case 'tools':
+        addOut('OPENING DZT MINIAPP ECOSYSTEM...');
+        setTimeout(() => {
+          window.location.href = '/apps';
+        }, 800);
+        break;
       case 'vc':
+      case 'meet':
       case 'call':
       case 'video':
-        addOut('INITIATING P2P VIDEO TRANSMISSION...');
-        addOut('Opening /vc Video Call Suite in 1.2s...');
+        addOut('INITIATING DZT MEET P2P VIDEO TRANSMISSION...');
+        addOut('Opening DZt Meet MiniApp Suite in 1.2s...');
         setTimeout(() => {
-          window.location.href = '/vc';
+          window.location.href = '/apps?app=meet';
         }, 1200);
         break;
       case 'whoami':

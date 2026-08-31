@@ -164,11 +164,10 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
         {onNavigate && (
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <button
-              onClick={() => onNavigate('vc')}
-              className="w-full sm:w-auto px-6 py-3 bg-white/10 border border-white/30 text-white text-xs font-bold font-mono uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+              onClick={() => onNavigate('projects')}
+              className="w-full sm:w-auto px-6 py-3 bg-white/10 border border-white/20 text-white text-xs font-bold font-mono uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Instant Video Call (/vc)</span>
+              <span>View Projects</span>
             </button>
             <button
               onClick={() => onNavigate('contact')}

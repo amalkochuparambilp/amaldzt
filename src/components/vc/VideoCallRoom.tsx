@@ -102,9 +102,17 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await fetch('/api/vc/rooms');
+        const res = await fetch('/api/meet/rooms');
         if (res.ok) {
           const data = await res.json();
+          if (data.rooms) {
+            setPublicRooms(data.rooms);
+            return;
+          }
+        }
+        const fallbackRes = await fetch('/api/vc/rooms');
+        if (fallbackRes.ok) {
+          const data = await fallbackRes.json();
           if (data.rooms) setPublicRooms(data.rooms);
         }
       } catch {
@@ -123,9 +131,9 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
     }
   }, [initialRoomId]);
 
-  // Update browser URL when roomId or VC state changes
+  // Update browser URL when roomId or Meet state changes
   useEffect(() => {
-    const newUrl = `/vc?room=${encodeURIComponent(roomId)}`;
+    const newUrl = `/meet?room=${encodeURIComponent(roomId)}`;
     window.history.replaceState(null, '', newUrl);
   }, [roomId]);
 
@@ -231,7 +239,7 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
   // Copy share link
   const handleCopyRoomUrl = () => {
     const origin = window.location.origin;
-    const fullUrl = `${origin}/vc?room=${encodeURIComponent(roomId)}`;
+    const fullUrl = `${origin}/meet?room=${encodeURIComponent(roomId)}`;
     navigator.clipboard.writeText(fullUrl).then(() => {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2400);
@@ -889,13 +897,13 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
               <div className="space-y-1 pb-4 border-b border-white/10">
                 <div className="flex items-center gap-2 text-xs text-cyan-400 font-bold uppercase tracking-widest">
                   <Sparkles className="w-4 h-4" />
-                  <span>DZt Transmission Hub</span>
+                  <span>DZt Meet • Video Platform</span>
                 </div>
                 <h2 className="text-xl font-bold text-white tracking-tight uppercase">
-                  P2P Video Call Suite
+                  Video Meeting Platform
                 </h2>
                 <p className="text-xs text-white/50 font-sans">
-                  Direct peer-to-peer WebRTC encrypted video, high-fidelity voice transmission, and live screen broadcasting.
+                  Enterprise-grade direct peer-to-peer WebRTC encrypted video, crystal audio, and live screen broadcasting.
                 </p>
               </div>
 
@@ -937,19 +945,22 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
                   <button
                     onClick={handleCopyRoomUrl}
                     className="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xs text-xs font-mono transition-colors flex items-center gap-1.5 cursor-pointer"
-                    title="Copy Shareable Room URL"
+                    title="Copy Shareable Meet URL"
                   >
                     {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-white/70" />}
-                    <span className="hidden sm:inline">{copiedLink ? 'Copied' : 'Link'}</span>
+                    <span className="hidden sm:inline">{copiedLink ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
               </div>
 
               {/* Shareable Room URL Display */}
               <div className="bg-black/50 border border-white/10 p-3 rounded-xs space-y-1">
-                <span className="text-[9px] text-white/40 uppercase tracking-widest block">Invite Link to Join:</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] text-white/40 uppercase tracking-widest block">Dedicated Meet URL:</span>
+                  <span className="text-[9px] text-emerald-400 font-mono">1-Click Join</span>
+                </div>
                 <div className="text-[11px] text-cyan-300 font-mono truncate select-all">
-                  {typeof window !== 'undefined' ? `${window.location.origin}/vc?room=${encodeURIComponent(roomId)}` : `/vc?room=${roomId}`}
+                  {typeof window !== 'undefined' ? `${window.location.origin}/meet?room=${encodeURIComponent(roomId)}` : `/meet?room=${roomId}`}
                 </div>
               </div>
 

@@ -231,12 +231,33 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-app.get('/api/vc/rooms', (_req, res) => {
+const getActiveRoomsList = () => {
   const activeRooms: { id: string; userCount: number }[] = [];
   rooms.forEach((room, id) => {
     activeRooms.push({ id, userCount: room.size });
   });
-  res.json({ rooms: activeRooms });
+  return activeRooms;
+};
+
+app.get('/api/meet/rooms', (_req, res) => {
+  res.json({ rooms: getActiveRoomsList() });
+});
+
+app.get('/api/meet/room/:roomId', (req, res) => {
+  const { roomId } = req.params;
+  const room = rooms.get(roomId);
+  if (!room) {
+    return res.json({ exists: false, count: 0, peers: [] });
+  }
+  return res.json({
+    exists: true,
+    count: room.size,
+    peers: getRoomPeers(roomId)
+  });
+});
+
+app.get('/api/vc/rooms', (_req, res) => {
+  res.json({ rooms: getActiveRoomsList() });
 });
 
 app.get('/api/vc/room/:roomId', (req, res) => {
