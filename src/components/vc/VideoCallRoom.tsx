@@ -116,9 +116,16 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
     return () => clearInterval(interval);
   }, []);
 
+  // Synchronize roomId if initialRoomId prop changes
+  useEffect(() => {
+    if (initialRoomId && initialRoomId !== roomId) {
+      setRoomId(initialRoomId);
+    }
+  }, [initialRoomId]);
+
   // Update browser URL when roomId or VC state changes
   useEffect(() => {
-    const newUrl = `${window.location.pathname}?room=${encodeURIComponent(roomId)}`;
+    const newUrl = `/vc?room=${encodeURIComponent(roomId)}`;
     window.history.replaceState(null, '', newUrl);
   }, [roomId]);
 
@@ -344,7 +351,23 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
       } else if (signalData.type === 'ice-candidate') {
         const pc = peerConnectionsRef.current.get(senderId);
         if (pc && signalData.candidate) {
-          await pc.addIceCandidate(new RTCIceCandidate(signalData.candidate));
+          try {
+            if (pc.remoteDescription) {
+              await pc.addIceCandidate(new RTCIceCandidate(signalData.candidate));
+            } else {
+              setTimeout(async () => {
+                try {
+                  if (pc.remoteDescription) {
+                    await pc.addIceCandidate(new RTCIceCandidate(signalData.candidate));
+                  }
+                } catch {
+                  // ignore
+                }
+              }, 500);
+            }
+          } catch (e) {
+            console.warn('Failed to add ICE candidate', e);
+          }
         }
       } else if (signalData.type === 'mute-status') {
         setPeers((prev) => {
@@ -382,11 +405,21 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
       // Ensure local media stream is active
       let stream = localStream;
       if (!stream) {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: { width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-        setLocalStream(stream);
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: { width: { ideal: 1280 }, height: { ideal: 720 } }
+          });
+          setLocalStream(stream);
+        } catch {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            setLocalStream(stream);
+            setIsVideoMuted(true);
+          } catch {
+            console.warn('Joining call without audio/video hardware stream');
+          }
+        }
       }
 
       // Initialize Signaling Client

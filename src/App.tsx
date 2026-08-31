@@ -20,30 +20,45 @@ export default function App() {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search;
-      if (path.startsWith('/vc') || hash.startsWith('#vc') || search.includes('room=')) {
+      if (path.startsWith('/vc') || hash.startsWith('#vc') || hash.includes('/vc') || search.includes('room=')) {
         return 'vc';
       }
     }
     return 'home';
   };
 
-  const [activeTab, setActiveTab] = useState<Tab>(getInitialTab);
-  const [initialRoomId, setInitialRoomId] = useState<string | undefined>(() => {
+  const getInitialRoom = (): string | undefined => {
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
       const r = searchParams.get('room');
       if (r) return r;
+
+      // Also check hash query params like #vc?room=abc or #/vc?room=abc
+      if (window.location.hash.includes('room=')) {
+        const hashQuery = window.location.hash.split('?')[1];
+        if (hashQuery) {
+          const hashParams = new URLSearchParams(hashQuery);
+          const hashRoom = hashParams.get('room');
+          if (hashRoom) return hashRoom;
+        }
+      }
+
       const pathParts = window.location.pathname.split('/').filter(Boolean);
       if (pathParts[0] === 'vc' && pathParts[1]) {
         return pathParts[1];
       }
     }
     return undefined;
-  });
+  };
+
+  const initialTabState = getInitialTab();
+  const [activeTab, setActiveTab] = useState<Tab>(initialTabState);
+  const [initialRoomId, setInitialRoomId] = useState<string | undefined>(getInitialRoom);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSystemBooted, setIsSystemBooted] = useState(false);
-  const [bootProgress, setBootProgress] = useState(0);
+  // If user opens a direct VC link, boot immediately
+  const [isSystemBooted, setIsSystemBooted] = useState<boolean>(() => initialTabState === 'vc');
+  const [bootProgress, setBootProgress] = useState<number>(() => initialTabState === 'vc' ? 100 : 0);
   const [bootStep, setBootStep] = useState(0);
 
   const [batteryStatus, setBatteryStatus] = useState<{
@@ -68,16 +83,18 @@ export default function App() {
     const handlePopState = () => {
       const path = window.location.pathname.toLowerCase();
       const search = window.location.search;
-      if (path.startsWith('/vc') || search.includes('room=')) {
+      const hash = window.location.hash.toLowerCase();
+
+      if (path.startsWith('/vc') || hash.startsWith('#vc') || hash.includes('/vc') || search.includes('room=')) {
         setActiveTab('vc');
-        const params = new URLSearchParams(window.location.search);
-        const r = params.get('room');
-        if (r) setInitialRoomId(r);
+        setIsSystemBooted(true);
+        const room = getInitialRoom();
+        if (room) setInitialRoomId(room);
       } else {
-        const hash = window.location.hash.replace('#', '') as Tab;
+        const cleanHash = window.location.hash.replace('#', '') as Tab;
         const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact', 'vc'];
-        if (validTabs.includes(hash)) {
-          setActiveTab(hash);
+        if (validTabs.includes(cleanHash)) {
+          setActiveTab(cleanHash);
         } else {
           setActiveTab('home');
         }
