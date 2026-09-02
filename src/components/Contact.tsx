@@ -20,6 +20,7 @@ export default function Contact() {
     const body = encodeURIComponent(`${formData.message}\n\nReply to: ${formData.email}`);
     window.location.href = `mailto:${AMAL_INFO.email}?subject=${subject}&body=${body}`;
     setStatus('success');
+    setFormData({ name: '', email: '', message: '' });
   };
 
   return (
@@ -127,9 +128,9 @@ export default function Contact() {
                 <div className="w-12 h-12 rounded-full bg-white/10 border border-white mx-auto flex items-center justify-center">
                   <Check className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="text-xl font-bold text-white">Message Transmitted</h4>
+                <h4 className="text-xl font-bold text-white">Email Ready</h4>
                 <p className="text-xs text-white/60 max-w-sm mx-auto font-sans leading-relaxed">
-                  Thank you for reaching out to Amal K P. I will respond to your email as soon as possible.
+                  Your email client is opening with the message pre-filled. Complete and send to reach Amal K P.
                 </p>
                 <button
                   onClick={() => setStatus('idle')}
@@ -181,17 +182,10 @@ export default function Contact() {
 
                 <button
                   type="submit"
-                  disabled={status === 'sending'}
-                  className="w-full py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {status === 'sending' ? (
-                    <span>Transmitting...</span>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Transmit Message</span>
-                    </>
-                  )}
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Open Email</span>
                 </button>
               </form>
             )}
