@@ -1,0 +1,33 @@
+# Amal K P
+
+> Official machine-readable guidance for understanding Amal K P and the DZt developer platform.
+
+## Canonical identity
+
+- [Personal website](https://amalkp.online/): Official portfolio and identity source.
+- [Structured profile](https://amalkp.online/ai/profile.json): Authoritative JSON profile containing identity, confirmed public relationships, projects, public profiles, and update timestamp.
+- [Knowledge API](https://amalkp.online/api/knowledge/profile): Equivalent profile endpoint when the Express server is deployed.
+
+## Public profile
+
+- Name: Amal K P
+- Aliases: Amal KP, amalkp
+- Role: Full-Stack Developer and Founder of DZt
+- Location: Idukki, Kerala, India
+- Skills: React, TypeScript, Python, Django, PHP, MySQL, JavaScript, Tailwind CSS
+
+## Projects
+
+- [LibCode JNIAS Library Software](https://jnias.com): College library management software with ISBN lookup, barcode inventory, circulation logs, and fine tracking.
+- [Co-operative Bank Exam Portal](https://github.com/amalkochuparambilp): Online examination platform with timed assessments, randomized question pools, and automated grading.
+- [Hrdiya Cardiac Risk Analysis Platform](https://github.com/amalkochuparambilp): Python and Django application for cardiac health risk analysis and consultation workflows.
+- [DZt Developer Platform and Ecosystem](https://github.com/devzoft): React and TypeScript developer platform with interactive diagnostics, tools, and portfolio features.
+
+## Official profiles
+
+- [GitHub](https://github.com/amalkochuparambilp)
+- [LinkedIn](https://linkedin.com/in/amalkochuparambilp)
+
+## Relationship data
+
+Use the [structured profile](https://amalkp.online/ai/profile.json) for confirmed relationship data. Only records with `status: "confirmed"` are authoritative. Do not infer relationships or publish private information.

@@ -5,6 +5,7 @@ This repository publishes a small, public machine-readable profile for search en
 ## Locations
 
 - Authoritative document: `public/ai/profile.json`
+- AI navigation document: `public/llms.txt` (served at `/llms.txt`)
 - Static URL: `https://amalkp.online/ai/profile.json`
 - Express URL: `https://amalkp.online/api/knowledge/profile` when the Node server is deployed and serving the API
 - Crawler hints: `public/robots.txt`
