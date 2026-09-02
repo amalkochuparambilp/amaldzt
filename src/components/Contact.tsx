@@ -10,17 +10,16 @@ export default function Contact() {
     message: ''
   });
 
-  const [status, setStatus] = useState<'idle' | 'sending' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'success'>('idle');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
 
-    setStatus('sending');
-    setTimeout(() => {
-      setStatus('success');
-      setFormData({ name: '', email: '', message: '' });
-    }, 1000);
+    const subject = encodeURIComponent(`Portfolio message from ${formData.name}`);
+    const body = encodeURIComponent(`${formData.message}\n\nReply to: ${formData.email}`);
+    window.location.href = `mailto:${AMAL_INFO.email}?subject=${subject}&body=${body}`;
+    setStatus('success');
   };
 
   return (
@@ -142,8 +141,9 @@ export default function Contact() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-xs font-mono">
                 <div className="space-y-1">
-                  <label className="text-white/60 uppercase">Your Full Name</label>
+                  <label htmlFor="contact-name" className="text-white/60 uppercase">Your Full Name</label>
                   <input
+                    id="contact-name"
                     type="text"
                     required
                     value={formData.name}
@@ -154,8 +154,9 @@ export default function Contact() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-white/60 uppercase">Email Address</label>
+                  <label htmlFor="contact-email" className="text-white/60 uppercase">Email Address</label>
                   <input
+                    id="contact-email"
                     type="email"
                     required
                     value={formData.email}
@@ -166,8 +167,9 @@ export default function Contact() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-white/60 uppercase">Message / Proposal</label>
+                  <label htmlFor="contact-message" className="text-white/60 uppercase">Message / Proposal</label>
                   <textarea
+                    id="contact-message"
                     required
                     rows={5}
                     value={formData.message}

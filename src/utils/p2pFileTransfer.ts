@@ -58,6 +58,8 @@ export interface P2PTransferCallbacks {
 const CHUNK_SIZE = 64 * 1024; // 64KB binary chunk size for WebRTC DataChannel
 const BUFFER_THRESHOLD = 512 * 1024; // 512KB backpressure threshold
 const FILE_HEADER_BYTES = 36; // 32 bytes ASCII ID + 4 bytes Uint32 Chunk Index
+const MAX_FILE_SIZE = 1024 * 1024 * 1024;
+const MAX_CHUNKS = Math.ceil(MAX_FILE_SIZE / CHUNK_SIZE);
 
 // Generate 32-char hex file ID
 export function generateFileId(): string {
@@ -517,14 +519,21 @@ export class P2PFileManager {
   private handleIncomingFileHeader(rawMeta: any) {
     if (!rawMeta || !rawMeta.id) return;
     const cleanId = String(rawMeta.id).trim();
+    const size = Number(rawMeta.size);
+    const totalChunks = Number(rawMeta.totalChunks);
+    const expectedChunks = size === 0 ? 0 : Math.ceil(size / CHUNK_SIZE);
+    if (!/^[a-f0-9]{32}$/.test(cleanId) || !Number.isSafeInteger(size) || size < 0 || size > MAX_FILE_SIZE || totalChunks !== expectedChunks || totalChunks > MAX_CHUNKS) {
+      this.callbacks.onTransferError(cleanId, 'Invalid or oversized file metadata');
+      return;
+    }
 
     const meta: TransferMeta = {
       id: cleanId,
       name: rawMeta.name || 'unnamed_file',
-      size: Number(rawMeta.size) || 0,
+      size,
       type: rawMeta.type || 'application/octet-stream',
       lastModified: rawMeta.lastModified,
-      totalChunks: Number(rawMeta.totalChunks) || 1,
+      totalChunks,
       senderId: rawMeta.senderId || 'unknown',
       senderName: rawMeta.senderName || 'Remote Peer',
       timestamp: rawMeta.timestamp || Date.now()
@@ -552,12 +561,20 @@ export class P2PFileManager {
       eta: 0,
       status: 'transferring'
     });
+
+    if (meta.size === 0) {
+      const blob = new Blob([], { type: meta.type });
+      const blobUrl = URL.createObjectURL(blob);
+      this.receivingFiles.delete(cleanId);
+      this.callbacks.onTransferComplete({ id: cleanId, meta, direction: 'receive', progress: 100, bytesTransferred: 0, speed: 0, eta: 0, status: 'completed', blob, blobUrl, completedAt: Date.now() });
+    }
   }
 
   private handleIncomingChunkData(fileId: string, chunkIndex: number, chunkData: ArrayBuffer) {
     const cleanId = fileId.trim();
     const state = this.receivingFiles.get(cleanId);
     if (!state) return;
+    if (!Number.isInteger(chunkIndex) || chunkIndex < 0 || chunkIndex >= state.totalChunks || chunkData.byteLength > CHUNK_SIZE || state.receivedBytes + chunkData.byteLength > state.meta.size) return;
 
     if (!state.chunks[chunkIndex]) {
       state.chunks[chunkIndex] = chunkData;
@@ -592,7 +609,7 @@ export class P2PFileManager {
     this.callbacks.onTransferProgress(progressObj);
 
     // Check if all chunks received
-    if (state.receivedChunks >= state.totalChunks || state.receivedBytes >= state.meta.size) {
+    if (state.receivedChunks === state.totalChunks && state.receivedBytes === state.meta.size) {
       const completeChunks = state.chunks.filter((c): c is ArrayBuffer => c !== null);
       const mimeType = state.meta.type || 'application/octet-stream';
       const blob = new Blob(completeChunks, { type: mimeType });
@@ -678,7 +695,11 @@ export class P2PFileManager {
 
   public async sendFile(file: File, targetPeerId?: string): Promise<string> {
     const fileId = generateFileId();
-    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    const totalChunks = file.size === 0 ? 0 : Math.ceil(file.size / CHUNK_SIZE);
+    if (file.size > MAX_FILE_SIZE) {
+      this.callbacks.onTransferError(fileId, 'File exceeds the 1 GB transfer limit');
+      return fileId;
+    }
 
     const meta: TransferMeta = {
       id: fileId,
@@ -719,9 +740,10 @@ export class P2PFileManager {
       channelsToSend.forEach((dc) => {
         try { dc.send(headerPayload); } catch {}
       });
-    } else if (this.signalingClient) {
-      // Stream via Signaling Relay
-      this.signalingClient.sendFileHeader(meta, targetPeerId);
+    } else {
+      this.callbacks.onTransferError(fileId, 'A direct peer connection is required for file transfers');
+      this.activeUploads.delete(fileId);
+      return fileId;
     }
 
     // Step 2: Stream binary chunks
@@ -761,8 +783,6 @@ export class P2PFileManager {
     const idEncoder = new TextEncoder();
     const idBytes = idEncoder.encode(fileId.padEnd(32, ' ').slice(0, 32));
 
-    const useSignalingRelay = channels.length === 0;
-
     while (offset < file.size) {
       const uploadState = this.activeUploads.get(fileId);
       if (uploadState?.isCancelled || this.isClosed) {
@@ -770,9 +790,6 @@ export class P2PFileManager {
         channels.forEach((dc) => {
           if (dc.readyState === 'open') dc.send(cancelMsg);
         });
-        if (useSignalingRelay && this.signalingClient) {
-          this.signalingClient.sendFileCancel(fileId, 'Sender cancelled', targetPeerId);
-        }
         return;
       }
 
@@ -807,16 +824,6 @@ export class P2PFileManager {
             try { dc.send(packet.buffer); } catch {}
           }
         }
-      } else if (this.signalingClient) {
-        // Signaling Relay Fallback
-        const base64Data = arrayBufferToBase64(chunkBuffer);
-        this.signalingClient.sendFileChunk({
-          fileId,
-          chunkIndex,
-          data: base64Data,
-          totalChunks: meta.totalChunks,
-          bytes: chunkBuffer.byteLength
-        }, targetPeerId);
       }
 
       offset += chunkBuffer.byteLength;
