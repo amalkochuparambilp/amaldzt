@@ -35,7 +35,7 @@ export const PROJECTS: Project[] = [
       'High-speed search engine across thousands of library records',
       'Admin analytics dashboard for circulation & fine tracking'
     ],
-    githubUrl: 'https://github.com/amalkp/libcode-jnias',
+    githubUrl: 'https://jnias.com',
     featured: true
   },
   {
@@ -99,7 +99,8 @@ export const SKILLS: Skill[] = [
   { name: 'Git & Version Control', level: 85, category: 'Core & Tools', icon: 'GitBranch' },
   { name: 'Team Work & Collaboration', level: 95, category: 'Professional', icon: 'Users' },
   { name: 'System Architecture', level: 80, category: 'Core & Tools', icon: 'Layers' },
-  { name: 'UI/UX Design', level: 86, category: 'Frontend', icon: 'Palette' }
+  { name: 'UI/UX Design', level: 86, category: 'Frontend', icon: 'Palette' },
+  { name: 'Affinity', level: 89, category: 'Core & Tools', icon: 'Palette' }
 ];
 
 export const ECOSYSTEM_NODES = [
