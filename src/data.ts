@@ -8,7 +8,7 @@ export const AMAL_INFO = {
   email: 'amalkochuparambilp@gmail.com',
   phone: '+91 7510211318',
   linkedin: 'https://linkedin.com/in/amalkochuparambilp',
-  github: 'https://github.com/amalkp',
+  github: 'https://github.com/amalkochuparambilp',
   summary: 'BCA candidate at Jawaharlal Nehru Institute of Arts and Science (JNIAS) with strong technical expertise in React, Python, Django, PHP, MySQL, and modern web architectures. Founder and Lead at DZt digital platform, developer of LibCode JNIAS, Co-operative Bank Exam Portal, and Hrdiya health analytics application.',
   education: {
     degree: 'Bachelor of Computer Application (BCA)',
