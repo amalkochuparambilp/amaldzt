@@ -20,6 +20,15 @@ const PORT = 3000;
 const server = http.createServer(app);
 
 // Middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 app.use(express.json());
 
 // In-memory rooms for WebRTC Signaling
@@ -286,6 +295,16 @@ app.get('/api/contact/status', (_req, res) => {
   res.json({
     configured: hasToken && hasChatId,
     service: 'telegram'
+  });
+});
+
+// Knowledge layer profile endpoint
+app.get('/api/knowledge/profile', (_req, res) => {
+  const profilePath = path.join(process.cwd(), 'public', 'ai', 'profile.json');
+  res.sendFile(profilePath, (err) => {
+    if (err) {
+      res.status(404).json({ error: 'Profile not found' });
+    }
   });
 });
 

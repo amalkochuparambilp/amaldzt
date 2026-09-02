@@ -101,34 +101,102 @@ export default function Contact() {
     setStatus('submitting');
     setErrorMessage(null);
 
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const message = formData.message.trim();
+    const honeypot = formData.honeypot.trim();
+
+    // Honeypot spam interceptor
+    if (honeypot) {
+      setStatus('success');
+      setFormData({ name: '', email: '', message: '', honeypot: '' });
+      return;
+    }
+
+    let isDelivered = false;
+
+    // Step 1: Attempt transmission via backend /api/contact
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          message: formData.message.trim(),
-          _hp: formData.honeypot
-        })
+        body: JSON.stringify({ name, email, message, _hp: honeypot })
       });
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setStatus('success');
-        setFormData({ name: '', email: '', message: '', honeypot: '' });
-        setFormErrors({});
-      } else {
-        setStatus('error');
-        setErrorMessage(data.error || 'Failed to dispatch message to Telegram. Please try again or reach out directly.');
+      const contentType = response.headers.get('content-type') || '';
+      let data: any = null;
+      if (contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
       }
-    } catch (err: any) {
-      console.error('Contact submission error:', err);
-      setStatus('error');
-      setErrorMessage('Network connection error. Please verify your internet and try again.');
+
+      if (response.ok && data?.success) {
+        isDelivered = true;
+      } else if (response.status === 400 || response.status === 429) {
+        // Legitimate validation or rate-limit from the server
+        setStatus('error');
+        setErrorMessage(data?.error || 'Validation error. Please verify your details.');
+        return;
+      } else {
+        // 404, 500, or HTML returned (e.g. static Vercel host without active serverless proxy)
+        console.warn('Backend /api/contact unavailable or returned non-JSON. Initiating client-side gateway fallback...');
+      }
+    } catch (networkErr) {
+      console.warn('Direct connection to /api/contact failed (static host). Initiating client-side gateway fallback...', networkErr);
+    }
+
+    // Step 2: Fallback to direct Telegram Bot API if server endpoint is unavailable (e.g. Vercel static deployment)
+    if (!isDelivered) {
+      try {
+        const fallbackBotToken = '8698327116:AAElplFCAnxuyC0gVORQEAll8qP70btDwUk';
+        const fallbackChatId = '7814866194';
+
+        const formatted = [
+          '📩 New Contact Form Submission',
+          '',
+          `👤 Name: ${name}`,
+          `📧 Email: ${email}`,
+          `💬 Message: ${message}`
+        ].join('\n');
+
+        const directResponse = await fetch(`https://api.telegram.org/bot${fallbackBotToken}/sendMessage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            chat_id: fallbackChatId,
+            text: formatted,
+            disable_web_page_preview: true
+          })
+        });
+
+        const directData = await directResponse.json().catch(() => ({}));
+        if (directResponse.ok && directData?.ok) {
+          isDelivered = true;
+        } else {
+          throw new Error(directData?.description || 'Telegram gateway dispatch failed');
+        }
+      } catch (fallbackErr: any) {
+        console.error('All transmission methods exhausted:', fallbackErr);
+        setStatus('error');
+        setErrorMessage(
+          fallbackErr.message || 'Transmission failed. Please check your internet or reach out directly via email.'
+        );
+        return;
+      }
+    }
+
+    if (isDelivered) {
+      setStatus('success');
+      setFormData({ name: '', email: '', message: '', honeypot: '' });
+      setFormErrors({});
     }
   };
 
@@ -287,12 +355,34 @@ export default function Contact() {
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-950/40 border border-red-500/50 rounded-xs flex items-start gap-2.5 text-red-200"
+                    className="p-3.5 bg-red-950/50 border border-red-500/60 rounded-xs space-y-2 text-red-200"
                   >
-                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1 text-[11px] leading-relaxed">
-                      <strong className="font-bold block uppercase tracking-wide">Transmission Error</strong>
-                      <span>{errorMessage}</span>
+                    <div className="flex items-start gap-2.5">
+                      <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 text-[11px] leading-relaxed">
+                        <strong className="font-bold block uppercase tracking-wide text-red-300">Transmission Error</strong>
+                        <span>{errorMessage}</span>
+                      </div>
+                    </div>
+                    <div className="pt-2 flex flex-wrap items-center gap-2 border-t border-red-500/20 text-[11px]">
+                      <a
+                        href={`mailto:${AMAL_INFO.email}?subject=${encodeURIComponent(
+                          `Portfolio Inquiry from ${formData.name.trim() || 'Visitor'}`
+                        )}&body=${encodeURIComponent(
+                          `Name: ${formData.name.trim()}\nEmail: ${formData.email.trim()}\n\nMessage:\n${formData.message.trim()}`
+                        )}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-400/40 rounded-xs font-mono text-white transition-colors"
+                      >
+                        <Mail className="w-3.5 h-3.5 text-red-300" />
+                        <span>Send directly via Email Client</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => { setStatus('idle'); setErrorMessage(null); }}
+                        className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xs font-mono text-white/70 transition-colors"
+                      >
+                        Dismiss
+                      </button>
                     </div>
                   </motion.div>
                 )}
