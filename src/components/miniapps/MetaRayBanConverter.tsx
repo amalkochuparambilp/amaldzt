@@ -330,7 +330,7 @@ export default function MetaRayBanConverter({ onBack }: MetaRayBanConverterProps
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-mono font-bold tracking-wide">
             <Glasses className="w-4 h-4 text-pink-400" />
-            <span>Ray-Ban Meta Smart Glasses</span>
+            <span>Now Live</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight uppercase font-mono">
@@ -436,7 +436,7 @@ export default function MetaRayBanConverter({ onBack }: MetaRayBanConverterProps
             ) : (
               <>
                 <Zap className="w-5 h-5" />
-                <span>⚡ ALL-IN-ONE CONVERT & SAVE</span>
+                <span>CONVERT & SHARE</span>
               </>
             )}
           </button>
