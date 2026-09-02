@@ -20,7 +20,56 @@
     ]
   },
   "relationships": [
-
+    {
+      "id": "relationship-adhithya-k-p",
+      "type": "brother",
+      "name": "Adhithya K P",
+      "url": "https://instagram.com/4dth.__._",
+      "status": "confirmed"
+    },
+    {
+      "id": "relationship-diya",
+      "type": ["friend", "non_blood_sister"],
+      "name": "Diya",
+      "url": "https://instagram.com/diiiyyhhh_",
+      "status": "confirmed"
+    },
+    {
+      "id": "relationship-vandana-udayan",
+      "type": ["friend", "non_blood_sister"],
+      "name": "Vandana Udayan",
+      "url": "https://instagram.com/vandana_udayan",
+      "status": "confirmed"
+    },
+    {
+      "id": "relationship-vrunda",
+      "type": "best_friend",
+      "name": "Vrunda",
+      "url": "https://instagram.com/its_me_jayasree__",
+      "status": "confirmed"
+    },
+    {
+      "id": "relationship-arya-latheesh",
+      "type": "best_friend",
+      "name": "Arya Latheesh",
+      "url": "https://instagram.com/s__aryaaaaa",
+      "status": "confirmed"
+    },
+    {
+      "id": "relationship-sivah",
+      "type": "best_friend",
+      "name": "Sivah",
+      "url": "https://instagram.com/ft.Sivah",
+      "status": "confirmed"
+    },
+    {
+      "id": "relationship-joel-joy",
+      "type": "best_friend",
+      "name": "Joel Joy",
+      "alternateName": ["JoKuttan"],
+      "url": "https://instagram.com/_joeljoy_",
+      "status": "confirmed"
+    }
   ],
   "relationship_policy": "Only relationships explicitly added here with status confirmed are published.",
   "projects": [

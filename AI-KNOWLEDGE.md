@@ -24,7 +24,7 @@ The document contains:
 - `official_sources`: public URLs intended to support identity verification.
 - `last_updated`: ISO-8601 timestamp for the last factual update.
 
-Each relationship should use a stable `id` when available and should include a precise `type`, public `name`, optional public `url`, and `status`. Only add a relationship when Amal has explicitly verified that it is intended for public publication and set `status` to `confirmed`. Do not infer relationships from names, social connections or project collaboration.
+Each relationship should use a stable `id` when available and should include a precise `type` (or an array of precise types when more than one relationship applies), public `name`, optional public `url`, and `status`. Only add a relationship when Amal has explicitly verified that it is intended for public publication and set `status` to `confirmed`. Do not infer relationships from names, social connections or project collaboration.
 
 Example:
 
