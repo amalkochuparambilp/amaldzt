@@ -28,30 +28,35 @@ export default function App() {
         path.startsWith('/share') ||
         path.startsWith('/send') ||
         path.startsWith('/files') ||
-        hash.startsWith('#apps') ||
-        hash.startsWith('#miniapp') ||
-        hash.startsWith('#drop') ||
-        hash.startsWith('#share') ||
-        hash.includes('/apps') ||
-        hash.includes('/drop')
-      ) {
-        return 'apps';
-      }
-      if (
+        path.startsWith('/metarayban') ||
+        path.startsWith('/rayban') ||
         path.startsWith('/meet') ||
         path.startsWith('/call') ||
         path.startsWith('/room') ||
         path.startsWith('/join') ||
         path.startsWith('/vc') ||
+        hash.startsWith('#apps') ||
+        hash.startsWith('#miniapp') ||
+        hash.startsWith('#drop') ||
+        hash.startsWith('#share') ||
         hash.startsWith('#meet') ||
         hash.startsWith('#call') ||
         hash.startsWith('#vc') ||
+        hash.includes('/apps') ||
+        hash.includes('/drop') ||
         hash.includes('/meet') ||
         hash.includes('/vc') ||
         search.includes('room=') ||
         search.includes('app=')
       ) {
         return 'apps';
+      }
+
+      // Check standard section hashes
+      const cleanHash = hash.replace('#', '') as Tab;
+      const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact'];
+      if (validTabs.includes(cleanHash)) {
+        return cleanHash;
       }
     }
     return 'home';
@@ -64,6 +69,14 @@ export default function App() {
       if (appParam) return appParam;
 
       const path = window.location.pathname.toLowerCase();
+      if (
+        path.startsWith('/metarayban') ||
+        path.startsWith('/rayban') ||
+        window.location.hash.includes('metarayban') ||
+        window.location.hash.includes('rayban')
+      ) {
+        return 'metarayban';
+      }
       if (
         path.startsWith('/drop') ||
         path.startsWith('/share') ||
@@ -81,6 +94,8 @@ export default function App() {
         path.startsWith('/room') ||
         path.startsWith('/join') ||
         path.startsWith('/vc') ||
+        window.location.hash.includes('meet') ||
+        window.location.hash.includes('vc') ||
         window.location.search.includes('room=')
       ) {
         return 'meet';
@@ -95,7 +110,6 @@ export default function App() {
       const r = searchParams.get('room');
       if (r) return r;
 
-      // Also check hash query params like #meet?room=abc or #apps?room=abc or #drop?room=abc
       if (window.location.hash.includes('room=')) {
         const hashQuery = window.location.hash.split('?')[1];
         if (hashQuery) {
@@ -105,7 +119,6 @@ export default function App() {
         }
       }
 
-      // Check path parts e.g. /meet/jnias-lab-473 or /drop/dzt-drop-101
       const pathParts = window.location.pathname.split('/').filter(Boolean);
       const prefixes = ['meet', 'call', 'room', 'join', 'vc', 'drop', 'share', 'send'];
       if (prefixes.includes(pathParts[0]?.toLowerCase()) && pathParts[1]) {
@@ -121,10 +134,26 @@ export default function App() {
   const [initialRoomId, setInitialRoomId] = useState<string | undefined>(getInitialRoom);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // If user opens a direct Apps / Meet link, boot immediately
   const [isSystemBooted, setIsSystemBooted] = useState<boolean>(() => initialTabState === 'apps' || initialTabState === 'meet' || initialTabState === 'vc');
   const [bootProgress, setBootProgress] = useState<number>(() => (initialTabState === 'apps' || initialTabState === 'meet' || initialTabState === 'vc') ? 100 : 0);
   const [bootStep, setBootStep] = useState(0);
+
+  // Synchronize PopState Navigation (Browser Back / Forward buttons)
+  useEffect(() => {
+    const handlePopState = () => {
+      const tab = getInitialTab();
+      const app = getInitialApp();
+      const room = getInitialRoom();
+
+      setActiveTab(tab);
+      setInitialAppId(app);
+      setInitialRoomId(room);
+      setIsSystemBooted(true);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const [batteryStatus, setBatteryStatus] = useState<{
     level: number | null;
@@ -142,60 +171,6 @@ export default function App() {
     { text: 'Configuring interactive terminal & workspace...', sub: 'Setting up client state' },
     { text: 'Application workspace ready', sub: 'Welcome to Amal K P Portfolio' }
   ];
-
-  // URL sync and popstate listener
-  useEffect(() => {
-    const handlePopState = () => {
-      const path = window.location.pathname.toLowerCase();
-      const search = window.location.search;
-      const hash = window.location.hash.toLowerCase();
-
-      if (
-        path.startsWith('/apps') ||
-        path.startsWith('/miniapp') ||
-        path.startsWith('/dzt-app') ||
-        hash.startsWith('#apps') ||
-        hash.startsWith('#miniapp') ||
-        hash.includes('/apps')
-      ) {
-        setActiveTab('apps');
-        setIsSystemBooted(true);
-        const app = getInitialApp();
-        if (app) setInitialAppId(app);
-        const room = getInitialRoom();
-        if (room) setInitialRoomId(room);
-      } else if (
-        path.startsWith('/meet') ||
-        path.startsWith('/call') ||
-        path.startsWith('/room') ||
-        path.startsWith('/join') ||
-        path.startsWith('/vc') ||
-        hash.startsWith('#meet') ||
-        hash.startsWith('#call') ||
-        hash.startsWith('#vc') ||
-        hash.includes('/meet') ||
-        hash.includes('/vc') ||
-        search.includes('room=')
-      ) {
-        setActiveTab('apps');
-        setInitialAppId('meet');
-        setIsSystemBooted(true);
-        const room = getInitialRoom();
-        if (room) setInitialRoomId(room);
-      } else {
-        const cleanHash = window.location.hash.replace('#', '') as Tab;
-        const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'apps', 'contact'];
-        if (validTabs.includes(cleanHash)) {
-          setActiveTab(cleanHash);
-        } else {
-          setActiveTab('home');
-        }
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
 
   useEffect(() => {
     const progressInterval = setInterval(() => {

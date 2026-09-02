@@ -68,15 +68,40 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
     }
   }, [initialAppId]);
 
-  // Update browser URL query parameter when app changes
+  // Synchronize on browser Back / Forward buttons inside MiniApps
   useEffect(() => {
-    if (activeApp) {
-      const url = `/apps?app=${encodeURIComponent(activeApp)}${initialRoomId ? `&room=${encodeURIComponent(initialRoomId)}` : ''}`;
-      window.history.replaceState(null, '', url);
-    } else {
-      window.history.replaceState(null, '', '/apps');
-    }
-  }, [activeApp, initialRoomId]);
+    const handlePopState = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const app = searchParams.get('app');
+      const path = window.location.pathname.toLowerCase();
+
+      if (path.startsWith('/metarayban') || path.startsWith('/rayban')) {
+        setActiveApp('metarayban');
+      } else if (path.startsWith('/drop') || path.startsWith('/share')) {
+        setActiveApp('drop');
+      } else if (path.startsWith('/meet') || path.startsWith('/vc')) {
+        setActiveApp('meet');
+      } else if (app) {
+        setActiveApp(app);
+      } else if (path.startsWith('/apps')) {
+        setActiveApp(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleLaunchApp = (appId: string) => {
+    setActiveApp(appId);
+    const url = `/apps?app=${encodeURIComponent(appId)}${initialRoomId ? `&room=${encodeURIComponent(initialRoomId)}` : ''}`;
+    window.history.pushState({ appId }, '', url);
+  };
+
+  const handleBackToCatalog = () => {
+    setActiveApp(null);
+    window.history.pushState(null, '', '/apps');
+  };
 
   const handleCopyHubUrl = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -100,15 +125,15 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
     {
       id: 'metarayban',
       title: 'DZt Meta RayBan',
-      tagline: 'JPG/PNG Meta EXIF Scaler, Video Frame Suite & Base64 Converter',
+      tagline: '1-Tap 3024×4032 Scaling, PNG to JPEG, Meta AI EXIF Injection & Base64',
       category: 'dev',
       categoryLabel: 'Hardware & AI Vision',
-      badge: 'Photo & Video • Live',
+      badge: 'PNG + Meta EXIF • Live',
       badgeColor: 'text-pink-400 bg-pink-500/10 border-pink-500/30',
       icon: Glasses,
-      description: 'Media suite tailored for Ray-Ban Meta Smart Glasses. Automates 3024×4032 JPG/PNG scaling with transparency support, injects Meta AI EXIF model headers, extracts video frames to Ray-Ban Meta photos, formats 9:16 portrait video, and generates pure Base64 vision feeds.',
-      features: ['JPG & PNG Support', 'Video 9:16 Suite & Frame Extractor', 'Meta AI EXIF Injector', 'Pure Base64 & Web Share'],
-      techStack: ['Piexif.js', 'Canvas Transform', 'MediaRecorder', 'Web Share API'],
+      description: 'Smart photo converter tailored for Ray-Ban Meta Smart Glasses. Converts PNG & JPG files to 3024×4032, injects authentic Meta AI EXIF model headers, extracts pure Base64 for prompt vision feeds, and triggers instant mobile photo roll save.',
+      features: ['PNG & JPG Auto-Conversion', '3024×4032 Target Resolution', 'Meta AI EXIF Injector', 'Pure Base64 & Web Share'],
+      techStack: ['Piexif.js', 'Canvas Transform', 'EXIF Metadata', 'Web Share API'],
       directUrl: '/apps?app=metarayban'
     },
     {
@@ -216,7 +241,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
           <div className="bg-[#0e0e0e] border border-white/15 p-4 rounded-xs flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setActiveApp(null)}
+                onClick={handleBackToCatalog}
                 className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/15 text-white text-xs font-mono rounded-xs flex items-center gap-2 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
@@ -249,26 +274,26 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
           {/* Render Active MiniApp Container */}
           {(activeApp === 'metarayban' || activeApp === 'rayban' || activeApp === 'meta') && (
             <div className="border border-white/10 rounded-xs bg-[#080808]">
-              <MetaRayBanConverter onBack={() => setActiveApp(null)} />
+              <MetaRayBanConverter onBack={handleBackToCatalog} />
             </div>
           )}
 
           {(activeApp === 'drop' || activeApp === 'share' || activeApp === 'fileshare') && (
             <div className="border border-white/10 rounded-xs bg-[#080808]">
-              <FileShareRoom initialRoomId={initialRoomId} onExit={() => setActiveApp(null)} />
+              <FileShareRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
             </div>
           )}
 
           {activeApp === 'meet' && (
             <div className="border border-white/10 rounded-xs bg-[#080808]">
-              <VideoCallRoom initialRoomId={initialRoomId} onExit={() => setActiveApp(null)} />
+              <VideoCallRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
             </div>
           )}
 
-          {activeApp === 'libcode' && <LibCodeApp onBack={() => setActiveApp(null)} />}
-          {activeApp === 'hrdiya' && <HrdiyaApp onBack={() => setActiveApp(null)} />}
-          {activeApp === 'bankexam' && <BankExamApp onBack={() => setActiveApp(null)} />}
-          {activeApp === 'subnet' && <SubnetCalculatorApp onBack={() => setActiveApp(null)} />}
+          {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}
+          {activeApp === 'hrdiya' && <HrdiyaApp onBack={handleBackToCatalog} />}
+          {activeApp === 'bankexam' && <BankExamApp onBack={handleBackToCatalog} />}
+          {activeApp === 'subnet' && <SubnetCalculatorApp onBack={handleBackToCatalog} />}
         </div>
       ) : (
         /* MiniApp Hub Catalog View */
@@ -420,7 +445,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
                     </button>
 
                     <button
-                      onClick={() => setActiveApp(app.id)}
+                      onClick={() => handleLaunchApp(app.id)}
                       className={`px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider rounded-xs flex items-center gap-2 transition-all cursor-pointer ${
                         isMeet
                           ? 'bg-cyan-500 hover:bg-cyan-400 text-black shadow-[0_0_15px_rgba(6,182,212,0.3)]'
