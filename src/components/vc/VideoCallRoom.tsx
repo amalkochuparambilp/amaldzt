@@ -66,6 +66,7 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
 
   // Local media stream states
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [isVideoMuted, setIsVideoMuted] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -218,6 +219,8 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
       };
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      localStreamRef.current?.getTracks().forEach((track) => track.stop());
+      localStreamRef.current = stream;
       setLocalStream(stream);
       attachAudioAnalyser(stream);
       await refreshDevices();
@@ -232,9 +235,8 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
       initPreviewMedia();
     }
     return () => {
-      if (!inCall && localStream) {
-        localStream.getTracks().forEach(t => t.stop());
-      }
+      localStreamRef.current?.getTracks().forEach((track) => track.stop());
+      localStreamRef.current = null;
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (audioContextRef.current) audioContextRef.current.close().catch(() => {});
     };
@@ -269,22 +271,19 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
     setFacingMode(nextMode);
     setIsLocalMirrored(nextMode === 'user');
 
-    if (localStream) {
-      const oldVideoTrack = localStream.getVideoTracks()[0];
-      if (oldVideoTrack) oldVideoTrack.stop();
-    }
-
     try {
       const newStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { exact: nextMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false
       });
       const newVideoTrack = newStream.getVideoTracks()[0];
+      if (!newVideoTrack) throw new Error('No replacement camera track available');
 
       if (localStream) {
         const oldTrack = localStream.getVideoTracks()[0];
         if (oldTrack) localStream.removeTrack(oldTrack);
         localStream.addTrack(newVideoTrack);
+        oldTrack?.stop();
       }
 
       // If in call, replace track in peer connections
@@ -304,10 +303,12 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
           audio: false
         });
         const fallbackTrack = fallbackStream.getVideoTracks()[0];
+        if (!fallbackTrack) throw new Error('No fallback camera track available');
         if (localStream) {
           const oldTrack = localStream.getVideoTracks()[0];
           if (oldTrack) localStream.removeTrack(oldTrack);
           localStream.addTrack(fallbackTrack);
+          oldTrack?.stop();
         }
         if (inCall) {
           peerConnectionsRef.current.forEach((pc) => {
@@ -495,11 +496,13 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
             audio: true,
             video: { width: { ideal: 1280 }, height: { ideal: 720 } }
           });
+          localStreamRef.current = stream;
           setLocalStream(stream);
           attachAudioAnalyser(stream);
         } catch {
           try {
             stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            localStreamRef.current = stream;
             setLocalStream(stream);
             setIsVideoMuted(true);
             attachAudioAnalyser(stream);
@@ -522,7 +525,9 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
             });
             return next;
           });
-          createPeerConnection(remotePeerId, true);
+          if (peerId < remotePeerId) {
+            createPeerConnection(remotePeerId, true);
+          }
         },
 
         onPeerLeft: (remotePeerId) => {
@@ -600,6 +605,10 @@ export default function VideoCallRoom({ initialRoomId, onExit }: VideoCallRoomPr
       screenTrackRef.current.stop();
       screenTrackRef.current = null;
     }
+
+    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    localStreamRef.current = null;
+    setLocalStream(null);
 
     setPeers(new Map());
     setInCall(false);

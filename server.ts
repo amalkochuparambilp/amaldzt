@@ -42,14 +42,16 @@ function getRoomPeers(roomId: string, excludePeerId?: string) {
 wss.on('connection', (ws: WebSocket) => {
   let currentRoomId: string | null = null;
   let currentPeerId: string | null = null;
-  let isAlive = true;
+  const heartbeatSocket = ws as WebSocket & { isAlive?: boolean };
+  heartbeatSocket.isAlive = true;
 
   ws.on('pong', () => {
-    isAlive = true;
+    heartbeatSocket.isAlive = true;
   });
 
   ws.on('message', (rawMessage: string) => {
     try {
+      if (rawMessage.length > 1024 * 1024) return;
       const data = JSON.parse(rawMessage.toString());
       const { type } = data;
 
@@ -57,32 +59,35 @@ wss.on('connection', (ws: WebSocket) => {
         case 'join': {
           const { roomId, peerId, displayName } = data;
           if (!roomId || !peerId) return;
+          if (currentRoomId || currentPeerId || typeof roomId !== 'string' || typeof peerId !== 'string') return;
+          if (!/^[a-z0-9][a-z0-9-]{2,63}$/i.test(roomId) || !/^[a-zA-Z0-9_-]{4,64}$/.test(peerId)) return;
 
-          currentRoomId = roomId;
+          currentRoomId = roomId.trim().toLowerCase();
           currentPeerId = peerId;
 
-          if (!rooms.has(roomId)) {
-            rooms.set(roomId, new Map());
+          if (!rooms.has(currentRoomId)) {
+            rooms.set(currentRoomId, new Map());
           }
 
-          const room = rooms.get(roomId)!;
+          const room = rooms.get(currentRoomId)!;
+          if (room.has(peerId)) return;
           const clientInfo: ClientInfo = {
             ws,
             peerId,
-            displayName: displayName || `Peer-${peerId.slice(0, 4)}`,
-            roomId,
+            displayName: typeof displayName === 'string' ? displayName.trim().slice(0, 80) || `Peer-${peerId.slice(0, 4)}` : `Peer-${peerId.slice(0, 4)}`,
+            roomId: currentRoomId,
             isAlive: true
           };
 
           room.set(peerId, clientInfo);
 
           // Get list of existing peers in the room
-          const existingPeers = getRoomPeers(roomId, peerId);
+          const existingPeers = getRoomPeers(currentRoomId, peerId);
 
           // Send confirmation & existing peer list to the joining peer
           ws.send(JSON.stringify({
             type: 'joined-room',
-            roomId,
+            roomId: currentRoomId,
             peerId,
             peers: existingPeers
           }));
@@ -101,17 +106,17 @@ wss.on('connection', (ws: WebSocket) => {
         }
 
         case 'signal': {
-          const { roomId, targetId, senderId, signalData } = data;
-          if (!roomId || !targetId || !signalData) return;
+          const { targetId, signalData } = data;
+          if (!currentRoomId || !currentPeerId || !targetId || !signalData) return;
 
-          const room = rooms.get(roomId);
+          const room = rooms.get(currentRoomId);
           if (room) {
             const targetClient = room.get(targetId);
             if (targetClient && targetClient.ws.readyState === WebSocket.OPEN) {
               targetClient.ws.send(JSON.stringify({
                 type: 'signal',
-                roomId,
-                senderId: senderId || currentPeerId,
+                roomId: currentRoomId,
+                senderId: currentPeerId,
                 signalData
               }));
             }
@@ -120,17 +125,17 @@ wss.on('connection', (ws: WebSocket) => {
         }
 
         case 'chat': {
-          const { roomId, senderId, senderName, text, timestamp } = data;
-          if (!roomId || !text) return;
+          const { text, timestamp } = data;
+          if (!currentRoomId || !currentPeerId || typeof text !== 'string' || !text.trim()) return;
 
-          const room = rooms.get(roomId);
+          const room = rooms.get(currentRoomId);
           if (room) {
             const payload = JSON.stringify({
               type: 'chat',
-              roomId,
-              senderId: senderId || currentPeerId,
-              senderName: senderName || 'Anonymous',
-              text,
+              roomId: currentRoomId,
+              senderId: currentPeerId,
+              senderName: room.get(currentPeerId)?.displayName || 'Anonymous',
+              text: text.trim().slice(0, 2000),
               timestamp: timestamp || Date.now()
             });
 
@@ -144,16 +149,16 @@ wss.on('connection', (ws: WebSocket) => {
         }
 
         case 'reaction': {
-          const { roomId, senderId, senderName, emoji } = data;
-          if (!roomId || !emoji) return;
+          const { emoji } = data;
+          if (!currentRoomId || !currentPeerId || typeof emoji !== 'string' || emoji.length > 32) return;
 
-          const room = rooms.get(roomId);
+          const room = rooms.get(currentRoomId);
           if (room) {
             const payload = JSON.stringify({
               type: 'reaction',
-              roomId,
-              senderId: senderId || currentPeerId,
-              senderName: senderName || 'Peer',
+              roomId: currentRoomId,
+              senderId: currentPeerId,
+              senderName: room.get(currentPeerId)?.displayName || 'Peer',
               emoji
             });
 
@@ -170,12 +175,12 @@ wss.on('connection', (ws: WebSocket) => {
         case 'file-chunk':
         case 'file-cancel':
         case 'file-ack': {
-          const { roomId, targetId, senderId } = data;
-          if (!roomId) return;
+          const { targetId } = data;
+          if (!currentRoomId || !currentPeerId) return;
 
-          const room = rooms.get(roomId);
+          const room = rooms.get(currentRoomId);
           if (room) {
-            const rawPayload = JSON.stringify(data);
+            const rawPayload = JSON.stringify({ ...data, roomId: currentRoomId, senderId: currentPeerId });
             if (targetId) {
               const targetClient = room.get(targetId);
               if (targetClient && targetClient.ws.readyState === WebSocket.OPEN) {
@@ -184,7 +189,7 @@ wss.on('connection', (ws: WebSocket) => {
             } else {
               // Broadcast to all other peers in the room
               room.forEach((client, pid) => {
-                if (pid !== (senderId || currentPeerId) && client.ws.readyState === WebSocket.OPEN) {
+                if (pid !== currentPeerId && client.ws.readyState === WebSocket.OPEN) {
                   client.ws.send(rawPayload);
                 }
               });

@@ -10,26 +10,29 @@ export default function Contact() {
     message: ''
   });
 
-  const [status, setStatus] = useState<'idle' | 'sending' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'success'>('idle');
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) return;
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const message = formData.message.trim();
+    if (!name || !email || !message) return;
 
-    setStatus('sending');
-    setTimeout(() => {
-      setStatus('success');
-      setFormData({ name: '', email: '', message: '' });
-    }, 1000);
+    const subject = encodeURIComponent(`Portfolio message from ${name}`);
+    const body = encodeURIComponent(`${message}\n\nReply to: ${email}`);
+    window.location.href = `mailto:${AMAL_INFO.email}?subject=${subject}&body=${body}`;
+    setStatus('success');
+    setFormData({ name, email, message });
   };
 
   return (
-    <section id="contact-section" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
+    <section id="contact-section" aria-labelledby="contact-heading" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-white/10 pb-6">
         <div className="space-y-1">
           <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Transmission Relay</span>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase">
+          <h2 id="contact-heading" className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase">
             GET IN TOUCH
           </h2>
         </div>
@@ -123,14 +126,16 @@ export default function Contact() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
+                role="status"
+                aria-live="polite"
                 className="py-12 text-center space-y-4"
               >
                 <div className="w-12 h-12 rounded-full bg-white/10 border border-white mx-auto flex items-center justify-center">
                   <Check className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="text-xl font-bold text-white">Message Transmitted</h4>
+                <h4 className="text-xl font-bold text-white">Email Ready</h4>
                 <p className="text-xs text-white/60 max-w-sm mx-auto font-sans leading-relaxed">
-                  Thank you for reaching out to Amal K P. I will respond to your email as soon as possible.
+                  Your email client is opening with the message pre-filled. Complete and send to reach Amal K P.
                 </p>
                 <button
                   onClick={() => setStatus('idle')}
@@ -142,10 +147,13 @@ export default function Contact() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-xs font-mono">
                 <div className="space-y-1">
-                  <label className="text-white/60 uppercase">Your Full Name</label>
+                  <label htmlFor="contact-name" className="text-white/60 uppercase">Your Full Name</label>
                   <input
+                    id="contact-name"
                     type="text"
                     required
+                    maxLength={100}
+                    autoComplete="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. John Doe"
@@ -154,10 +162,13 @@ export default function Contact() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-white/60 uppercase">Email Address</label>
+                  <label htmlFor="contact-email" className="text-white/60 uppercase">Email Address</label>
                   <input
+                    id="contact-email"
                     type="email"
                     required
+                    maxLength={254}
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="e.g. john@example.com"
@@ -166,9 +177,12 @@ export default function Contact() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-white/60 uppercase">Message / Proposal</label>
+                  <label htmlFor="contact-message" className="text-white/60 uppercase">Message / Proposal</label>
                   <textarea
+                    id="contact-message"
                     required
+                    maxLength={5000}
+                    autoComplete="off"
                     rows={5}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -179,17 +193,10 @@ export default function Contact() {
 
                 <button
                   type="submit"
-                  disabled={status === 'sending'}
-                  className="w-full py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {status === 'sending' ? (
-                    <span>Transmitting...</span>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Transmit Message</span>
-                    </>
-                  )}
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Open Email</span>
                 </button>
               </form>
             )}
