@@ -21,6 +21,7 @@
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "mqtt": "^5.15.2",
+    "piexifjs": "^1.0.6",
     "qrcode": "^1.5.4",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",

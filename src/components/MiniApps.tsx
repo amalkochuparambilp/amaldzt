@@ -23,10 +23,13 @@ import {
   HardDriveDownload,
   Sliders,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Glasses
 } from 'lucide-react';
 import VideoCallRoom from './vc/VideoCallRoom';
 import FileShareRoom from './p2p/FileShareRoom';
+import MetaRayBanConverter from './miniapps/MetaRayBanConverter';
+import QRCodeDisplay from './QRCodeDisplay';
 
 interface MiniAppsProps {
   initialAppId?: string;
@@ -94,6 +97,20 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
   };
 
   const miniAppsList: MiniAppItem[] = [
+    {
+      id: 'metarayban',
+      title: 'DZt Meta RayBan',
+      tagline: '1-Tap 3024×4032 Scaling, Meta AI EXIF Injection & Base64 Converter',
+      category: 'dev',
+      categoryLabel: 'Hardware & AI Vision',
+      badge: 'Meta AI EXIF • Live',
+      badgeColor: 'text-pink-400 bg-pink-500/10 border-pink-500/30',
+      icon: Glasses,
+      description: 'Smart photo converter tailored for Ray-Ban Meta Smart Glasses. Automates 3024×4032 orientation scaling, injects authentic Meta AI EXIF model headers, extracts pure Base64 for prompt vision feeds, and triggers instant mobile photo roll save.',
+      features: ['3024×4032 Target Resolution', 'Meta AI EXIF Injector', 'Pure Base64 Extraction', 'iOS/Android Save & Web Share'],
+      techStack: ['Piexif.js', 'Canvas Transform', 'EXIF Metadata', 'Web Share API'],
+      directUrl: '/apps?app=metarayban'
+    },
     {
       id: 'drop',
       title: 'DZt Drop (File Transfer)',
@@ -230,6 +247,12 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
           </div>
 
           {/* Render Active MiniApp Container */}
+          {(activeApp === 'metarayban' || activeApp === 'rayban' || activeApp === 'meta') && (
+            <div className="border border-white/10 rounded-xs bg-[#080808]">
+              <MetaRayBanConverter onBack={() => setActiveApp(null)} />
+            </div>
+          )}
+
           {(activeApp === 'drop' || activeApp === 'share' || activeApp === 'fileshare') && (
             <div className="border border-white/10 rounded-xs bg-[#080808]">
               <FileShareRoom initialRoomId={initialRoomId} onExit={() => setActiveApp(null)} />
@@ -595,18 +618,14 @@ function LibCodeApp({ onBack }: { onBack: () => void }) {
                 </span>
               </div>
             ) : (
-              <div className="bg-neutral-50 p-4 border border-neutral-200 rounded-2xs flex flex-col items-center justify-center space-y-2">
-                <div className="w-24 h-24 bg-black p-2 rounded-xs flex flex-wrap gap-1 items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white bg-black m-0.5" />
-                  <div className="w-5 h-5 border-2 border-white bg-black m-0.5" />
-                  <div className="w-5 h-5 border-2 border-white bg-black m-0.5" />
-                  <div className="w-2 h-2 bg-white m-0.5" />
-                  <div className="w-2 h-2 bg-white m-0.5" />
-                  <div className="w-5 h-5 border-2 border-white bg-black m-0.5" />
-                </div>
-                <span className="font-mono text-[11px] font-bold tracking-wider select-all">
-                  {accessionNumber}
-                </span>
+              <div className="bg-neutral-50 p-3 border border-neutral-200 rounded-2xs flex flex-col items-center justify-center space-y-1">
+                <QRCodeDisplay
+                  value={accessionNumber || 'JNIAS-ACCESS-001'}
+                  size={100}
+                  showActions={false}
+                  fileName={`libcode-${accessionNumber}.png`}
+                  className="space-y-1"
+                />
               </div>
             )}
 

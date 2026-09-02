@@ -43,6 +43,7 @@ import {
   playP2PSound
 } from '../../utils/p2pFileTransfer';
 import { generatePeerId } from '../../utils/webrtc';
+import QRCodeDisplay from '../QRCodeDisplay';
 
 interface FileShareRoomProps {
   initialRoomId?: string;
@@ -1209,54 +1210,17 @@ export default function FileShareRoom({ initialRoomId, onExit }: FileShareRoomPr
                 </p>
               </div>
 
-              {/* Dynamic SVG QR Pattern */}
-              <div className="p-4 bg-white rounded-xs flex items-center justify-center mx-auto w-48 h-48 shadow-lg">
-                <svg viewBox="0 0 100 100" className="w-full h-full text-black fill-current">
-                  {/* Outer Frame 1 */}
-                  <rect x="5" y="5" width="28" height="28" fill="black" />
-                  <rect x="9" y="9" width="20" height="20" fill="white" />
-                  <rect x="13" y="13" width="12" height="12" fill="black" />
-
-                  {/* Outer Frame 2 */}
-                  <rect x="67" y="5" width="28" height="28" fill="black" />
-                  <rect x="71" y="9" width="20" height="20" fill="white" />
-                  <rect x="75" y="13" width="12" height="12" fill="black" />
-
-                  {/* Outer Frame 3 */}
-                  <rect x="5" y="67" width="28" height="28" fill="black" />
-                  <rect x="9" y="71" width="20" height="20" fill="white" />
-                  <rect x="13" y="75" width="12" height="12" fill="black" />
-
-                  {/* Data Matrix Dots from Room String Hash */}
-                  {Array.from(roomId + 'dzt-p2p-drop-transfer').map((char, index) => {
-                    const code = char.charCodeAt(0);
-                    const x = 36 + ((code * (index + 1)) % 28);
-                    const y = 5 + ((code * 3 + index * 7) % 90);
-                    return (
-                      <rect
-                        key={index}
-                        x={x}
-                        y={y}
-                        width="3.5"
-                        height="3.5"
-                        fill="black"
-                      />
-                    );
-                  })}
-                  {/* Center Emblem */}
-                  <circle cx="50" cy="50" r="6" fill="black" />
-                  <circle cx="50" cy="50" r="3" fill="white" />
-                </svg>
-              </div>
-
-              <div className="space-y-2">
-                <button
-                  onClick={handleCopyLink}
-                  className="w-full py-2.5 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-white/90 transition-colors rounded-xs flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedLink ? 'Link Copied!' : 'Copy Direct Room Link'}</span>
-                </button>
+              {/* High-Resolution ISO QR Code */}
+              <div className="py-2 flex justify-center">
+                <QRCodeDisplay
+                  value={
+                    typeof window !== 'undefined'
+                      ? `${window.location.origin}/apps?app=drop&room=${encodeURIComponent(roomId)}`
+                      : `https://dzt-drop/apps?app=drop&room=${roomId}`
+                  }
+                  size={180}
+                  fileName={`dzt-drop-room-${roomId}.png`}
+                />
               </div>
             </motion.div>
           </motion.div>
