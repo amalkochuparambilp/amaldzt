@@ -1,5 +1,6 @@
 import express from 'express';
 import http from 'http';
+import fs from 'fs';
 import path from 'path';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
@@ -256,6 +257,19 @@ wss.on('close', () => {
 // API Routes
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+app.get('/api/knowledge/profile', (_req, res) => {
+  const profilePath = process.env.NODE_ENV === 'production'
+    ? path.join(process.cwd(), 'dist', 'ai', 'profile.json')
+    : path.join(process.cwd(), 'public', 'ai', 'profile.json');
+
+  try {
+    const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
+    res.type('application/json').json(profile);
+  } catch {
+    res.status(500).json({ error: 'Knowledge profile unavailable' });
+  }
 });
 
 const getActiveRoomsList = () => {

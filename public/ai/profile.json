@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "entity": {
+    "id": "https://amalkp.online/#amal-k-p",
+    "@type": "Person",
+    "name": "Amal K P",
+    "alternateName": ["Amal KP", "amalkp"],
+    "url": "https://amalkp.online/",
+    "jobTitle": "Full-Stack Developer and Founder of DZt",
+    "description": "Full-stack developer and BCA candidate based in Idukki, Kerala, India.",
+    "public_profiles": [
+      {
+        "platform": "GitHub",
+        "url": "https://github.com/amalkochuparambilp"
+      },
+      {
+        "platform": "LinkedIn",
+        "url": "https://linkedin.com/in/amalkochuparambilp"
+      }
+    ]
+  },
+  "relationships": [
+
+  ],
+  "relationship_policy": "Only relationships explicitly added here with status confirmed are published.",
+  "projects": [
+    {
+      "id": "libcode-jnias",
+      "name": "LibCode JNIAS Library Software",
+      "description": "College library management software with ISBN lookup, barcode inventory, circulation logs and fine tracking.",
+      "url": "https://jnias.com",
+      "source_url": "https://jnias.com"
+    },
+    {
+      "id": "bank-exam-portal",
+      "name": "Co-operative Bank Exam Portal",
+      "description": "Online examination platform with timed assessments, randomized question pools and automated grading.",
+      "source_url": "https://github.com/amalkochuparambilp"
+    },
+    {
+      "id": "hrdiya-health-analysis",
+      "name": "Hrdiya Cardiac Risk Analysis Platform",
+      "description": "Python and Django web application for cardiac health risk analysis and consultation workflows.",
+      "source_url": "https://github.com/amalkochuparambilp"
+    },
+    {
+      "id": "dzt-developer-platform",
+      "name": "DZt Developer Platform and Ecosystem",
+      "description": "React and TypeScript developer platform with interactive diagnostics, tools and portfolio features.",
+      "source_url": "https://github.com/devzoft"
+    }
+  ],
+  "official_sources": [
+    {
+      "type": "personal_website",
+      "url": "https://amalkp.online/"
+    },
+    {
+      "type": "GitHub_profile",
+      "url": "https://github.com/amalkochuparambilp"
+    },
+    {
+      "type": "LinkedIn_profile",
+      "url": "https://linkedin.com/in/amalkochuparambilp"
+    }
+  ],
+  "last_updated": "2026-09-02T00:00:00Z"
+}

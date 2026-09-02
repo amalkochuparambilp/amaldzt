@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /ai/profile.json
+Disallow: /api/
+Disallow: /apps
+Disallow: /meet
+Disallow: /call
+Disallow: /room
+Disallow: /join
+Disallow: /vc
+
+Sitemap: https://amalkp.online/sitemap.xml
