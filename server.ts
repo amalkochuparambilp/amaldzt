@@ -290,8 +290,8 @@ app.get('/api/health', (_req, res) => {
 
 // Contact API status check
 app.get('/api/contact/status', (_req, res) => {
-  const hasToken = Boolean(process.env.TELEGRAM_BOT_TOKEN || '8698327116:AAElplFCAnxuyC0gVORQEAll8qP70btDwUk');
-  const hasChatId = Boolean(process.env.TELEGRAM_CHAT_ID || '7814866194');
+  const hasToken = Boolean(process.env.TELEGRAM_BOT_TOKEN);
+  const hasChatId = Boolean(process.env.TELEGRAM_CHAT_ID);
   res.json({
     configured: hasToken && hasChatId,
     service: 'telegram'
@@ -410,8 +410,8 @@ app.post('/api/contact', async (req, res) => {
     }
 
     // 4. Secure Telegram Configuration
-    const botToken = process.env.TELEGRAM_BOT_TOKEN || '8698327116:AAElplFCAnxuyC0gVORQEAll8qP70btDwUk';
-    const chatId = process.env.TELEGRAM_CHAT_ID || '7814866194';
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
 
     if (!botToken || !chatId) {
       console.error('[Contact API] Telegram BOT token or Chat ID is not configured.');

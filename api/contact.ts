@@ -1,6 +1,6 @@
 // Universal Vercel Function for /api/contact (supports both Node.js req/res and Web Request/Response)
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8698327116:AAElplFCAnxuyC0gVORQEAll8qP70btDwUk';
-const CHAT_ID = process.env.TELEGRAM_CHAT_ID || '7814866194';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 export default async function handler(req: any, res?: any) {
   // Check if running in Web Standard / Edge Runtime (Request object without Express res)
@@ -28,6 +28,16 @@ export default async function handler(req: any, res?: any) {
         status: 405,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
+    }
+
+    if (!BOT_TOKEN || !CHAT_ID) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Telegram delivery is not configured. Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables.'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     try {
@@ -112,6 +122,13 @@ export default async function handler(req: any, res?: any) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
+  }
+
+  if (!BOT_TOKEN || !CHAT_ID) {
+    return res.status(500).json({
+      success: false,
+      error: 'Telegram delivery is not configured. Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables.'
+    });
   }
 
   try {

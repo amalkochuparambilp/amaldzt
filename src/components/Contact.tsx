@@ -113,9 +113,7 @@ export default function Contact() {
       return;
     }
 
-    let isDelivered = false;
-
-    // Step 1: Attempt transmission via backend /api/contact
+    // Attempt transmission via backend /api/contact
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -137,66 +135,30 @@ export default function Contact() {
       }
 
       if (response.ok && data?.success) {
-        isDelivered = true;
-      } else if (response.status === 400 || response.status === 429) {
-        // Legitimate validation or rate-limit from the server
-        setStatus('error');
-        setErrorMessage(data?.error || 'Validation error. Please verify your details.');
+        setStatus('success');
+        setFormData({ name: '', email: '', message: '', honeypot: '' });
+        setFormErrors({});
         return;
+      }
+
+      setStatus('error');
+      if (data?.error) {
+        setErrorMessage(data.error);
+      } else if (response.status === 404) {
+        setErrorMessage('The contact server route was not found. Please contact directly via email.');
+      } else if (response.status === 429) {
+        setErrorMessage('Please wait a moment before sending another message.');
+      } else if (response.status >= 500) {
+        setErrorMessage('The message dispatch service is temporarily unavailable. Please email directly.');
       } else {
-        // 404, 500, or HTML returned (e.g. static Vercel host without active serverless proxy)
-        console.warn('Backend /api/contact unavailable or returned non-JSON. Initiating client-side gateway fallback...');
+        setErrorMessage('Unable to deliver message at this time. Please use direct email below.');
       }
-    } catch (networkErr) {
-      console.warn('Direct connection to /api/contact failed (static host). Initiating client-side gateway fallback...', networkErr);
-    }
-
-    // Step 2: Fallback to direct Telegram Bot API if server endpoint is unavailable (e.g. Vercel static deployment)
-    if (!isDelivered) {
-      try {
-        const fallbackBotToken = '8698327116:AAElplFCAnxuyC0gVORQEAll8qP70btDwUk';
-        const fallbackChatId = '7814866194';
-
-        const formatted = [
-          '📩 New Contact Form Submission',
-          '',
-          `👤 Name: ${name}`,
-          `📧 Email: ${email}`,
-          `💬 Message: ${message}`
-        ].join('\n');
-
-        const directResponse = await fetch(`https://api.telegram.org/bot${fallbackBotToken}/sendMessage`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            chat_id: fallbackChatId,
-            text: formatted,
-            disable_web_page_preview: true
-          })
-        });
-
-        const directData = await directResponse.json().catch(() => ({}));
-        if (directResponse.ok && directData?.ok) {
-          isDelivered = true;
-        } else {
-          throw new Error(directData?.description || 'Telegram gateway dispatch failed');
-        }
-      } catch (fallbackErr: any) {
-        console.error('All transmission methods exhausted:', fallbackErr);
-        setStatus('error');
-        setErrorMessage(
-          fallbackErr.message || 'Transmission failed. Please check your internet or reach out directly via email.'
-        );
-        return;
-      }
-    }
-
-    if (isDelivered) {
-      setStatus('success');
-      setFormData({ name: '', email: '', message: '', honeypot: '' });
-      setFormErrors({});
+    } catch (networkErr: any) {
+      console.error('Contact submission error:', networkErr);
+      setStatus('error');
+      setErrorMessage(
+        'Network error: Failed to connect to the messaging server. Please check your internet connection or use direct email.'
+      );
     }
   };
 
