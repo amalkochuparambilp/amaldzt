@@ -1,43 +1,156 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AMAL_INFO } from '../data';
-import { Mail, Phone, MapPin, Linkedin, Github, Send, Check, MessageSquare } from 'lucide-react';
+import { 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Linkedin, 
+  Github, 
+  Send, 
+  Check, 
+  MessageSquare, 
+  AlertCircle, 
+  Loader2,
+  SendHorizontal
+} from 'lucide-react';
+
+interface FormState {
+  name: string;
+  email: string;
+  message: string;
+  honeypot: string;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  message?: string;
+}
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormState>({
     name: '',
     email: '',
-    message: ''
+    message: '',
+    honeypot: ''
   });
 
-  const [status, setStatus] = useState<'idle' | 'success'>('idle');
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // Client-side validation
+  const validate = (): boolean => {
+    const errors: FormErrors = {};
+    const trimmedName = formData.name.trim();
+    const trimmedEmail = formData.email.trim();
+    const trimmedMessage = formData.message.message ? formData.message.trim() : formData.message.trim();
+
+    if (!trimmedName) {
+      errors.name = 'Full name is required.';
+    } else if (trimmedName.length < 2) {
+      errors.name = 'Name must be at least 2 characters.';
+    } else if (trimmedName.length > 100) {
+      errors.name = 'Name cannot exceed 100 characters.';
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!trimmedEmail) {
+      errors.email = 'Email address is required.';
+    } else if (!emailRegex.test(trimmedEmail)) {
+      errors.email = 'Please enter a valid email address.';
+    } else if (trimmedEmail.length > 100) {
+      errors.email = 'Email cannot exceed 100 characters.';
+    }
+
+    if (!trimmedMessage) {
+      errors.message = 'Message content is required.';
+    } else if (trimmedMessage.length < 5) {
+      errors.message = 'Message must be at least 5 characters.';
+    } else if (trimmedMessage.length > 3000) {
+      errors.message = 'Message cannot exceed 3,000 characters.';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear error on user edit
+    if (formErrors[name as keyof FormErrors]) {
+      setFormErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+    if (status === 'error') {
+      setStatus('idle');
+      setErrorMessage(null);
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const name = formData.name.trim();
-    const email = formData.email.trim();
-    const message = formData.message.trim();
-    if (!name || !email || !message) return;
 
-    const subject = encodeURIComponent(`Portfolio message from ${name}`);
-    const body = encodeURIComponent(`${message}\n\nReply to: ${email}`);
-    window.location.href = `mailto:${AMAL_INFO.email}?subject=${subject}&body=${body}`;
-    setStatus('success');
-    setFormData({ name, email, message });
+    // Client-side validation check
+    if (!validate()) {
+      return;
+    }
+
+    setStatus('submitting');
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          message: formData.message.trim(),
+          _hp: formData.honeypot
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setStatus('success');
+        setFormData({ name: '', email: '', message: '', honeypot: '' });
+        setFormErrors({});
+      } else {
+        setStatus('error');
+        setErrorMessage(data.error || 'Failed to dispatch message to Telegram. Please try again or reach out directly.');
+      }
+    } catch (err: any) {
+      console.error('Contact submission error:', err);
+      setStatus('error');
+      setErrorMessage('Network connection error. Please verify your internet and try again.');
+    }
+  };
+
+  const resetForm = () => {
+    setStatus('idle');
+    setErrorMessage(null);
+    setFormErrors({});
+    setFormData({ name: '', email: '', message: '', honeypot: '' });
   };
 
   return (
-    <section id="contact-section" aria-labelledby="contact-heading" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
+    <section id="contact-section" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-white/10 pb-6">
         <div className="space-y-1">
           <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Transmission Relay</span>
-          <h2 id="contact-heading" className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase">
             GET IN TOUCH
           </h2>
         </div>
         <p className="text-xs text-white/50 max-w-sm font-sans leading-relaxed">
-          Reach out for collaborations, project inquiries, or software discussions.
+          Reach out for collaborations, project inquiries, or software discussions. Direct telegram notification configured.
         </p>
       </div>
 
@@ -107,6 +220,12 @@ export default function Contact() {
                 <span>LinkedIn</span>
               </a>
             </div>
+
+            {/* Bot Integration Badge */}
+            <div className="p-3 bg-black/40 border border-white/10 flex items-center gap-3 text-[11px] font-mono text-white/60">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+              <span>Telegram Bot Transmission Active</span>
+            </div>
           </div>
         </div>
 
@@ -117,86 +236,174 @@ export default function Contact() {
               <MessageSquare className="w-4 h-4 text-white/60" />
               <span>SEND DIRECT MESSAGE</span>
             </h3>
-            <span className="text-[10px] font-mono text-white/40">RELAY ACTIVE</span>
+            <span className="text-[10px] font-mono text-white/40">TELEGRAM GATEWAY</span>
           </div>
 
           <AnimatePresence mode="wait">
             {status === 'success' ? (
               <motion.div
+                key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                role="status"
-                aria-live="polite"
                 className="py-12 text-center space-y-4"
               >
-                <div className="w-12 h-12 rounded-full bg-white/10 border border-white mx-auto flex items-center justify-center">
-                  <Check className="w-6 h-6 text-white" />
+                <div className="w-14 h-14 rounded-full bg-white/10 border border-white mx-auto flex items-center justify-center">
+                  <Check className="w-7 h-7 text-white" />
                 </div>
-                <h4 className="text-xl font-bold text-white">Email Ready</h4>
-                <p className="text-xs text-white/60 max-w-sm mx-auto font-sans leading-relaxed">
-                  Your email client is opening with the message pre-filled. Complete and send to reach Amal K P.
-                </p>
-                <button
-                  onClick={() => setStatus('idle')}
-                  className="mt-4 px-4 py-2 border border-white/20 bg-white/10 text-xs font-mono text-white hover:bg-white/20 transition-colors cursor-pointer"
-                >
-                  Send Another Message
-                </button>
+                <div className="space-y-1">
+                  <h4 className="text-xl font-bold text-white uppercase tracking-tight">Message Sent Successfully!</h4>
+                  <p className="text-xs text-white/60 max-w-sm mx-auto font-sans leading-relaxed">
+                    Your transmission was delivered directly to Amal's Telegram. You will receive a response at your email address shortly.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <button
+                    onClick={resetForm}
+                    className="px-5 py-2.5 border border-white/20 bg-white/10 text-xs font-mono text-white hover:bg-white/20 transition-colors cursor-pointer rounded-xs"
+                  >
+                    Send Another Message
+                  </button>
+                </div>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4 text-xs font-mono">
-                <div className="space-y-1">
-                  <label htmlFor="contact-name" className="text-white/60 uppercase">Your Full Name</label>
+              <form onSubmit={handleSubmit} noValidate className="space-y-4 text-xs font-mono">
+                {/* Honeypot Spam Protection Field - Hidden from humans */}
+                <div className="hidden" aria-hidden="true" style={{ display: 'none' }}>
+                  <label htmlFor="contact-form-hp">Do not fill this field</label>
+                  <input
+                    id="contact-form-hp"
+                    type="text"
+                    name="honeypot"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={formData.honeypot}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                {/* Error Banner */}
+                {status === 'error' && errorMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-3 bg-red-950/40 border border-red-500/50 rounded-xs flex items-start gap-2.5 text-red-200"
+                  >
+                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 text-[11px] leading-relaxed">
+                      <strong className="font-bold block uppercase tracking-wide">Transmission Error</strong>
+                      <span>{errorMessage}</span>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Name field */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="contact-name" className="text-white/70 uppercase tracking-wide">
+                      Your Full Name <span className="text-red-400">*</span>
+                    </label>
+                    <span className="text-[10px] text-white/40">{formData.name.length}/100</span>
+                  </div>
                   <input
                     id="contact-name"
+                    name="name"
                     type="text"
                     required
                     maxLength={100}
-                    autoComplete="name"
+                    disabled={status === 'submitting'}
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. John Doe"
-                    className="w-full p-3 bg-black border border-white/10 rounded-sm text-white focus:outline-none focus:border-white/40"
+                    onChange={handleInputChange}
+                    placeholder="e.g. Alex Rivera"
+                    className={`w-full p-3 bg-black border rounded-xs text-white focus:outline-none transition-colors ${
+                      formErrors.name 
+                        ? 'border-red-500/80 focus:border-red-400' 
+                        : 'border-white/15 focus:border-white/50'
+                    }`}
                   />
+                  {formErrors.name && (
+                    <p className="text-[10px] text-red-400 font-sans">{formErrors.name}</p>
+                  )}
                 </div>
 
-                <div className="space-y-1">
-                  <label htmlFor="contact-email" className="text-white/60 uppercase">Email Address</label>
+                {/* Email field */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="contact-email" className="text-white/70 uppercase tracking-wide">
+                      Email Address <span className="text-red-400">*</span>
+                    </label>
+                    <span className="text-[10px] text-white/40">{formData.email.length}/100</span>
+                  </div>
                   <input
                     id="contact-email"
+                    name="email"
                     type="email"
                     required
-                    maxLength={254}
-                    autoComplete="email"
+                    maxLength={100}
+                    disabled={status === 'submitting'}
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="e.g. john@example.com"
-                    className="w-full p-3 bg-black border border-white/10 rounded-sm text-white focus:outline-none focus:border-white/40"
+                    onChange={handleInputChange}
+                    placeholder="e.g. alex@example.com"
+                    className={`w-full p-3 bg-black border rounded-xs text-white focus:outline-none transition-colors ${
+                      formErrors.email 
+                        ? 'border-red-500/80 focus:border-red-400' 
+                        : 'border-white/15 focus:border-white/50'
+                    }`}
                   />
+                  {formErrors.email && (
+                    <p className="text-[10px] text-red-400 font-sans">{formErrors.email}</p>
+                  )}
                 </div>
 
-                <div className="space-y-1">
-                  <label htmlFor="contact-message" className="text-white/60 uppercase">Message / Proposal</label>
+                {/* Message field */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="contact-message" className="text-white/70 uppercase tracking-wide">
+                      Message / Proposal <span className="text-red-400">*</span>
+                    </label>
+                    <span className={`text-[10px] ${formData.message.length > 2900 ? 'text-amber-400' : 'text-white/40'}`}>
+                      {formData.message.length}/3000
+                    </span>
+                  </div>
                   <textarea
                     id="contact-message"
+                    name="message"
                     required
-                    maxLength={5000}
-                    autoComplete="off"
                     rows={5}
+                    maxLength={3000}
+                    disabled={status === 'submitting'}
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Write your message here..."
-                    className="w-full p-3 bg-black border border-white/10 rounded-sm text-white focus:outline-none focus:border-white/40 resize-none"
+                    onChange={handleInputChange}
+                    placeholder="Write your project proposal, inquiry, or discussion note here..."
+                    className={`w-full p-3 bg-black border rounded-xs text-white focus:outline-none transition-colors resize-none ${
+                      formErrors.message 
+                        ? 'border-red-500/80 focus:border-red-400' 
+                        : 'border-white/15 focus:border-white/50'
+                    }`}
                   />
+                  {formErrors.message && (
+                    <p className="text-[10px] text-red-400 font-sans">{formErrors.message}</p>
+                  )}
                 </div>
 
+                {/* Submit button */}
                 <button
+                  id="btn-contact-submit"
                   type="submit"
-                  className="w-full py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={status === 'submitting'}
+                  className="w-full min-h-[44px] py-3.5 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded-xs shadow-md mt-2"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Open Email</span>
+                  {status === 'submitting' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-black" />
+                      <span>Transmitting to Telegram...</span>
+                    </>
+                  ) : (
+                    <>
+                      <SendHorizontal className="w-4 h-4" />
+                      <span>Transmit Message</span>
+                    </>
+                  )}
                 </button>
               </form>
             )}
@@ -206,3 +413,4 @@ export default function Contact() {
     </section>
   );
 }
+

@@ -1,9 +1,11 @@
 import express from 'express';
 import http from 'http';
-import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
+
+dotenv.config();
 
 interface ClientInfo {
   ws: WebSocket;
@@ -42,16 +44,14 @@ function getRoomPeers(roomId: string, excludePeerId?: string) {
 wss.on('connection', (ws: WebSocket) => {
   let currentRoomId: string | null = null;
   let currentPeerId: string | null = null;
-  const heartbeatSocket = ws as WebSocket & { isAlive?: boolean };
-  heartbeatSocket.isAlive = true;
+  let isAlive = true;
 
   ws.on('pong', () => {
-    heartbeatSocket.isAlive = true;
+    isAlive = true;
   });
 
   ws.on('message', (rawMessage: string) => {
     try {
-      if (rawMessage.length > 1024 * 1024) return;
       const data = JSON.parse(rawMessage.toString());
       const { type } = data;
 
@@ -59,35 +59,32 @@ wss.on('connection', (ws: WebSocket) => {
         case 'join': {
           const { roomId, peerId, displayName } = data;
           if (!roomId || !peerId) return;
-          if (currentRoomId || currentPeerId || typeof roomId !== 'string' || typeof peerId !== 'string') return;
-          if (!/^[a-z0-9][a-z0-9-]{2,63}$/i.test(roomId) || !/^[a-zA-Z0-9_-]{4,64}$/.test(peerId)) return;
 
-          currentRoomId = roomId.trim().toLowerCase();
+          currentRoomId = roomId;
           currentPeerId = peerId;
 
-          if (!rooms.has(currentRoomId)) {
-            rooms.set(currentRoomId, new Map());
+          if (!rooms.has(roomId)) {
+            rooms.set(roomId, new Map());
           }
 
-          const room = rooms.get(currentRoomId)!;
-          if (room.has(peerId)) return;
+          const room = rooms.get(roomId)!;
           const clientInfo: ClientInfo = {
             ws,
             peerId,
-            displayName: typeof displayName === 'string' ? displayName.trim().slice(0, 80) || `Peer-${peerId.slice(0, 4)}` : `Peer-${peerId.slice(0, 4)}`,
-            roomId: currentRoomId,
+            displayName: displayName || `Peer-${peerId.slice(0, 4)}`,
+            roomId,
             isAlive: true
           };
 
           room.set(peerId, clientInfo);
 
           // Get list of existing peers in the room
-          const existingPeers = getRoomPeers(currentRoomId, peerId);
+          const existingPeers = getRoomPeers(roomId, peerId);
 
           // Send confirmation & existing peer list to the joining peer
           ws.send(JSON.stringify({
             type: 'joined-room',
-            roomId: currentRoomId,
+            roomId,
             peerId,
             peers: existingPeers
           }));
@@ -106,17 +103,17 @@ wss.on('connection', (ws: WebSocket) => {
         }
 
         case 'signal': {
-          const { targetId, signalData } = data;
-          if (!currentRoomId || !currentPeerId || !targetId || !signalData) return;
+          const { roomId, targetId, senderId, signalData } = data;
+          if (!roomId || !targetId || !signalData) return;
 
-          const room = rooms.get(currentRoomId);
+          const room = rooms.get(roomId);
           if (room) {
             const targetClient = room.get(targetId);
             if (targetClient && targetClient.ws.readyState === WebSocket.OPEN) {
               targetClient.ws.send(JSON.stringify({
                 type: 'signal',
-                roomId: currentRoomId,
-                senderId: currentPeerId,
+                roomId,
+                senderId: senderId || currentPeerId,
                 signalData
               }));
             }
@@ -125,17 +122,17 @@ wss.on('connection', (ws: WebSocket) => {
         }
 
         case 'chat': {
-          const { text, timestamp } = data;
-          if (!currentRoomId || !currentPeerId || typeof text !== 'string' || !text.trim()) return;
+          const { roomId, senderId, senderName, text, timestamp } = data;
+          if (!roomId || !text) return;
 
-          const room = rooms.get(currentRoomId);
+          const room = rooms.get(roomId);
           if (room) {
             const payload = JSON.stringify({
               type: 'chat',
-              roomId: currentRoomId,
-              senderId: currentPeerId,
-              senderName: room.get(currentPeerId)?.displayName || 'Anonymous',
-              text: text.trim().slice(0, 2000),
+              roomId,
+              senderId: senderId || currentPeerId,
+              senderName: senderName || 'Anonymous',
+              text,
               timestamp: timestamp || Date.now()
             });
 
@@ -149,16 +146,16 @@ wss.on('connection', (ws: WebSocket) => {
         }
 
         case 'reaction': {
-          const { emoji } = data;
-          if (!currentRoomId || !currentPeerId || typeof emoji !== 'string' || emoji.length > 32) return;
+          const { roomId, senderId, senderName, emoji } = data;
+          if (!roomId || !emoji) return;
 
-          const room = rooms.get(currentRoomId);
+          const room = rooms.get(roomId);
           if (room) {
             const payload = JSON.stringify({
               type: 'reaction',
-              roomId: currentRoomId,
-              senderId: currentPeerId,
-              senderName: room.get(currentPeerId)?.displayName || 'Peer',
+              roomId,
+              senderId: senderId || currentPeerId,
+              senderName: senderName || 'Peer',
               emoji
             });
 
@@ -175,12 +172,12 @@ wss.on('connection', (ws: WebSocket) => {
         case 'file-chunk':
         case 'file-cancel':
         case 'file-ack': {
-          const { targetId } = data;
-          if (!currentRoomId || !currentPeerId) return;
+          const { roomId, targetId, senderId } = data;
+          if (!roomId) return;
 
-          const room = rooms.get(currentRoomId);
+          const room = rooms.get(roomId);
           if (room) {
-            const rawPayload = JSON.stringify({ ...data, roomId: currentRoomId, senderId: currentPeerId });
+            const rawPayload = JSON.stringify(data);
             if (targetId) {
               const targetClient = room.get(targetId);
               if (targetClient && targetClient.ws.readyState === WebSocket.OPEN) {
@@ -189,7 +186,7 @@ wss.on('connection', (ws: WebSocket) => {
             } else {
               // Broadcast to all other peers in the room
               room.forEach((client, pid) => {
-                if (pid !== currentPeerId && client.ws.readyState === WebSocket.OPEN) {
+                if (pid !== (senderId || currentPeerId) && client.ws.readyState === WebSocket.OPEN) {
                   client.ws.send(rawPayload);
                 }
               });
@@ -259,21 +256,196 @@ wss.on('close', () => {
   clearInterval(heartbeatInterval);
 });
 
+// Rate Limiter for Contact Form Submissions
+interface ContactRateLimit {
+  count: number;
+  resetTime: number;
+  lastRequestTime: number;
+}
+const contactRateLimits = new Map<string, ContactRateLimit>();
+
+// Clean up expired rate limit entries every 2 minutes
+setInterval(() => {
+  const now = Date.now();
+  contactRateLimits.forEach((record, ip) => {
+    if (now > record.resetTime) {
+      contactRateLimits.delete(ip);
+    }
+  });
+}, 120000);
+
 // API Routes
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-app.get('/api/knowledge/profile', (_req, res) => {
-  const profilePath = process.env.NODE_ENV === 'production'
-    ? path.join(process.cwd(), 'dist', 'ai', 'profile.json')
-    : path.join(process.cwd(), 'public', 'ai', 'profile.json');
+// Contact API status check
+app.get('/api/contact/status', (_req, res) => {
+  const hasToken = Boolean(process.env.TELEGRAM_BOT_TOKEN || '8698327116:AAElplFCAnxuyC0gVORQEAll8qP70btDwUk');
+  const hasChatId = Boolean(process.env.TELEGRAM_CHAT_ID || '7814866194');
+  res.json({
+    configured: hasToken && hasChatId,
+    service: 'telegram'
+  });
+});
 
+// Contact Form Submission Endpoint
+app.post('/api/contact', async (req, res) => {
   try {
-    const profile = JSON.parse(fs.readFileSync(profilePath, 'utf8'));
-    res.type('application/json').json(profile);
-  } catch {
-    res.status(500).json({ error: 'Knowledge profile unavailable' });
+    const rawIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+
+    // 1. Rate Limit Checks (max 5 per 10 minutes, minimum 5 seconds between consecutive attempts)
+    const existingLimit = contactRateLimits.get(rawIp);
+    if (existingLimit) {
+      if (now < existingLimit.resetTime) {
+        if (now - existingLimit.lastRequestTime < 5000) {
+          return res.status(429).json({
+            success: false,
+            error: 'Please wait a few seconds before submitting again.'
+          });
+        }
+        if (existingLimit.count >= 5) {
+          const waitMinutes = Math.ceil((existingLimit.resetTime - now) / 60000);
+          return res.status(429).json({
+            success: false,
+            error: `Too many submissions from this connection. Please wait ${waitMinutes} minute${waitMinutes > 1 ? 's' : ''} before trying again.`
+          });
+        }
+        existingLimit.count += 1;
+        existingLimit.lastRequestTime = now;
+      } else {
+        contactRateLimits.set(rawIp, {
+          count: 1,
+          resetTime: now + 600000,
+          lastRequestTime: now
+        });
+      }
+    } else {
+      contactRateLimits.set(rawIp, {
+        count: 1,
+        resetTime: now + 600000,
+        lastRequestTime: now
+      });
+    }
+
+    const { name, email, message, _hp } = req.body || {};
+
+    // 2. Honeypot Spam Protection: If hidden bot field is filled, silently discard without notifying spammer
+    if (_hp && typeof _hp === 'string' && _hp.trim().length > 0) {
+      console.warn(`[Anti-Spam] Honeypot triggered from IP: ${rawIp}`);
+      return res.json({
+        success: true,
+        message: 'Message sent successfully!'
+      });
+    }
+
+    // 3. Server-side Validation
+    if (typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please enter your name.'
+      });
+    }
+    const cleanName = name.trim();
+    if (cleanName.length < 2 || cleanName.length > 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name must be between 2 and 100 characters.'
+      });
+    }
+
+    if (typeof email !== 'string' || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please enter your email address.'
+      });
+    }
+    const cleanEmail = email.trim();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(cleanEmail) || cleanEmail.length > 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide a valid email address (e.g. name@example.com).'
+      });
+    }
+
+    if (typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please enter your message.'
+      });
+    }
+    const cleanMessage = message.trim();
+    if (cleanMessage.length < 5) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message must be at least 5 characters long.'
+      });
+    }
+    if (cleanMessage.length > 3000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message is too long (maximum 3000 characters).'
+      });
+    }
+
+    // 4. Secure Telegram Configuration
+    const botToken = process.env.TELEGRAM_BOT_TOKEN || '8698327116:AAElplFCAnxuyC0gVORQEAll8qP70btDwUk';
+    const chatId = process.env.TELEGRAM_CHAT_ID || '7814866194';
+
+    if (!botToken || !chatId) {
+      console.error('[Contact API] Telegram BOT token or Chat ID is not configured.');
+      return res.status(500).json({
+        success: false,
+        error: 'Telegram delivery is currently unconfigured on the server. Please email directly.'
+      });
+    }
+
+    // 5. Construct clearly formatted Telegram text
+    const formattedTelegramMessage = [
+      '📩 New Contact Form Submission',
+      '',
+      `👤 Name: ${cleanName}`,
+      `📧 Email: ${cleanEmail}`,
+      `💬 Message: ${cleanMessage}`
+    ].join('\n');
+
+    // 6. Send to Telegram Bot API
+    const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    const response = await fetch(telegramApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: formattedTelegramMessage,
+        disable_web_page_preview: true
+      })
+    });
+
+    const data = (await response.json()) as { ok: boolean; description?: string; error_code?: number };
+
+    if (!response.ok || !data.ok) {
+      console.error('[Contact API] Telegram API error:', data);
+      const errorMsg = data.description || 'Unable to deliver message to Telegram.';
+      return res.status(502).json({
+        success: false,
+        error: `Telegram delivery failed: ${errorMsg}`
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Message sent successfully!'
+    });
+  } catch (error: any) {
+    console.error('[Contact API] Internal error processing submission:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An internal server error occurred while sending your message. Please try again later.'
+    });
   }
 });
 
