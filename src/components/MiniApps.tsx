@@ -100,20 +100,20 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
     {
       id: 'metarayban',
       title: 'DZt Meta RayBan',
-      tagline: '1-Tap 3024×4032 Scaling, Meta AI EXIF Injection & Base64 Converter',
+      tagline: 'JPG/PNG Meta EXIF Scaler, Video Frame Suite & Base64 Converter',
       category: 'dev',
       categoryLabel: 'Hardware & AI Vision',
-      badge: 'Meta AI EXIF • Live',
+      badge: 'Photo & Video • Live',
       badgeColor: 'text-pink-400 bg-pink-500/10 border-pink-500/30',
       icon: Glasses,
-      description: 'Smart photo converter tailored for Ray-Ban Meta Smart Glasses. Automates 3024×4032 orientation scaling, injects authentic Meta AI EXIF model headers, extracts pure Base64 for prompt vision feeds, and triggers instant mobile photo roll save.',
-      features: ['3024×4032 Target Resolution', 'Meta AI EXIF Injector', 'Pure Base64 Extraction', 'iOS/Android Save & Web Share'],
-      techStack: ['Piexif.js', 'Canvas Transform', 'EXIF Metadata', 'Web Share API'],
+      description: 'Media suite tailored for Ray-Ban Meta Smart Glasses. Automates 3024×4032 JPG/PNG scaling with transparency support, injects Meta AI EXIF model headers, extracts video frames to Ray-Ban Meta photos, formats 9:16 portrait video, and generates pure Base64 vision feeds.',
+      features: ['JPG & PNG Support', 'Video 9:16 Suite & Frame Extractor', 'Meta AI EXIF Injector', 'Pure Base64 & Web Share'],
+      techStack: ['Piexif.js', 'Canvas Transform', 'MediaRecorder', 'Web Share API'],
       directUrl: '/apps?app=metarayban'
     },
     {
       id: 'drop',
-      title: 'DZt Drop (File Transfer)',
+      title: 'DZt Drop (P2P File Transfer)',
       tagline: 'Encrypted Browser-to-Browser File & Clipboard Beam',
       category: 'communication',
       categoryLabel: 'Communication',
@@ -127,7 +127,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
     },
     {
       id: 'meet',
-      title: 'DZt Meet (Video Call)',
+      title: 'DZt Meet (P2P Video Call)',
       tagline: 'Encrypted Multi-Peer Video & Audio Transmission Hub',
       category: 'communication',
       categoryLabel: 'Communication',
@@ -287,7 +287,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
                   DZt MiniApps Hub
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-400 max-w-2xl font-sans">
-                  Interactive real-time web applications, video communication rooms, and engineering calculators developed by Amal K P.
+                  Interactive real-time web applications, P2P video communication rooms, and engineering calculators developed by Amal K P.
                 </p>
               </div>
 
