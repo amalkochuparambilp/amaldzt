@@ -12,24 +12,27 @@ export default function Contact() {
 
   const [status, setStatus] = useState<'idle' | 'success'>('idle');
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) return;
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const message = formData.message.trim();
+    if (!name || !email || !message) return;
 
-    const subject = encodeURIComponent(`Portfolio message from ${formData.name}`);
-    const body = encodeURIComponent(`${formData.message}\n\nReply to: ${formData.email}`);
+    const subject = encodeURIComponent(`Portfolio message from ${name}`);
+    const body = encodeURIComponent(`${message}\n\nReply to: ${email}`);
     window.location.href = `mailto:${AMAL_INFO.email}?subject=${subject}&body=${body}`;
     setStatus('success');
-    setFormData({ name: '', email: '', message: '' });
+    setFormData({ name, email, message });
   };
 
   return (
-    <section id="contact-section" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
+    <section id="contact-section" aria-labelledby="contact-heading" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-white/10 pb-6">
         <div className="space-y-1">
           <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Transmission Relay</span>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase">
+          <h2 id="contact-heading" className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase">
             GET IN TOUCH
           </h2>
         </div>
@@ -123,6 +126,8 @@ export default function Contact() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
+                role="status"
+                aria-live="polite"
                 className="py-12 text-center space-y-4"
               >
                 <div className="w-12 h-12 rounded-full bg-white/10 border border-white mx-auto flex items-center justify-center">
@@ -147,6 +152,8 @@ export default function Contact() {
                     id="contact-name"
                     type="text"
                     required
+                    maxLength={100}
+                    autoComplete="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. John Doe"
@@ -160,6 +167,8 @@ export default function Contact() {
                     id="contact-email"
                     type="email"
                     required
+                    maxLength={254}
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="e.g. john@example.com"
@@ -172,6 +181,8 @@ export default function Contact() {
                   <textarea
                     id="contact-message"
                     required
+                    maxLength={5000}
+                    autoComplete="off"
                     rows={5}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
