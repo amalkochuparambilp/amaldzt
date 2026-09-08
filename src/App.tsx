@@ -10,6 +10,8 @@ import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import MiniApps from './components/MiniApps';
+import NoticePopup from './components/NoticePopup';
+import NotificationBar from './components/NotificationBar';
 import { AMAL_INFO } from './data';
 
 type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact' | 'meet' | 'vc';
@@ -353,8 +355,10 @@ export default function App() {
         AMAL K P // PORTFOLIO & RESUME DOCUMENT
       </div>
 
-      {/* Top Header Navigation */}
-      <header className="sticky top-0 z-40 bg-[#050505]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-10 h-20 flex items-center justify-between no-print select-none">
+      {/* Top Header Navigation & Live Notification Bar */}
+      <div className="sticky top-0 z-40 w-full no-print">
+        <NotificationBar />
+        <header className="bg-[#050505]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-10 h-20 flex items-center justify-between select-none">
         {/* Brand Logo - High Density Signature with Glitch Hover */}
         <button
           id="btn-nav-brand-logo"
@@ -452,6 +456,7 @@ export default function App() {
           </button>
         </div>
       </header>
+    </div>
 
       {/* Mobile Drawer Navigation */}
       <AnimatePresence>
@@ -543,6 +548,9 @@ export default function App() {
           <span>STABLE_BUILD_v2.0</span>
         </div>
       </footer>
+
+      {/* Global Live Broadcast Notice Popup */}
+      <NoticePopup />
 
     </div>
   );
