@@ -5,7 +5,7 @@ export const AMAL_INFO = {
   title: 'BCA Candidate & Founder of DZt',
   tagline: 'Building high-performance web applications, intuitive interfaces & scalable digital platforms.',
   location: 'Balagram, Idukki, Kerala, India',
-  email: 'connect@amalkp.online',
+  email: 'amalkochuparambilp@gmail.com',
   phone: '+91 7510211318',
   linkedin: 'https://linkedin.com/in/amalkochuparambilp',
   github: 'https://github.com/amalkochuparambilp',

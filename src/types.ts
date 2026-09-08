@@ -64,21 +64,3 @@ export interface MediaDeviceInfoOption {
   label: string;
 }
 
-export interface WebsiteNotice {
-  id: string;
-  message: string;
-  author: string;
-  timestamp: number;
-  active: boolean;
-  type?: 'announcement' | 'maintenance' | 'alert' | 'update';
-}
-
-export interface WebsiteNotificationBar {
-  id: string;
-  message: string;
-  author: string;
-  timestamp: number;
-  active: boolean;
-  type?: 'announcement' | 'maintenance' | 'alert' | 'update';
-}
-

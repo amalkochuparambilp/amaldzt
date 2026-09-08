@@ -10,8 +10,7 @@ import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import MiniApps from './components/MiniApps';
-import NoticePopup from './components/NoticePopup';
-import NotificationBar from './components/NotificationBar';
+import SplashScreen from './components/SplashScreen';
 import { AMAL_INFO } from './data';
 
 type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact' | 'meet' | 'vc';
@@ -137,8 +136,6 @@ export default function App() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSystemBooted, setIsSystemBooted] = useState<boolean>(() => initialTabState === 'apps' || initialTabState === 'meet' || initialTabState === 'vc');
-  const [bootProgress, setBootProgress] = useState<number>(() => (initialTabState === 'apps' || initialTabState === 'meet' || initialTabState === 'vc') ? 100 : 0);
-  const [bootStep, setBootStep] = useState(0);
 
   // Synchronize PopState Navigation (Browser Back / Forward buttons)
   useEffect(() => {
@@ -166,32 +163,6 @@ export default function App() {
     charging: null,
     supported: false,
   });
-
-  const appLoadingSteps = [
-    { text: 'Loading application modules & UI core...', sub: 'Fetching dynamic components' },
-    { text: 'Connecting DZt MiniApp Hub & services...', sub: 'Initializing interactive apps' },
-    { text: 'Configuring interactive terminal & workspace...', sub: 'Setting up client state' },
-    { text: 'Application workspace ready', sub: 'Welcome to Amal K P Portfolio' }
-  ];
-
-  useEffect(() => {
-    const progressInterval = setInterval(() => {
-      setBootProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          setTimeout(() => setIsSystemBooted(true), 300);
-          return 100;
-        }
-        const next = prev + Math.floor(Math.random() * 18 + 12);
-        if (next > 25 && next <= 50) setBootStep(1);
-        if (next > 50 && next <= 75) setBootStep(2);
-        if (next > 75) setBootStep(3);
-        return Math.min(next, 100);
-      });
-    }, 160);
-
-    return () => clearInterval(progressInterval);
-  }, []);
 
   // Battery Status API listener for real-time tracking
   useEffect(() => {
@@ -267,85 +238,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#050505] text-[#e0e0e0] flex flex-col font-sans selection:bg-white/20 selection:text-white relative overflow-x-hidden">
       
-      {/* Modern Web Application Splash / Loading Screen */}
-      <AnimatePresence>
-        {!isSystemBooted && (
-          <motion.div 
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 bg-[#080808] z-50 flex flex-col items-center justify-center p-6 text-white select-none overflow-hidden"
-          >
-            {/* Subtle Ambient Background Gradients */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-cyan-500/5 via-white/[0.03] to-transparent rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
-
-            <div className="relative z-10 max-w-sm w-full flex flex-col items-center text-center space-y-7">
-              
-              {/* App Brand Emblem */}
-              <div className="relative">
-                <motion.div 
-                  animate={{ scale: [1, 1.04, 1] }}
-                  transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
-                  className="w-16 h-16 bg-white text-black flex items-center justify-center rounded-xs shadow-[0_0_30px_rgba(255,255,255,0.15)] font-black text-2xl"
-                >
-                  <span>A</span>
-                </motion.div>
-                <div className="absolute -bottom-2 -right-2 bg-neutral-900 border border-white/20 px-1.5 py-0.5 rounded-2xs text-[9px] font-mono text-cyan-400 font-bold uppercase tracking-wider">
-                  DZt
-                </div>
-              </div>
-
-              {/* Title and Tagline */}
-              <div className="space-y-1">
-                <h1 className="text-lg font-bold uppercase tracking-tight text-white font-mono">
-                  Amal K P
-                </h1>
-                <p className="text-xs text-white/50 font-sans">
-                  Digital Workspace & MiniApp Ecosystem
-                </p>
-              </div>
-
-              {/* Progress Bar & Status */}
-              <div className="w-full space-y-3 bg-[#0f0f0f] border border-white/10 p-4 rounded-xs">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-white/60 truncate pr-2 text-left text-[11px]">
-                    {appLoadingSteps[bootStep]?.text || 'Loading application...'}
-                  </span>
-                  <span className="text-white font-bold">{bootProgress}%</span>
-                </div>
-
-                <div className="w-full h-1.5 bg-black/60 rounded-full overflow-hidden border border-white/10">
-                  <motion.div 
-                    className="h-full bg-gradient-to-r from-white/70 via-cyan-400 to-white"
-                    style={{ width: `${bootProgress}%` }}
-                    transition={{ ease: 'easeOut', duration: 0.15 }}
-                  />
-                </div>
-
-                {/* Sub-status modules */}
-                <div className="flex items-center justify-between text-[9px] font-mono text-white/40 pt-1 border-t border-white/5">
-                  <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Web App Suite
-                  </span>
-                  <span>v2.4 • Ready</span>
-                </div>
-              </div>
-
-              {/* Quick Launch Skip Button */}
-              <button
-                onClick={() => setIsSystemBooted(true)}
-                className="text-[11px] font-mono text-white/40 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 pt-1"
-              >
-                <span>Entering workspace...</span>
-                <span className="text-white/70 hover:underline font-bold">Skip</span>
-              </button>
-
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Professional Executive Splash Screen */}
+      {!isSystemBooted && (
+        <SplashScreen onComplete={() => setIsSystemBooted(true)} />
+      )}
 
       {/* Global Ambient grid background */}
       <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none z-0" />
@@ -355,10 +251,8 @@ export default function App() {
         AMAL K P // PORTFOLIO & RESUME DOCUMENT
       </div>
 
-      {/* Top Header Navigation & Live Notification Bar */}
-      <div className="sticky top-0 z-40 w-full no-print">
-        <NotificationBar />
-        <header className="bg-[#050505]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-10 h-20 flex items-center justify-between select-none">
+      {/* Top Header Navigation */}
+      <header className="sticky top-0 z-40 bg-[#050505]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-10 h-20 flex items-center justify-between no-print select-none">
         {/* Brand Logo - High Density Signature with Glitch Hover */}
         <button
           id="btn-nav-brand-logo"
@@ -456,7 +350,6 @@ export default function App() {
           </button>
         </div>
       </header>
-    </div>
 
       {/* Mobile Drawer Navigation */}
       <AnimatePresence>
@@ -548,9 +441,6 @@ export default function App() {
           <span>STABLE_BUILD_v2.0</span>
         </div>
       </footer>
-
-      {/* Global Live Broadcast Notice Popup */}
-      <NoticePopup />
 
     </div>
   );
