@@ -4,6 +4,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
+import { getDiyaStatus, processDiyaChat, sendTelegramNotification } from './server/diya';
 
 dotenv.config();
 
@@ -306,6 +307,74 @@ app.get('/api/knowledge/profile', (_req, res) => {
       res.status(404).json({ error: 'Profile not found' });
     }
   });
+});
+
+// Diya Chatbot Status & Gateway Endpoint
+app.get('/api/diya/status', async (_req, res) => {
+  try {
+    const status = await getDiyaStatus();
+    res.json(status);
+  } catch (err: any) {
+    console.error('[Diya Status API] Error:', err);
+    res.status(500).json({ online: false, error: err?.message || 'Server error' });
+  }
+});
+
+// Diya Chatbot Message Processing Endpoint
+app.post('/api/diya/chat', async (req, res) => {
+  try {
+    const { message, history, visitorInfo, forwardToTelegram, context } = req.body || {};
+    if (typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ success: false, error: 'Message content is required.' });
+    }
+
+    const result = await processDiyaChat({
+      message: message.trim(),
+      history: Array.isArray(history) ? history : [],
+      visitorInfo,
+      forwardToTelegram: Boolean(forwardToTelegram),
+      context
+    });
+
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (err: any) {
+    console.error('[Diya Chat API] Error:', err);
+    res.status(500).json({
+      success: false,
+      reply: "I'm having a brief connection pause, but I am still here! Feel free to reach out directly to Amal at amalkochuparambilp@gmail.com or via Telegram.",
+      error: err?.message || 'Internal error'
+    });
+  }
+});
+
+// Diya Direct Telegram Dispatch Endpoint
+app.post('/api/diya/telegram/send', async (req, res) => {
+  try {
+    const { visitorName, contact, message, context } = req.body || {};
+    if (typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ success: false, error: 'Message content is required.' });
+    }
+
+    const result = await sendTelegramNotification({
+      visitorName,
+      contact,
+      message: message.trim(),
+      context,
+      isDirectNote: true
+    });
+
+    if (!result.success) {
+      return res.status(502).json({ success: false, error: result.error });
+    }
+
+    res.json({ success: true, message: 'Delivered to Amal via Telegram!' });
+  } catch (err: any) {
+    console.error('[Diya Telegram Direct API] Error:', err);
+    res.status(500).json({ success: false, error: err?.message || 'Internal server error' });
+  }
 });
 
 // Contact Form Submission Endpoint
