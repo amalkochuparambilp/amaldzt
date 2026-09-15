@@ -23,12 +23,10 @@ import {
   HardDriveDownload,
   Sliders,
   CheckCircle2,
-  AlertCircle,
-  Glasses
+  AlertCircle
 } from 'lucide-react';
 import VideoCallRoom from './vc/VideoCallRoom';
 import FileShareRoom from './p2p/FileShareRoom';
-import MetaRayBanConverter from './miniapps/MetaRayBanConverter';
 import QRCodeDisplay from './QRCodeDisplay';
 
 interface MiniAppsProps {
@@ -75,9 +73,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
       const app = searchParams.get('app');
       const path = window.location.pathname.toLowerCase();
 
-      if (path.startsWith('/metarayban') || path.startsWith('/rayban')) {
-        setActiveApp('metarayban');
-      } else if (path.startsWith('/drop') || path.startsWith('/share')) {
+      if (path.startsWith('/drop') || path.startsWith('/share')) {
         setActiveApp('drop');
       } else if (path.startsWith('/meet') || path.startsWith('/vc')) {
         setActiveApp('meet');
@@ -122,20 +118,6 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
   };
 
   const miniAppsList: MiniAppItem[] = [
-    {
-      id: 'metarayban',
-      title: 'DZt Meta RayBan',
-      tagline: '1-Tap 3024×4032 Scaling, PNG to JPEG, Meta AI EXIF Injection & Base64',
-      category: 'dev',
-      categoryLabel: 'Hardware & AI Vision',
-      badge: 'PNG + Meta EXIF • Live',
-      badgeColor: 'text-pink-400 bg-pink-500/10 border-pink-500/30',
-      icon: Glasses,
-      description: 'Smart photo converter tailored for Ray-Ban Meta Smart Glasses. Converts PNG & JPG files to 3024×4032, injects authentic Meta AI EXIF model headers, extracts pure Base64 for prompt vision feeds, and triggers instant mobile photo roll save.',
-      features: ['PNG & JPG Auto-Conversion', '3024×4032 Target Resolution', 'Meta AI EXIF Injector', 'Pure Base64 & Web Share'],
-      techStack: ['Piexif.js', 'Canvas Transform', 'EXIF Metadata', 'Web Share API'],
-      directUrl: '/apps?app=metarayban'
-    },
     {
       id: 'drop',
       title: 'DZt Drop (P2P File Transfer)',
@@ -272,12 +254,6 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
           </div>
 
           {/* Render Active MiniApp Container */}
-          {(activeApp === 'metarayban' || activeApp === 'rayban' || activeApp === 'meta') && (
-            <div className="border border-white/10 rounded-xs bg-[#080808]">
-              <MetaRayBanConverter onBack={handleBackToCatalog} />
-            </div>
-          )}
-
           {(activeApp === 'drop' || activeApp === 'share' || activeApp === 'fileshare') && (
             <div className="border border-white/10 rounded-xs bg-[#080808]">
               <FileShareRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />

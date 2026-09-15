@@ -64,21 +64,3 @@ export interface MediaDeviceInfoOption {
   label: string;
 }
 
-export interface DiyaChatMessage {
-  id: string;
-  sender: 'user' | 'diya' | 'system';
-  text: string;
-  timestamp: number;
-  telegramSent?: boolean;
-  status?: 'sending' | 'sent' | 'failed';
-}
-
-export interface DiyaBotStatus {
-  online: boolean;
-  telegramConfigured: boolean;
-  botUsername?: string;
-  botName?: string;
-  geminiConfigured: boolean;
-}
-
-

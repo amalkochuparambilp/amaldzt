@@ -29,8 +29,6 @@ export default function App() {
         path.startsWith('/share') ||
         path.startsWith('/send') ||
         path.startsWith('/files') ||
-        path.startsWith('/metarayban') ||
-        path.startsWith('/rayban') ||
         path.startsWith('/meet') ||
         path.startsWith('/call') ||
         path.startsWith('/room') ||
@@ -70,14 +68,6 @@ export default function App() {
       if (appParam) return appParam;
 
       const path = window.location.pathname.toLowerCase();
-      if (
-        path.startsWith('/metarayban') ||
-        path.startsWith('/rayban') ||
-        window.location.hash.includes('metarayban') ||
-        window.location.hash.includes('rayban')
-      ) {
-        return 'metarayban';
-      }
       if (
         path.startsWith('/drop') ||
         path.startsWith('/share') ||
