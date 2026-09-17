@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 48" fill="none">
-  <rect width="170" height="48" rx="8" fill="#064E3B" fill-opacity="0.3" stroke="#059669" stroke-width="1.5"/>
-  <path d="M22 17l6 7-6 7M36 17l-6 7 6 7" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
-  <text x="48" y="29" fill="#ECFDF5" font-family="monospace, sans-serif" font-size="12" font-weight="700" letter-spacing="1">LIBCODE</text>
-</svg>
