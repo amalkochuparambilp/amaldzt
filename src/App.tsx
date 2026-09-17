@@ -234,27 +234,27 @@ export default function App() {
       </div>
 
       {/* Top Header Navigation */}
-      <header className="sticky top-0 z-40 bg-[#050505]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-10 h-20 flex items-center justify-between no-print select-none">
+      <header className="sticky top-0 z-40 bg-[#050505]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-8 xl:px-10 h-20 flex items-center justify-between no-print select-none gap-4">
         {/* Brand Logo - High Density Signature with Glitch Hover */}
         <button
           id="btn-nav-brand-logo"
           onClick={() => handleNavigate('home')}
-          className="flex items-center gap-3 py-1 text-white hover:opacity-90 transition-all cursor-pointer text-left glitch-hover group"
+          className="flex items-center gap-3 py-1 text-white hover:opacity-90 transition-all cursor-pointer text-left glitch-hover group shrink-0 whitespace-nowrap"
         >
-          <div className="w-9 h-9 bg-white text-black flex items-center justify-center rounded-sm font-black text-lg shadow-sm glitch-icon transition-transform group-hover:scale-105">
+          <div className="w-9 h-9 bg-white text-black flex items-center justify-center rounded-sm font-black text-lg shadow-sm glitch-icon transition-transform group-hover:scale-105 shrink-0">
             <span>A</span>
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-sm font-bold tracking-tight uppercase leading-none text-white flex items-center gap-1.5">
+            <h1 className="text-sm font-bold tracking-tight uppercase leading-none text-white flex items-center gap-1.5 whitespace-nowrap">
               <span>Amal K P</span>
               <span className="text-[9px] font-mono text-white/30 border border-white/20 px-1 py-0.2 rounded-xs font-normal">DZt</span>
             </h1>
-            <p className="text-[10px] text-white/40 tracking-[0.1em] uppercase leading-none">BCA Candidate • JNIAS Balagram</p>
+            <p className="text-[10px] text-white/40 tracking-[0.08em] uppercase leading-none whitespace-nowrap">BCA Candidate • JNIAS Balagram</p>
           </div>
         </button>
 
-        {/* Desktop Minimalist Navigation Bar */}
-        <nav className="hidden md:flex items-center gap-2">
+        {/* Desktop Minimalist Navigation Bar (Active on XL screens 1280px+) */}
+        <nav className="hidden xl:flex items-center gap-1.5 2xl:gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -263,7 +263,7 @@ export default function App() {
                 key={item.id}
                 id={`tab-btn-${item.id}`}
                 onClick={() => handleNavigate(item.id)}
-                className={`px-3.5 py-2 border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative ${
+                className={`px-2.5 2xl:px-3.5 py-1.5 2xl:py-2 border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative whitespace-nowrap shrink-0 ${
                   isActive 
                     ? 'text-white font-semibold bg-white/5 border-white/20 shadow-sm' 
                     : 'text-white/50 border-transparent hover:text-white hover:bg-white/[0.02]'
@@ -286,11 +286,11 @@ export default function App() {
         </nav>
 
         {/* Header CTA Right */}
-        <div className="flex items-center gap-3 no-print">
+        <div className="flex items-center gap-2 sm:gap-3 no-print shrink-0">
           {/* Header Battery Status Tracker */}
           <div 
             id="header-battery-tracker"
-            className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-xs font-mono text-[11px] text-white/80 select-none hover:bg-white/10 transition-colors"
+            className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-xs font-mono text-[11px] text-white/80 select-none hover:bg-white/10 transition-colors shrink-0"
             title={batteryStatus.charging ? 'Battery: Charging' : 'Battery: Discharging'}
           >
             {batteryStatus.charging ? (
@@ -306,7 +306,7 @@ export default function App() {
             )}
           </div>
 
-          <div className="hidden lg:flex items-center text-right pr-1">
+          <div className="hidden 2xl:flex items-center text-right pr-1 shrink-0 whitespace-nowrap">
             <div>
               <span className="block text-[10px] text-white/30 uppercase tracking-widest font-mono">Ecosystem</span>
               <span className="text-xs font-medium tracking-tight text-white">Founder / Lead at <span className="italic font-serif">DZt</span></span>
@@ -316,16 +316,16 @@ export default function App() {
           <button
             id="btn-nav-resume-pdf"
             onClick={() => handleNavigate('resume')}
-            className="hidden sm:inline-block px-5 py-2.5 bg-white text-black text-xs font-bold font-mono uppercase tracking-widest hover:bg-white/90 transition-colors cursor-pointer rounded-xs glitch-button"
+            className="hidden sm:inline-block px-4 2xl:px-5 py-2 2xl:py-2.5 bg-white text-black text-xs font-bold font-mono uppercase tracking-widest hover:bg-white/90 transition-colors cursor-pointer rounded-xs glitch-button shrink-0 whitespace-nowrap"
           >
             Resume.pdf
           </button>
 
-          {/* Mobile hamburger menu toggle */}
+          {/* Navigation drawer toggle for screen sizes below 1280px (tablets, compact desktop, mobile) */}
           <button
             id="btn-mobile-menu-toggle"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden min-w-[44px] min-h-[44px] p-2.5 rounded-sm border border-white/10 hover:bg-white/5 text-white/60 hover:text-white transition-all cursor-pointer flex items-center justify-center"
+            className="xl:hidden min-w-[44px] min-h-[44px] p-2.5 rounded-sm border border-white/10 hover:bg-white/5 text-white/60 hover:text-white transition-all cursor-pointer flex items-center justify-center shrink-0"
             aria-label="Toggle Navigation Menu"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -333,14 +333,14 @@ export default function App() {
         </div>
       </header>
 
-      {/* Mobile Drawer Navigation */}
+      {/* Responsive Drawer Navigation (Active below 1280px) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/10 px-4 py-4 z-30 space-y-2 no-print relative"
+            className="xl:hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/10 px-4 py-4 z-30 space-y-2 no-print relative"
           >
             {navItems.map((item) => {
               const Icon = item.icon;
