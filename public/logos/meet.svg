@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 48" fill="none">
+  <rect width="160" height="48" rx="8" fill="#312E81" fill-opacity="0.25" stroke="#4F46E5" stroke-width="1.5"/>
+  <rect x="16" y="16" width="16" height="16" rx="3" stroke="#818CF8" stroke-width="2"/>
+  <path d="M32 20l8-4v16l-8-4v-8z" stroke="#818CF8" stroke-width="2" stroke-linejoin="round"/>
+  <text x="48" y="29" fill="#EEF2FF" font-family="monospace, sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">DZT MEET</text>
+</svg>

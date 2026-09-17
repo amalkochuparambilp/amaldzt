@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 48" fill="none">
+  <rect width="160" height="48" rx="8" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+  <path d="M24 16h8v16h-8zM36 16h6l6 10V16h6v16h-6l-6-10v10h-6z" fill="#60A5FA"/>
+  <text x="62" y="29" fill="#F3F4F6" font-family="monospace, sans-serif" font-size="13" font-weight="700" letter-spacing="1">JNIAS</text>
+</svg>

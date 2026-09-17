@@ -90,6 +90,36 @@
   box-shadow: -3px 0 0 rgba(255, 0, 80, 0.8), 3px 0 0 rgba(0, 255, 255, 0.8);
 }
 
+/* Seamless Infinite Marquee Animations */
+@keyframes marquee-left {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 24s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marquee-right 24s linear infinite;
+  will-change: transform;
+}
+
+.pause-hover:hover .animate-marquee-left,
+.pause-hover:hover .animate-marquee-right {
+  animation-play-state: paused;
+}
+
 @media print {
   body {
     background: white !important;

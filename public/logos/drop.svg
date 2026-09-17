@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 48" fill="none">
+  <rect width="160" height="48" rx="8" fill="#064E3B" fill-opacity="0.25" stroke="#059669" stroke-width="1.5"/>
+  <path d="M24 16v16M24 32l-5-5M24 32l5-5M16 32h16" stroke="#34D399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="44" y="29" fill="#ECFDF5" font-family="monospace, sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">DZT DROP</text>
+</svg>

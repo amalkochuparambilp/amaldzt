@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { ArrowRight, Cpu, FileText, Mail, UserCheck } from 'lucide-react';
 import { AMAL_INFO } from '../data';
 import HeroTelemetry from './HeroTelemetry';
+import PartnershipMarquee from './PartnershipMarquee';
 
 interface HeroProps {
   onNavigate: (tab: string) => void;
@@ -140,6 +141,11 @@ export default function Hero({ onNavigate }: HeroProps) {
             </div>
             <p className="text-xs text-white/80 font-mono">Cardiac Disease Risk Analysis & Consultation Platform</p>
           </div>
+        </motion.div>
+
+        {/* Partnership and Colab Logo Marquee */}
+        <motion.div variants={itemVariants} className="pt-2">
+          <PartnershipMarquee onNavigate={onNavigate} />
         </motion.div>
 
         {/* Live Interactive Telemetry Dashboard */}

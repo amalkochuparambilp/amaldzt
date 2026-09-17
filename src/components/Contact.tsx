@@ -45,7 +45,7 @@ export default function Contact() {
     const errors: FormErrors = {};
     const trimmedName = formData.name.trim();
     const trimmedEmail = formData.email.trim();
-    const trimmedMessage = formData.message.message ? formData.message.trim() : formData.message.trim();
+    const trimmedMessage = formData.message.trim();
 
     if (!trimmedName) {
       errors.name = 'Full name is required.';
