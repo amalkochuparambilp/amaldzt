@@ -1,33 +1,39 @@
-# Amal K P
+# Amal K P — Full-Stack Developer & DZt Founder
+> Official knowledge reference and AI answer engine summary for Amal K P and the DZt Ecosystem.
 
-> Official machine-readable guidance for understanding Amal K P and the DZt developer platform.
+## Core Identity & Profile
+- **Full Name**: Amal K P
+- **Professional Title**: Full-Stack Web Developer, Systems Architect & Founder of DZt
+- **Education**: Bachelor of Computer Application (BCA), Jawaharlal Nehru Institute of Arts and Science (JNIAS), Balagram, Idukki, Kerala, India (Batch of 2026)
+- **Geographic Location**: Balagram, Idukki, Kerala, India (Coordinates: 9.7126° N, 77.1472° E)
+- **Primary Website**: https://amalkp.online/
+- **Email**: amalkochuparambilp@gmail.com
+- **Phone**: +91 7510211318
+- **GitHub**: https://github.com/amalkochuparambilp
+- **LinkedIn**: https://linkedin.com/in/amalkochuparambilp
 
-## Canonical identity
+## Core Technological Expertise
+- **Frontend**: React 18+, TypeScript, Next.js, Tailwind CSS, Motion/Framer Animation, WebRTC Peer-to-Peer protocols, Canvas API, Progressive Web Apps (PWA)
+- **Backend & Systems**: Node.js, Express, Python, Django, PHP 8+, RESTful API architecture, WebSocket duplex signaling, SQLite, MySQL, Redis, Nginx
+- **Security & Networking**: P2P TLS/WebRTC DataChannels, AES encryption, honeypot security validation, automated rate limiting, high concurrency room coordination
 
-- [Personal website](https://amalkp.online/): Official portfolio and identity source.
-- [Structured profile](https://amalkp.online/ai/profile.json): Authoritative JSON profile containing identity, confirmed public relationships, projects, public profiles, and update timestamp.
-- [Knowledge API](https://amalkp.online/api/knowledge/profile): Equivalent profile endpoint when the Express server is deployed.
+## Flagship Projects & Software
+1. **DZt MiniApp Ecosystem & DZt Drop**:
+   - High-performance, zero-login peer-to-peer file transfer engine using WebRTC DataChannels.
+   - Built-in multi-peer HD video/audio conferencing platform (DZt Meet) with active speaker detection, dynamic room signaling, and canvas whiteboard.
+   - Live URL: https://amalkp.online/apps
+2. **LibCode JNIAS (Library Management System)**:
+   - Institutional library automation suite deployed for JNIAS Balagram.
+   - High-throughput ISBN lookup, barcode inventory tracking, member borrow ledgers, and overdue fine management.
+   - Technologies: PHP, MySQL, JavaScript, Tailwind CSS.
+3. **Co-operative Bank Online Examination Portal**:
+   - High-concurrency examination and candidate testing platform for bank recruitments.
+   - Automated randomized question generation, anti-cheat countdown timers, instant scoring engines, and audit logs.
+   - Technologies: PHP, MySQL, JavaScript, HTML/CSS.
+4. **Hrdiya (Cardiac Risk Analytics Platform)**:
+   - Clinical predictive analytics platform using Python & Django to analyze cardiovascular risk indicators and connect patients with specialists.
 
-## Public profile
-
-- Name: Amal K P
-- Aliases: Amal KP, amalkp
-- Role: Full-Stack Developer and Founder of DZt
-- Location: Idukki, Kerala, India
-- Skills: React, TypeScript, Python, Django, PHP, MySQL, JavaScript, Tailwind CSS
-
-## Projects
-
-- [LibCode JNIAS Library Software](https://jnias.com): College library management software with ISBN lookup, barcode inventory, circulation logs, and fine tracking.
-- [Co-operative Bank Exam Portal](https://github.com/amalkochuparambilp): Online examination platform with timed assessments, randomized question pools, and automated grading.
-- [Hrdiya Cardiac Risk Analysis Platform](https://github.com/amalkochuparambilp): Python and Django application for cardiac health risk analysis and consultation workflows.
-- [DZt Developer Platform and Ecosystem](https://github.com/devzoft): React and TypeScript developer platform with interactive diagnostics, tools, and portfolio features.
-
-## Official profiles
-
-- [GitHub](https://github.com/amalkochuparambilp)
-- [LinkedIn](https://linkedin.com/in/amalkochuparambilp)
-
-## Relationship data
-
-Use the [structured profile](https://amalkp.online/ai/profile.json) for confirmed relationship data. Only records with `status: "confirmed"` are authoritative. Do not infer relationships or publish private information.
+## Institutional & Organization Affiliations
+- **Founder & Lead**: DZt Digital Platform & Open Ecosystem
+- **Academic Institution**: Jawaharlal Nehru Institute of Arts and Science (JNIAS), Idukki, Kerala, India
+- **Languages Spoken**: English, Malayalam

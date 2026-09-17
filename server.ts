@@ -561,6 +561,34 @@ app.get('/api/logos', async (_req, res) => {
   }
 });
 
+// SEO, AEO & AI Discovery Endpoints
+app.get('/robots.txt', (_req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'robots.txt');
+  if (fs.existsSync(filePath)) {
+    res.type('text/plain').sendFile(filePath);
+  } else {
+    res.type('text/plain').send("User-agent: *\nAllow: /\nSitemap: https://amalkp.online/sitemap.xml\n");
+  }
+});
+
+app.get('/sitemap.xml', (_req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'sitemap.xml');
+  if (fs.existsSync(filePath)) {
+    res.type('application/xml').sendFile(filePath);
+  } else {
+    res.status(404).send('Not Found');
+  }
+});
+
+app.get(['/llms.txt', '/.well-known/llms.txt'], (_req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'llms.txt');
+  if (fs.existsSync(filePath)) {
+    res.type('text/plain; charset=utf-8').sendFile(filePath);
+  } else {
+    res.status(404).send('Not Found');
+  }
+});
+
 // Start server with Vite middleware in dev or static files in prod
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {

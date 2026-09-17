@@ -10,7 +10,6 @@ import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import MiniApps from './components/MiniApps';
-import SplashScreen from './components/SplashScreen';
 import { AMAL_INFO } from './data';
 
 type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact' | 'meet' | 'vc';
@@ -125,7 +124,6 @@ export default function App() {
   const [initialRoomId, setInitialRoomId] = useState<string | undefined>(getInitialRoom);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSystemBooted, setIsSystemBooted] = useState<boolean>(() => initialTabState === 'apps' || initialTabState === 'meet' || initialTabState === 'vc');
 
   // Synchronize PopState Navigation (Browser Back / Forward buttons)
   useEffect(() => {
@@ -137,7 +135,6 @@ export default function App() {
       setActiveTab(tab);
       setInitialAppId(app);
       setInitialRoomId(room);
-      setIsSystemBooted(true);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -228,11 +225,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#050505] text-[#e0e0e0] flex flex-col font-sans selection:bg-white/20 selection:text-white relative overflow-x-hidden">
       
-      {/* Professional Executive Splash Screen */}
-      {!isSystemBooted && (
-        <SplashScreen onComplete={() => setIsSystemBooted(true)} />
-      )}
-
       {/* Global Ambient grid background */}
       <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none z-0" />
 
@@ -415,17 +407,17 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Footer */}
-      <footer className="h-20 px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between bg-[#080808] border-t border-white/10 gap-4 no-print select-none">
-        <div className="flex gap-6 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
-          <a href={AMAL_INFO.github} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
-          <a href={AMAL_INFO.linkedin} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
-          <a href={`mailto:${AMAL_INFO.email}`} className="hover:text-white transition-colors">Email</a>
+      {/* Sleek Minimalist Footer */}
+      <footer id="portfolio-minimal-footer" className="py-5 px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between bg-[#080808] border-t border-white/10 gap-3 no-print select-none z-10">
+        <div className="flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
+          <a id="footer-link-github" href={AMAL_INFO.github} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
+          <a id="footer-link-linkedin" href={AMAL_INFO.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+          <a id="footer-link-email" href={`mailto:${AMAL_INFO.email}`} className="hover:text-white transition-colors">Email</a>
         </div>
         <div className="text-[10px] uppercase tracking-[0.1em] text-white/30 text-center">
           © 2026 {AMAL_INFO.name} — Founder of DZt — All Rights Reserved
         </div>
-        <div className="flex items-center gap-4 text-xs font-mono text-white/40 hidden md:flex">
+        <div className="flex items-center gap-3 text-xs font-mono text-white/40 hidden md:flex">
           <span>BALAGRAM_NODE</span>
           <span className="text-white/10">|</span>
           <span>STABLE_BUILD_v2.0</span>

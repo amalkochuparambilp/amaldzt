@@ -1,12 +1,41 @@
+# Robots.txt for Amal K P - DZt Portfolio & MiniApps Ecosystem
+# https://amalkp.online/
+
 User-agent: *
 Allow: /
-Allow: /ai/profile.json
-Disallow: /api/
-Disallow: /apps
-Disallow: /meet
-Disallow: /call
-Disallow: /room
-Disallow: /join
-Disallow: /vc
+Allow: /apps
+Allow: /about
+Allow: /projects
+Allow: /skills
+Allow: /collaborate
+Allow: /resume
+Allow: /contact
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+# AI Crawlers & Answer Engines (AEO)
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
 
 Sitemap: https://amalkp.online/sitemap.xml
