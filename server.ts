@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer as createViteServer } from 'vite';
@@ -508,6 +509,41 @@ app.get('/api/vc/room/:roomId', (req, res) => {
     count: room.size,
     peers: getRoomPeers(roomId)
   });
+});
+
+app.get('/api/logos', async (_req, res) => {
+  try {
+    const logosDir = path.join(process.cwd(), 'public', 'logos');
+    if (!fs.existsSync(logosDir)) {
+      return res.json({ logos: [] });
+    }
+    const files = await fs.promises.readdir(logosDir);
+    const validExtensions = ['.png', '.svg', '.jpg', '.jpeg', '.webp', '.gif', '.ico', '.avif'];
+    const logoFiles = files.filter(file => {
+      const ext = path.extname(file).toLowerCase();
+      return validExtensions.includes(ext);
+    });
+
+    const logos = logoFiles.map((file, index) => {
+      const baseName = path.basename(file, path.extname(file));
+      const cleanName = baseName
+        .replace(/[-_]/g, ' ')
+        .toUpperCase();
+
+      return {
+        id: `logo-${baseName}-${index}`,
+        fileName: file,
+        name: cleanName,
+        src: `/logos/${file}`,
+        alt: `${cleanName} Logo`
+      };
+    });
+
+    return res.json({ logos });
+  } catch (error) {
+    console.error('[API Logos] Error reading logos dir:', error);
+    return res.json({ logos: [] });
+  }
 });
 
 // Start server with Vite middleware in dev or static files in prod
