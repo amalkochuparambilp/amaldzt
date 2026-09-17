@@ -520,10 +520,22 @@ app.get('/api/logos', async (_req, res) => {
     }
     const files = await fs.promises.readdir(logosDir);
     const validExtensions = ['.png', '.svg', '.jpg', '.jpeg', '.webp', '.gif', '.ico', '.avif'];
-    const logoFiles = files.filter(file => {
+    
+    // Filter valid image files that are not empty (size > 0)
+    const logoFiles: string[] = [];
+    for (const file of files) {
       const lower = file.toLowerCase();
-      return validExtensions.some(ext => lower.endsWith(ext));
-    });
+      if (validExtensions.some(ext => lower.endsWith(ext))) {
+        try {
+          const stat = await fs.promises.stat(path.join(logosDir, file));
+          if (stat.size > 0) {
+            logoFiles.push(file);
+          }
+        } catch {
+          // ignore stat errors
+        }
+      }
+    }
 
     const logos = logoFiles.map((file, index) => {
       // Strip extensions recursively (e.g. .svg.webp -> base)
@@ -539,11 +551,15 @@ app.get('/api/logos', async (_req, res) => {
         }
       }
 
-      const cleanName = baseName
+      let cleanName = baseName
         .replace(/[_\-.]+/g, ' ')
         .replace(/\blogo\b|\b20\d\d\b/gi, '')
         .trim()
-        .toUpperCase() || 'PARTNER';
+        .toUpperCase();
+
+      if (!cleanName || cleanName.startsWith('ID') || cleanName.length > 25) {
+        cleanName = 'PARTNER';
+      }
 
       return {
         id: `logo-${baseName.replace(/\s+/g, '-')}-${index}`,

@@ -12,72 +12,90 @@ export interface LogoItem {
   fileName?: string;
 }
 
-// Resilient default logo list from /public/logos/ ensuring instant rendering on all hosting environments
-const DEFAULT_LOGOS: LogoItem[] = [
-  {
-    id: 'logo-openai',
-    name: 'OPENAI',
-    src: '/logos/openai-wordmark-dark.svg',
-    alt: 'OpenAI Logo',
-    fileName: 'openai-wordmark-dark.svg'
-  },
-  {
-    id: 'logo-axis-bank',
-    name: 'AXIS BANK',
-    src: '/logos/axis-bank.svg',
-    alt: 'Axis Bank Logo',
-    fileName: 'axis-bank.svg'
-  },
-  {
-    id: 'logo-shopify',
-    name: 'SHOPIFY',
-    src: '/logos/shopify.svg',
-    alt: 'Shopify Logo',
-    fileName: 'shopify.svg'
-  },
-  {
-    id: 'logo-bajaj-auto',
-    name: 'BAJAJ AUTO',
-    src: '/logos/bajaj-auto.svg',
-    alt: 'Bajaj Auto Logo',
-    fileName: 'bajaj-auto.svg'
-  },
-  {
-    id: 'logo-nss',
-    name: 'NATIONAL SERVICE SCHEME (NSS)',
-    src: '/logos/new-nss-seeklogo.png',
-    alt: 'NSS SeekLogo',
-    fileName: 'new-nss-seeklogo.png'
+// Vite eager glob: dynamically auto-discovers all logos in /public/logos/ at compile & build time
+const globbedFiles = (import.meta as unknown as { glob: (pattern: string, opts?: { eager: boolean }) => Record<string, unknown> }).glob ? (import.meta as unknown as { glob: (pattern: string, opts?: { eager: boolean }) => Record<string, unknown> }).glob('/public/logos/*.*', { eager: true }) : {};
+
+function getBuildTimeLogos(): LogoItem[] {
+  const keys = Object.keys(globbedFiles);
+  const validExtensions = ['.png', '.svg', '.jpg', '.jpeg', '.webp', '.gif', '.ico', '.avif'];
+
+  const filtered = keys.filter((key) => {
+    const lower = key.toLowerCase();
+    return validExtensions.some((ext) => lower.endsWith(ext));
+  });
+
+  if (filtered.length === 0) {
+    return [
+      { id: 'logo-openai', name: 'OPENAI', src: '/logos/openai-wordmark-dark.svg', alt: 'OpenAI Logo', fileName: 'openai-wordmark-dark.svg' },
+      { id: 'logo-axis-bank', name: 'AXIS BANK', src: '/logos/axis-bank.svg', alt: 'Axis Bank Logo', fileName: 'axis-bank.svg' },
+      { id: 'logo-shopify', name: 'SHOPIFY', src: '/logos/shopify.svg', alt: 'Shopify Logo', fileName: 'shopify.svg' },
+      { id: 'logo-nss', name: 'NATIONAL SERVICE SCHEME', src: '/logos/new-nss-seeklogo.png', alt: 'NSS Logo', fileName: 'new-nss-seeklogo.png' }
+    ];
   }
-];
+
+  return filtered.map((pathKey, index) => {
+    const fileName = pathKey.split('/').pop() || `logo-${index}`;
+    let baseName = fileName;
+    for (const ext of validExtensions) {
+      if (baseName.toLowerCase().endsWith(ext)) {
+        baseName = baseName.slice(0, -ext.length);
+      }
+    }
+    for (const ext of validExtensions) {
+      if (baseName.toLowerCase().endsWith(ext)) {
+        baseName = baseName.slice(0, -ext.length);
+      }
+    }
+
+    let cleanName = baseName
+      .replace(/[_\-.]+/g, ' ')
+      .replace(/\blogo\b|\b20\d\d\b/gi, '')
+      .trim()
+      .toUpperCase();
+
+    if (!cleanName || cleanName.startsWith('ID') || cleanName.length > 25) {
+      cleanName = `PARTNER ${index + 1}`;
+    }
+
+    return {
+      id: `glob-${baseName.replace(/[^a-zA-Z0-9]/g, '-')}-${index}`,
+      name: cleanName,
+      src: `/logos/${encodeURIComponent(fileName)}`,
+      alt: `${cleanName} Logo`,
+      fileName
+    };
+  });
+}
+
+const STATIC_INITIAL_LOGOS = getBuildTimeLogos();
 
 export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueeProps) {
-  // Initialize with DEFAULT_LOGOS so it renders instantly on production without waiting for /api/logos
-  const [fetchedLogos, setFetchedLogos] = useState<LogoItem[]>(DEFAULT_LOGOS);
+  // Initialize with build-time scanned logos from /public/logos/
+  const [logos, setLogos] = useState<LogoItem[]>(STATIC_INITIAL_LOGOS);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
-  // Background auto-poller to dynamically discover any newly added logos in /public/logos/
+  // Real-time poller to sync filesystem additions & deletions when running live server
   useEffect(() => {
     let isMounted = true;
 
-    const loadLogos = async () => {
+    const fetchLiveLogos = async () => {
       try {
         const res = await fetch(`/api/logos?t=${Date.now()}`);
         if (!res.ok) return;
         const data = await res.json();
         if (isMounted && data.logos && Array.isArray(data.logos) && data.logos.length > 0) {
-          setFetchedLogos(data.logos);
+          setLogos(data.logos);
         }
       } catch {
-        // Silently preserve DEFAULT_LOGOS on static hosts or offline
+        // Preserves build-time globbed logos on static hosts
       }
     };
 
-    loadLogos();
+    fetchLiveLogos();
 
-    // Fast re-poll every 4 seconds to sync newly dropped files
-    const interval = setInterval(loadLogos, 4000);
-    const handleFocus = () => loadLogos();
+    // Fast re-poll every 3 seconds to auto-update when files change
+    const interval = setInterval(fetchLiveLogos, 3000);
+    const handleFocus = () => fetchLiveLogos();
     window.addEventListener('focus', handleFocus);
     window.addEventListener('visibilitychange', handleFocus);
 
@@ -89,13 +107,13 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
     };
   }, []);
 
-  const handleImageError = (logoId: string) => {
-    setFailedImages((prev) => ({ ...prev, [logoId]: true }));
+  const handleImageError = (logoKey: string) => {
+    setFailedImages((prev) => ({ ...prev, [logoKey]: true }));
   };
 
-  // Prepare and distribute dynamically fetched logos across Track 1 and Track 2
+  // Distribute logos evenly across Track 1 and Track 2
   const { track1, track2 } = useMemo(() => {
-    const list = fetchedLogos.length > 0 ? fetchedLogos : DEFAULT_LOGOS;
+    const list = logos.length > 0 ? logos : STATIC_INITIAL_LOGOS;
 
     let t1: LogoItem[] = [];
     let t2: LogoItem[] = [];
@@ -123,7 +141,6 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
       while (res.length < minCount) {
         res = [...res, ...arr];
       }
-      // Duplicate for seamless 50% translation loop
       return [...res, ...res];
     };
 
@@ -131,7 +148,7 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
       track1: tileTrack(t1, 6),
       track2: tileTrack(t2, 6)
     };
-  }, [fetchedLogos]);
+  }, [logos]);
 
   return (
     <div id="partnership-marquee-section" className="relative py-6 sm:py-8 border-y border-white/10 bg-[#050505] overflow-hidden select-none space-y-3">
@@ -163,10 +180,11 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
 
         <div className="animate-marquee-left flex items-center gap-4 sm:gap-6 py-1">
           {track1.map((item, idx) => {
-            const isFailed = failedImages[`track1-${item.id}-${idx}`] || failedImages[item.id];
+            const key = `track1-${item.id}-${idx}`;
+            const isFailed = failedImages[key] || failedImages[item.id];
             return (
               <div
-                key={`track1-${item.id}-${idx}`}
+                key={key}
                 className="flex-shrink-0 flex items-center justify-center px-4 py-2.5 rounded-xs border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/30 transition-all duration-200 group min-w-[120px] sm:min-w-[140px] h-14"
                 title={item.name}
               >
@@ -175,8 +193,8 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
                     src={item.src}
                     alt={item.alt || `${item.name} Logo`}
                     referrerPolicy="no-referrer"
-                    onError={() => handleImageError(`track1-${item.id}-${idx}`)}
-                    className="w-auto h-7 sm:h-8 max-h-9 max-w-[130px] object-contain brightness-95 contrast-125 opacity-70 group-hover:opacity-100 group-hover:brightness-100 transition-all duration-200"
+                    onError={() => handleImageError(key)}
+                    className="w-auto h-7 sm:h-8 max-h-9 max-w-[130px] object-contain brightness-105 contrast-125 opacity-80 group-hover:opacity-100 group-hover:brightness-110 transition-all duration-200"
                   />
                 ) : (
                   <span className="text-[11px] font-mono font-bold tracking-wider text-white/60 group-hover:text-white transition-colors uppercase">
@@ -197,10 +215,11 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
 
         <div className="animate-marquee-right flex items-center gap-4 sm:gap-6 py-1">
           {track2.map((item, idx) => {
-            const isFailed = failedImages[`track2-${item.id}-${idx}`] || failedImages[item.id];
+            const key = `track2-${item.id}-${idx}`;
+            const isFailed = failedImages[key] || failedImages[item.id];
             return (
               <div
-                key={`track2-${item.id}-${idx}`}
+                key={key}
                 className="flex-shrink-0 flex items-center justify-center px-4 py-2.5 rounded-xs border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/30 transition-all duration-200 group min-w-[120px] sm:min-w-[140px] h-14"
                 title={item.name}
               >
@@ -209,8 +228,8 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
                     src={item.src}
                     alt={item.alt || `${item.name} Logo`}
                     referrerPolicy="no-referrer"
-                    onError={() => handleImageError(`track2-${item.id}-${idx}`)}
-                    className="w-auto h-7 sm:h-8 max-h-9 max-w-[130px] object-contain brightness-95 contrast-125 opacity-70 group-hover:opacity-100 group-hover:brightness-100 transition-all duration-200"
+                    onError={() => handleImageError(key)}
+                    className="w-auto h-7 sm:h-8 max-h-9 max-w-[130px] object-contain brightness-105 contrast-125 opacity-80 group-hover:opacity-100 group-hover:brightness-110 transition-all duration-200"
                   />
                 ) : (
                   <span className="text-[11px] font-mono font-bold tracking-wider text-white/60 group-hover:text-white transition-colors uppercase">
