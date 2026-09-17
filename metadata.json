@@ -1,10 +1,7 @@
 {
   "name": "Amal K P | Full-Stack Developer & DZt Founder",
   "description": "Official portfolio and software ecosystem of Amal K P — Full-Stack Developer, Founder of DZt, and BCA '26 at JNIAS Balagram, Kerala. Creator of LibCode JNIAS, Co-operative Bank Exam Portal, and P2P WebRTC DZt MiniApps.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone"
-  ],
+  "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]

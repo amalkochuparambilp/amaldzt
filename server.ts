@@ -477,40 +477,6 @@ const getActiveRoomsList = () => {
   return activeRooms;
 };
 
-app.get('/api/meet/rooms', (_req, res) => {
-  res.json({ rooms: getActiveRoomsList() });
-});
-
-app.get('/api/meet/room/:roomId', (req, res) => {
-  const { roomId } = req.params;
-  const room = rooms.get(roomId);
-  if (!room) {
-    return res.json({ exists: false, count: 0, peers: [] });
-  }
-  return res.json({
-    exists: true,
-    count: room.size,
-    peers: getRoomPeers(roomId)
-  });
-});
-
-app.get('/api/vc/rooms', (_req, res) => {
-  res.json({ rooms: getActiveRoomsList() });
-});
-
-app.get('/api/vc/room/:roomId', (req, res) => {
-  const { roomId } = req.params;
-  const room = rooms.get(roomId);
-  if (!room) {
-    return res.json({ exists: false, count: 0, peers: [] });
-  }
-  return res.json({
-    exists: true,
-    count: room.size,
-    peers: getRoomPeers(roomId)
-  });
-});
-
 app.get('/api/logos', async (_req, res) => {
   try {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -622,7 +588,7 @@ async function startServer() {
   }
 
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`P2P Video Call & DZt Server running on http://0.0.0.0:${PORT}`);
+    console.log(`DZt Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

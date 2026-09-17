@@ -1,5 +1,5 @@
 import mqtt, { MqttClient } from 'mqtt';
-import { VCPeer, VCChatMessage } from '../types';
+import { VCChatMessage } from '../types';
 
 export const RTC_CONFIG: RTCConfiguration = {
   iceServers: [

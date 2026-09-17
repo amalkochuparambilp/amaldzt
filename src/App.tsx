@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Video, Radio, LayoutGrid, Boxes, AppWindow } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Radio, LayoutGrid, Boxes, AppWindow } from 'lucide-react';
 
 import Hero from './components/Hero';
 import About from './components/About';
@@ -12,7 +12,7 @@ import Contact from './components/Contact';
 import MiniApps from './components/MiniApps';
 import { AMAL_INFO } from './data';
 
-type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact' | 'meet' | 'vc';
+type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact';
 
 export default function App() {
   const getInitialTab = (): Tab => {
@@ -28,22 +28,12 @@ export default function App() {
         path.startsWith('/share') ||
         path.startsWith('/send') ||
         path.startsWith('/files') ||
-        path.startsWith('/meet') ||
-        path.startsWith('/call') ||
-        path.startsWith('/room') ||
-        path.startsWith('/join') ||
-        path.startsWith('/vc') ||
         hash.startsWith('#apps') ||
         hash.startsWith('#miniapp') ||
         hash.startsWith('#drop') ||
         hash.startsWith('#share') ||
-        hash.startsWith('#meet') ||
-        hash.startsWith('#call') ||
-        hash.startsWith('#vc') ||
         hash.includes('/apps') ||
         hash.includes('/drop') ||
-        hash.includes('/meet') ||
-        hash.includes('/vc') ||
         search.includes('room=') ||
         search.includes('app=')
       ) {
@@ -78,18 +68,6 @@ export default function App() {
       ) {
         return 'drop';
       }
-      if (
-        path.startsWith('/meet') ||
-        path.startsWith('/call') ||
-        path.startsWith('/room') ||
-        path.startsWith('/join') ||
-        path.startsWith('/vc') ||
-        window.location.hash.includes('meet') ||
-        window.location.hash.includes('vc') ||
-        window.location.search.includes('room=')
-      ) {
-        return 'meet';
-      }
     }
     return undefined;
   };
@@ -110,7 +88,7 @@ export default function App() {
       }
 
       const pathParts = window.location.pathname.split('/').filter(Boolean);
-      const prefixes = ['meet', 'call', 'room', 'join', 'vc', 'drop', 'share', 'send'];
+      const prefixes = ['drop', 'share', 'send'];
       if (prefixes.includes(pathParts[0]?.toLowerCase()) && pathParts[1]) {
         return pathParts[1];
       }
@@ -181,13 +159,9 @@ export default function App() {
     initBattery();
   }, []);
 
-  const handleNavigate = (tab: string, customRoomId?: string) => {
+  const handleNavigate = (tab: string) => {
     let targetTab = tab as Tab;
-    if (tab === 'vc' || tab === 'meet') {
-      targetTab = 'apps';
-      setInitialAppId('meet');
-      if (customRoomId) setInitialRoomId(customRoomId);
-    } else if (tab === 'miniapp' || tab === 'apps') {
+    if (tab === 'miniapp' || tab === 'apps') {
       targetTab = 'apps';
       setInitialAppId(undefined);
     }
@@ -197,15 +171,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (targetTab === 'apps') {
-      if (tab === 'meet' || tab === 'vc') {
-        if (customRoomId) {
-          window.history.pushState(null, '', `/apps?app=meet&room=${encodeURIComponent(customRoomId)}`);
-        } else {
-          window.history.pushState(null, '', '/apps?app=meet');
-        }
-      } else {
-        window.history.pushState(null, '', '/apps');
-      }
+      window.history.pushState(null, '', '/apps');
     } else {
       window.history.pushState(null, '', `/#${targetTab}`);
     }
@@ -344,7 +310,7 @@ export default function App() {
           >
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id || (item.id === 'meet' && activeTab === 'vc');
+              const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
@@ -397,7 +363,7 @@ export default function App() {
             {activeTab === 'resume' && (
               <Resume />
             )}
-            {(activeTab === 'apps' || activeTab === 'meet' || activeTab === 'vc') && (
+            {activeTab === 'apps' && (
               <MiniApps initialAppId={initialAppId} initialRoomId={initialRoomId} onExitToHome={() => handleNavigate('home')} />
             )}
             {activeTab === 'contact' && (

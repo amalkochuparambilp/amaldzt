@@ -1,7 +1,6 @@
 import { useState, useEffect, useId } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Video, 
   QrCode, 
   HeartPulse, 
   GraduationCap, 
@@ -25,7 +24,6 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
-import VideoCallRoom from './vc/VideoCallRoom';
 import FileShareRoom from './p2p/FileShareRoom';
 import QRCodeDisplay from './QRCodeDisplay';
 
@@ -45,7 +43,7 @@ interface MiniAppItem {
   categoryLabel: string;
   badge: string;
   badgeColor: string;
-  icon: typeof Video;
+  icon: typeof Share2;
   description: string;
   features: string[];
   techStack: string[];
@@ -75,8 +73,6 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
 
       if (path.startsWith('/drop') || path.startsWith('/share')) {
         setActiveApp('drop');
-      } else if (path.startsWith('/meet') || path.startsWith('/vc')) {
-        setActiveApp('meet');
       } else if (app) {
         setActiveApp(app);
       } else if (path.startsWith('/apps')) {
@@ -131,20 +127,6 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
       features: ['WebRTC DataChannel Mesh', 'Zero Cloud File Storage', 'Live Speed & ETA Monitor', 'QR Code Phone Connect'],
       techStack: ['WebRTC DataChannel', 'DTLS/SCTP', 'Binary Chunks', 'Web Audio API'],
       directUrl: '/apps?app=drop'
-    },
-    {
-      id: 'meet',
-      title: 'DZt Meet (P2P Video Call)',
-      tagline: 'Encrypted Multi-Peer Video & Audio Transmission Hub',
-      category: 'communication',
-      categoryLabel: 'Communication',
-      badge: 'WebRTC Mesh • Live',
-      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-      icon: Video,
-      description: 'Zero-latency direct peer-to-peer audio/video calling suite with instant room creation, screen broadcasting, in-call chat, reaction animations, and shareable meeting invite links.',
-      features: ['WebRTC Mesh Architecture', 'HD Screen Sharing', 'Live In-Call Chat & Reactions', 'Hardware Device Selector'],
-      techStack: ['WebRTC', 'WebSocket', 'MQTT Signaling', 'STUN/ICE'],
-      directUrl: '/apps?app=meet'
     },
     {
       id: 'libcode',
@@ -260,12 +242,6 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
             </div>
           )}
 
-          {activeApp === 'meet' && (
-            <div className="border border-white/10 rounded-xs bg-[#080808]">
-              <VideoCallRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
-            </div>
-          )}
-
           {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}
           {activeApp === 'hrdiya' && <HrdiyaApp onBack={handleBackToCatalog} />}
           {activeApp === 'bankexam' && <BankExamApp onBack={handleBackToCatalog} />}
@@ -288,7 +264,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
                   DZt MiniApps Hub
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-400 max-w-2xl font-sans">
-                  Interactive real-time web applications, P2P video communication rooms, and engineering calculators developed by Amal K P.
+                  Interactive real-time web applications, P2P file transfer, and engineering calculators developed by Amal K P.
                 </p>
               </div>
 
@@ -355,21 +331,16 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredApps.map((app) => {
               const Icon = app.icon;
-              const isMeet = app.id === 'meet';
               return (
                 <div
                   key={app.id}
-                  className={`border rounded-xs p-6 flex flex-col justify-between space-y-6 transition-all group ${
-                    isMeet 
-                      ? 'bg-gradient-to-br from-[#0c0c0c] via-[#090909] to-[#040404] border-cyan-500/40 hover:border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.08)]' 
-                      : 'bg-[#0a0a0a] border-white/15 hover:border-white/30'
-                  }`}
+                  className="bg-[#0a0a0a] border border-white/15 hover:border-white/30 rounded-xs p-6 flex flex-col justify-between space-y-6 transition-all group"
                 >
                   <div className="space-y-4">
                     {/* Card Top Row */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xs border ${isMeet ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-white/5 border-white/10 text-white'}`}>
+                        <div className="p-2.5 rounded-xs border bg-white/5 border-white/10 text-white">
                           <Icon className="w-5 h-5" />
                         </div>
                         <div>
@@ -424,11 +395,7 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
 
                     <button
                       onClick={() => handleLaunchApp(app.id)}
-                      className={`px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider rounded-xs flex items-center gap-2 transition-all cursor-pointer ${
-                        isMeet
-                          ? 'bg-cyan-500 hover:bg-cyan-400 text-black shadow-[0_0_15px_rgba(6,182,212,0.3)]'
-                          : 'bg-white hover:bg-neutral-200 text-black'
-                      }`}
+                      className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider rounded-xs flex items-center gap-2 transition-all cursor-pointer bg-white hover:bg-neutral-200 text-black"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Launch App</span>

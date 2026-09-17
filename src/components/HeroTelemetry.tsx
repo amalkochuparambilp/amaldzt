@@ -401,7 +401,6 @@ export default function HeroTelemetry() {
         addOut('  whoami    - Display founder bio & qualifications');
         addOut('  apps      - Open DZt MiniApp Suite & Tools (/apps)');
         addOut('  drop      - Launch DZt Drop P2P Encrypted File Sharing (/apps?app=drop)');
-        addOut('  meet / vc - Launch DZt Meet Video Call (/apps?app=meet)');
         addOut('  projects  - List active platforms (LibCode, Bank Exam Portal, Hrdiya)');
         addOut('  skills    - Print key technical stack matrix');
         addOut('  ip        - Output visitor IP geolocation details');
@@ -426,16 +425,6 @@ export default function HeroTelemetry() {
         setTimeout(() => {
           window.location.href = '/apps?app=drop';
         }, 1000);
-        break;
-      case 'vc':
-      case 'meet':
-      case 'call':
-      case 'video':
-        addOut('INITIATING DZT MEET P2P VIDEO TRANSMISSION...');
-        addOut('Opening DZt Meet MiniApp Suite in 1.2s...');
-        setTimeout(() => {
-          window.location.href = '/apps?app=meet';
-        }, 1200);
         break;
       case 'whoami':
         addOut('NAME: Amal K P');

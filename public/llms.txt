@@ -20,7 +20,6 @@
 ## Flagship Projects & Software
 1. **DZt MiniApp Ecosystem & DZt Drop**:
    - High-performance, zero-login peer-to-peer file transfer engine using WebRTC DataChannels.
-   - Built-in multi-peer HD video/audio conferencing platform (DZt Meet) with active speaker detection, dynamic room signaling, and canvas whiteboard.
    - Live URL: https://amalkp.online/apps
 2. **LibCode JNIAS (Library Management System)**:
    - Institutional library automation suite deployed for JNIAS Balagram.
