@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 48" fill="none">
+  <rect width="160" height="48" rx="8" fill="#0A0A0A" stroke="#27272A" stroke-width="1.5"/>
+  <rect x="16" y="14" width="20" height="20" rx="4" fill="#FFFFFF"/>
+  <path d="M21 24h10M26 19v10" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="44" y="29" fill="#FAFAFA" font-family="monospace, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5">DZt LABS</text>
+</svg>

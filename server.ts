@@ -513,36 +513,51 @@ app.get('/api/vc/room/:roomId', (req, res) => {
 
 app.get('/api/logos', async (_req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     const logosDir = path.join(process.cwd(), 'public', 'logos');
     if (!fs.existsSync(logosDir)) {
-      return res.json({ logos: [] });
+      return res.json({ logos: [], count: 0 });
     }
     const files = await fs.promises.readdir(logosDir);
     const validExtensions = ['.png', '.svg', '.jpg', '.jpeg', '.webp', '.gif', '.ico', '.avif'];
     const logoFiles = files.filter(file => {
-      const ext = path.extname(file).toLowerCase();
-      return validExtensions.includes(ext);
+      const lower = file.toLowerCase();
+      return validExtensions.some(ext => lower.endsWith(ext));
     });
 
     const logos = logoFiles.map((file, index) => {
-      const baseName = path.basename(file, path.extname(file));
+      // Strip extensions recursively (e.g. .svg.webp -> base)
+      let baseName = file;
+      for (const ext of validExtensions) {
+        if (baseName.toLowerCase().endsWith(ext)) {
+          baseName = baseName.slice(0, -ext.length);
+        }
+      }
+      for (const ext of validExtensions) {
+        if (baseName.toLowerCase().endsWith(ext)) {
+          baseName = baseName.slice(0, -ext.length);
+        }
+      }
+
       const cleanName = baseName
-        .replace(/[-_]/g, ' ')
-        .toUpperCase();
+        .replace(/[_\-.]+/g, ' ')
+        .replace(/\blogo\b|\b20\d\d\b/gi, '')
+        .trim()
+        .toUpperCase() || 'PARTNER';
 
       return {
-        id: `logo-${baseName}-${index}`,
+        id: `logo-${baseName.replace(/\s+/g, '-')}-${index}`,
         fileName: file,
         name: cleanName,
-        src: `/logos/${file}`,
+        src: `/logos/${encodeURIComponent(file)}`,
         alt: `${cleanName} Logo`
       };
     });
 
-    return res.json({ logos });
+    return res.json({ logos, count: logos.length });
   } catch (error) {
     console.error('[API Logos] Error reading logos dir:', error);
-    return res.json({ logos: [] });
+    return res.json({ logos: [], count: 0 });
   }
 });
 
