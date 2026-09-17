@@ -12,40 +12,71 @@ export interface LogoItem {
   fileName: string;
 }
 
-// Dynamically auto-discover all logo files located in /public/logos/ via Vite glob
-const rawGlobbed = (import.meta as unknown as { glob: (pattern: string, opts?: { eager: boolean }) => Record<string, unknown> }).glob
-  ? (import.meta as unknown as { glob: (pattern: string, opts?: { eager: boolean }) => Record<string, unknown> }).glob('/public/logos/*.*', { eager: true })
-  : {};
-
-function scanStaticLogos(): LogoItem[] {
-  const validExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.webp', '.gif', '.ico', '.avif'];
-  const keys = Object.keys(rawGlobbed);
-
-  const matched = keys.filter((k) => {
-    const lower = k.toLowerCase();
-    return validExtensions.some((ext) => lower.endsWith(ext));
-  });
-
-  return matched.map((pathKey, idx) => {
-    const fileName = pathKey.split('/').pop() || `logo-${idx}`;
-    return {
-      id: `glob-${fileName.replace(/[^a-zA-Z0-9]/g, '-')}-${idx}`,
-      name: fileName.replace(/\.[^/.]+$/, '').replace(/[_\-.]+/g, ' ').toUpperCase(),
-      src: `/logos/${encodeURIComponent(fileName)}`,
-      alt: `${fileName} Logo`,
-      fileName
-    };
-  });
-}
-
-const STATIC_DISCOVERED = scanStaticLogos();
+// Baseline known logo registry to render immediately with 0ms delay
+const INITIAL_LOGOS: LogoItem[] = [
+  {
+    id: 'logo-openai',
+    name: 'OPENAI',
+    src: '/logos/openai-wordmark-dark.svg',
+    alt: 'OpenAI Logo',
+    fileName: 'openai-wordmark-dark.svg'
+  },
+  {
+    id: 'logo-axis-bank',
+    name: 'AXIS BANK',
+    src: '/logos/axis-bank.svg',
+    alt: 'Axis Bank Logo',
+    fileName: 'axis-bank.svg'
+  },
+  {
+    id: 'logo-shopify',
+    name: 'SHOPIFY',
+    src: '/logos/shopify.svg',
+    alt: 'Shopify Logo',
+    fileName: 'shopify.svg'
+  },
+  {
+    id: 'logo-nss',
+    name: 'NSS',
+    src: '/logos/new-nss-seeklogo.png',
+    alt: 'National Service Scheme',
+    fileName: 'new-nss-seeklogo.png'
+  },
+  {
+    id: 'logo-uxbjxoi',
+    name: 'PARTNER LOGO',
+    src: '/logos/idUxbjXOi-_logos.svg',
+    alt: 'Partner Logo',
+    fileName: 'idUxbjXOi-_logos.svg'
+  },
+  {
+    id: 'logo-hf5lcjo',
+    name: 'TECH PARTNER',
+    src: '/logos/idhf5lcjoR_1789676848779.svg',
+    alt: 'Tech Partner Logo',
+    fileName: 'idhf5lcjoR_1789676848779.svg'
+  },
+  {
+    id: 'logo-jps0yq',
+    name: 'CLOUD ECOSYSTEM',
+    src: '/logos/idJPs0Yq7Y_1789677081540.svg',
+    alt: 'Cloud Ecosystem Logo',
+    fileName: 'idJPs0Yq7Y_1789677081540.svg'
+  },
+  {
+    id: 'logo-jsce-imz',
+    name: 'DZT NETWORK',
+    src: '/logos/idJsCe_Imz_1789677158066.png',
+    alt: 'DZt Network Logo',
+    fileName: 'idJsCe_Imz_1789677158066.png'
+  }
+];
 
 export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueeProps) {
-  // Initialize with dynamically scanned logos from /public/logos/
-  const [logos, setLogos] = useState<LogoItem[]>(STATIC_DISCOVERED);
+  const [logos, setLogos] = useState<LogoItem[]>(INITIAL_LOGOS);
   const [erroredLogos, setErroredLogos] = useState<Record<string, boolean>>({});
 
-  // Real-time auto-fetcher polling /api/logos to sync filesystem changes (additions/deletions) instantly
+  // Dynamic Poller: automatically fetches any newly uploaded files in /public/logos/
   useEffect(() => {
     let isMounted = true;
 
@@ -54,19 +85,16 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
         const response = await fetch(`/api/logos?t=${Date.now()}`);
         if (!response.ok) return;
         const data = await response.json();
-        if (isMounted && data.logos && Array.isArray(data.logos)) {
-          if (data.logos.length > 0) {
-            setLogos(data.logos);
-          }
+        if (isMounted && data.logos && Array.isArray(data.logos) && data.logos.length > 0) {
+          setLogos(data.logos);
         }
       } catch {
-        // Preserves discovered glob logos
+        // Retains base list safely on static edge hosts
       }
     };
 
     fetchDynamicLogos();
 
-    // Auto-fetch every 2.5s and whenever user refocuses tab
     const interval = setInterval(fetchDynamicLogos, 2500);
     const onFocus = () => fetchDynamicLogos();
     window.addEventListener('focus', onFocus);
@@ -84,17 +112,15 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
     setErroredLogos((prev) => ({ ...prev, [logoSrc]: true }));
   };
 
-  // Filter out any broken/empty assets to guarantee ONLY pristine, working logos
+  // Keep only active, working logo items
   const validLogos = useMemo(() => {
-    const list = logos.length > 0 ? logos : STATIC_DISCOVERED;
+    const list = logos.length > 0 ? logos : INITIAL_LOGOS;
     return list.filter((item) => !erroredLogos[item.src]);
   }, [logos, erroredLogos]);
 
-  // Distribute valid logos across Track 1 (left) and Track 2 (right)
+  // Distribute across Track 1 and Track 2
   const { track1, track2 } = useMemo(() => {
-    if (validLogos.length === 0) {
-      return { track1: [], track2: [] };
-    }
+    if (validLogos.length === 0) return { track1: [], track2: [] };
 
     const t1: LogoItem[] = [];
     const t2: LogoItem[] = [];
@@ -114,7 +140,7 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
       if (t1.length === 0) t1.push(...t2);
     }
 
-    // Duplicate tiles to guarantee an uninterrupted, seamless infinite scrolling loop
+    // Multiply elements so track length is sufficient for seamless continuous loop
     const makeSeamlessTrack = (arr: LogoItem[]): LogoItem[] => {
       if (arr.length === 0) return [];
       let expanded = [...arr];
@@ -137,7 +163,7 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
   return (
     <div id="partnership-marquee-section" className="relative w-full py-6 sm:py-8 border-y border-white/10 bg-[#060606] overflow-hidden select-none space-y-3.5 z-10">
       
-      {/* High-Performance Hardware-Accelerated CSS Loop */}
+      {/* Self-contained CSS Animation */}
       <style>{`
         @keyframes marqueeLoopLeft {
           0% { transform: translate3d(0, 0, 0); }
@@ -187,7 +213,6 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
 
       {/* Track 1: Smooth Leftward Scroll — ONLY Pure Logos */}
       <div className="relative w-full overflow-hidden marquee-container flex items-center">
-        {/* Soft edge masking gradients */}
         <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-36 bg-gradient-to-r from-[#060606] via-[#060606]/90 to-transparent z-10 pointer-events-none" />
         <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-36 bg-gradient-to-l from-[#060606] via-[#060606]/90 to-transparent z-10 pointer-events-none" />
 
@@ -203,7 +228,7 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
                 alt={logo.alt}
                 referrerPolicy="no-referrer"
                 onError={() => handleImageError(logo.src)}
-                className="w-auto h-7 sm:h-8 max-h-9 max-w-[130px] object-contain brightness-105 contrast-125 opacity-75 group-hover:opacity-100 group-hover:brightness-125 transition-all duration-200 pointer-events-none select-none"
+                className="w-auto h-7 sm:h-8 max-h-9 max-w-[130px] object-contain brightness-105 contrast-125 opacity-80 group-hover:opacity-100 group-hover:brightness-125 transition-all duration-200 pointer-events-none select-none"
                 loading="eager"
               />
             </div>
@@ -213,7 +238,6 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
 
       {/* Track 2: Smooth Rightward Scroll — ONLY Pure Logos */}
       <div className="relative w-full overflow-hidden marquee-container flex items-center">
-        {/* Soft edge masking gradients */}
         <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-36 bg-gradient-to-r from-[#060606] via-[#060606]/90 to-transparent z-10 pointer-events-none" />
         <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-36 bg-gradient-to-l from-[#060606] via-[#060606]/90 to-transparent z-10 pointer-events-none" />
 
@@ -229,7 +253,7 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
                 alt={logo.alt}
                 referrerPolicy="no-referrer"
                 onError={() => handleImageError(logo.src)}
-                className="w-auto h-7 sm:h-8 max-h-9 max-w-[130px] object-contain brightness-105 contrast-125 opacity-75 group-hover:opacity-100 group-hover:brightness-125 transition-all duration-200 pointer-events-none select-none"
+                className="w-auto h-7 sm:h-8 max-h-9 max-w-[130px] object-contain brightness-105 contrast-125 opacity-80 group-hover:opacity-100 group-hover:brightness-125 transition-all duration-200 pointer-events-none select-none"
                 loading="eager"
               />
             </div>
