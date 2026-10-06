@@ -45,10 +45,10 @@ export default function Skills() {
 
       {/* Core Quick Stack Badges */}
       <div className="space-y-3">
-        <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Core Stack Overview</span>
+        <span className="text-[10px] text-[#0ae448] uppercase tracking-[0.2em] font-mono">Core Stack Overview</span>
         <div className="flex flex-wrap gap-2">
           {AMAL_INFO.skillsList.map((skill) => (
-            <span key={skill} className="px-3 py-1.5 bg-[#111] border border-white/10 text-xs font-mono text-white/90">
+            <span key={skill} className="px-3 py-1.5 bg-[#0e1112] border border-[#0ae448]/25 text-xs font-mono text-white/90 hover:border-[#0ae448] transition-colors">
               {skill}
             </span>
           ))}
@@ -63,8 +63,8 @@ export default function Skills() {
 
           return (
             <div key={category} className="space-y-4">
-              <h3 className="text-xs font-mono uppercase text-white/60 tracking-wider flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-white"></span>
+              <h3 className="text-xs font-mono uppercase text-white/70 tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#0ae448] shadow-[0_0_6px_#0ae448]"></span>
                 {category} Competencies
               </h3>
 
@@ -79,24 +79,24 @@ export default function Skills() {
                   <motion.div
                     key={skill.name}
                     variants={cardVariants}
-                    className="bg-[#111] border border-white/10 rounded-sm p-4 flex flex-col gap-3 hover:border-white/30 transition-colors"
+                    className="bg-[#101214] border border-[#0ae448]/15 rounded-xs p-4 flex flex-col gap-3 hover:border-[#0ae448]/60 hover:shadow-[0_0_20px_rgba(10,228,72,0.15)] transition-all"
                   >
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2.5">
                         {renderIcon(skill.icon)}
                         <span className="font-sans text-xs text-gray-200 font-medium">{skill.name}</span>
                       </div>
-                      <span className="font-mono text-xs text-white/80">{skill.level}%</span>
+                      <span className="font-mono text-xs text-[#0ae448] font-bold">{skill.level}%</span>
                     </div>
                     
                     {/* Meter bar */}
-                    <div className="w-full h-1 bg-black rounded-sm overflow-hidden border border-white/5">
+                    <div className="w-full h-1 bg-black rounded-xs overflow-hidden border border-white/5">
                       <motion.div
                         initial={{ width: 0 }}
                         whileInView={{ width: `${skill.level}%` }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, ease: 'easeOut' }}
-                        className="h-full bg-white"
+                        className="h-full bg-[#0ae448] shadow-[0_0_8px_#0ae448]"
                       />
                     </div>
                   </motion.div>

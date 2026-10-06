@@ -21,7 +21,7 @@ export default function Resume() {
         </div>
         <button
           onClick={handlePrint}
-          className="px-5 py-3 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-white/90 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg rounded-xs glitch-button"
+          className="px-5 py-3 bg-[#0ae448] text-black text-xs font-bold uppercase tracking-widest hover:bg-[#00ff87] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(10,228,72,0.35)] rounded-xs glitch-button"
         >
           <Printer className="w-4 h-4" />
           Print / Save PDF
@@ -31,7 +31,7 @@ export default function Resume() {
       {/* Printable Sheet */}
       <div 
         ref={resumeRef}
-        className="bg-[#111] border border-white/10 rounded-sm p-6 sm:p-10 text-gray-200 font-sans space-y-8 shadow-2xl relative overflow-hidden"
+        className="bg-[#111] border border-[#0ae448]/20 rounded-sm p-6 sm:p-10 text-gray-200 font-sans space-y-8 shadow-[0_0_35px_rgba(10,228,72,0.1)] relative overflow-hidden"
       >
         {/* Header Block */}
         <div className="border-b border-white/10 pb-6 space-y-4">
