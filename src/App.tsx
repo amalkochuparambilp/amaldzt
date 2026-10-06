@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Radio, LayoutGrid, Boxes, AppWindow } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Radio, LayoutGrid, Boxes, AppWindow, Sliders } from 'lucide-react';
 
 import Hero from './components/Hero';
 import About from './components/About';
@@ -10,11 +10,21 @@ import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import MiniApps from './components/MiniApps';
+import GsapMotionStudio from './components/GsapMotionStudio';
+import GsapCursor from './components/GsapCursor';
+import { GsapThemeConfig, DEFAULT_GSAP_THEME } from './utils/gsapTheme';
 import { AMAL_INFO } from './data';
 
 type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact';
 
 export default function App() {
+  const [gsapConfig, setGsapConfig] = useState<GsapThemeConfig>(DEFAULT_GSAP_THEME);
+  const [isGsapStudioOpen, setIsGsapStudioOpen] = useState(false);
+
+  const handleUpdateGsapConfig = (newCfg: Partial<GsapThemeConfig>) => {
+    setGsapConfig(prev => ({ ...prev, ...newCfg }));
+  };
+
   const getInitialTab = (): Tab => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname.toLowerCase();
@@ -160,22 +170,6 @@ export default function App() {
   }, []);
 
   const handleNavigate = (tab: string) => {
-    if (tab.startsWith('apps:')) {
-      const parts = tab.split(':');
-      const appId = parts[1];
-      const roomId = parts[2];
-      setInitialAppId(appId);
-      if (roomId) {
-        setInitialRoomId(roomId);
-      }
-      setActiveTab('apps');
-      setIsMobileMenuOpen(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      const query = `?app=${encodeURIComponent(appId)}${roomId ? `&room=${encodeURIComponent(roomId)}` : ''}`;
-      window.history.pushState(null, '', `/apps${query}`);
-      return;
-    }
-
     let targetTab = tab as Tab;
     if (tab === 'miniapp' || tab === 'apps') {
       targetTab = 'apps';
@@ -205,31 +199,65 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#e0e0e0] flex flex-col font-sans selection:bg-white/20 selection:text-white relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#0b0d0e] text-[#e5e7eb] flex flex-col font-sans selection:bg-[#0ae448]/30 selection:text-white relative overflow-x-hidden">
       
-      {/* Global Ambient grid background */}
-      <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none z-0" />
+      {/* GSAP Cursor Follower */}
+      <GsapCursor color={gsapConfig.accentColor} enabled={gsapConfig.cursorFollower} />
+
+      {/* GSAP Motion Studio Modal */}
+      <GsapMotionStudio
+        isOpen={isGsapStudioOpen}
+        onClose={() => setIsGsapStudioOpen(false)}
+        config={gsapConfig}
+        onChangeConfig={handleUpdateGsapConfig}
+      />
+
+      {/* Global Ambient GSAP grid background & radial glow */}
+      <div className="absolute inset-0 gsap-grid-bg opacity-50 pointer-events-none z-0" />
+      <div className="absolute top-0 left-0 right-0 h-[600px] gsap-radial-glow pointer-events-none z-0" />
 
       {/* Printable Header */}
       <div className="hidden print-only text-black p-4 font-mono text-xs border-b border-gray-300">
-        AMAL K P // PORTFOLIO & RESUME DOCUMENT
+        AMAL K P // PORTFOLIO & RESUME DOCUMENT (GSAP THEME)
+      </div>
+
+      {/* Top GSAP Realtime Engine Status Bar */}
+      <div className="bg-[#08090a] border-b border-[#0ae448]/20 px-4 sm:px-8 py-1.5 text-[10px] font-mono text-white/70 overflow-hidden flex items-center justify-between no-print select-none z-50">
+        <div className="flex items-center gap-2.5">
+          <span className="w-2 h-2 rounded-full bg-[#0ae448] shadow-[0_0_8px_#0ae448] animate-pulse" />
+          <span className="text-[#0ae448] font-bold tracking-wider">GSAP 3.12+ CORE ENGINE ACTIVE</span>
+          <span className="hidden sm:inline text-white/30">•</span>
+          <span className="hidden sm:inline text-white/60">60 FPS KINETIC MOTION</span>
+          <span className="hidden md:inline text-white/30">•</span>
+          <span className="hidden md:inline text-white/50">EASE: {gsapConfig.easing}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            id="btn-top-gsap-studio"
+            onClick={() => setIsGsapStudioOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#0ae448]/10 hover:bg-[#0ae448] text-[#0ae448] hover:text-black border border-[#0ae448]/30 rounded-xs font-bold transition-all cursor-pointer shadow-[0_0_12px_rgba(10,228,72,0.2)]"
+          >
+            <Sliders className="w-3 h-3" />
+            <span>GSAP Motion Studio</span>
+          </button>
+        </div>
       </div>
 
       {/* Top Header Navigation */}
-      <header className="sticky top-0 z-40 bg-[#050505]/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-8 xl:px-10 h-20 flex items-center justify-between no-print select-none gap-4">
-        {/* Brand Logo - High Density Signature with Glitch Hover */}
+      <header className="sticky top-0 z-40 bg-[#0b0d0e]/95 backdrop-blur-md border-b border-[#0ae448]/15 px-4 sm:px-8 xl:px-10 h-20 flex items-center justify-between no-print select-none gap-4">
+        {/* Brand Logo - GSAP Green Signature with Glitch Hover */}
         <button
           id="btn-nav-brand-logo"
           onClick={() => handleNavigate('home')}
           className="flex items-center gap-3 py-1 text-white hover:opacity-90 transition-all cursor-pointer text-left glitch-hover group shrink-0 whitespace-nowrap"
         >
-          <div className="w-9 h-9 bg-white text-black flex items-center justify-center rounded-sm font-black text-lg shadow-sm glitch-icon transition-transform group-hover:scale-105 shrink-0">
+          <div className="w-9 h-9 bg-[#0ae448] text-black flex items-center justify-center rounded-xs font-black text-lg shadow-[0_0_15px_rgba(10,228,72,0.4)] glitch-icon transition-transform group-hover:scale-105 shrink-0">
             <span>A</span>
           </div>
           <div className="space-y-0.5">
             <h1 className="text-sm font-bold tracking-tight uppercase leading-none text-white flex items-center gap-1.5 whitespace-nowrap">
               <span>Amal K P</span>
-              <span className="text-[9px] font-mono text-white/30 border border-white/20 px-1 py-0.2 rounded-xs font-normal">DZt</span>
+              <span className="text-[9px] font-mono text-[#0ae448] border border-[#0ae448]/30 bg-[#0ae448]/10 px-1 py-0.2 rounded-xs font-semibold">GSAP • DZt</span>
             </h1>
             <p className="text-[10px] text-white/40 tracking-[0.08em] uppercase leading-none whitespace-nowrap">BCA Candidate • JNIAS Balagram</p>
           </div>
@@ -247,19 +275,19 @@ export default function App() {
                 onClick={() => handleNavigate(item.id)}
                 className={`px-2.5 2xl:px-3.5 py-1.5 2xl:py-2 border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative whitespace-nowrap shrink-0 ${
                   isActive 
-                    ? 'text-white font-semibold bg-white/5 border-white/20 shadow-sm' 
+                    ? 'text-white font-semibold bg-[#0ae448]/10 border-[#0ae448]/40 shadow-[0_0_15px_rgba(10,228,72,0.15)]' 
                     : 'text-white/50 border-transparent hover:text-white hover:bg-white/[0.02]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : item.isLive ? 'text-cyan-400' : 'text-white/40'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#0ae448]' : item.isLive ? 'text-cyan-400' : 'text-white/40'}`} />
                 <span className="uppercase tracking-wider">{item.label}</span>
                 {item.isLive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0ae448] animate-pulse ml-0.5 shadow-[0_0_8px_#0ae448]" />
                 )}
                 {isActive && (
                   <motion.span 
                     layoutId="active-tab-glow"
-                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-white"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#0ae448] shadow-[0_0_10px_#0ae448]"
                   />
                 )}
               </button>
@@ -276,53 +304,57 @@ export default function App() {
             title={batteryStatus.charging ? 'Battery: Charging' : 'Battery: Discharging'}
           >
             {batteryStatus.charging ? (
-              <BatteryCharging className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+              <BatteryCharging className="w-3.5 h-3.5 text-[#0ae448] animate-pulse" />
             ) : (
               <Battery className="w-3.5 h-3.5 text-white/70" />
             )}
             <span className="font-bold">{batteryStatus.level !== null ? `${batteryStatus.level}%` : '100%'}</span>
             {batteryStatus.charging && (
-              <span className="hidden sm:inline-block text-[9px] font-semibold text-emerald-400 bg-emerald-500/20 px-1 py-0.2 rounded-2xs border border-emerald-500/30">
+              <span className="hidden sm:inline-block text-[9px] font-semibold text-[#0ae448] bg-[#0ae448]/20 px-1 py-0.2 rounded-2xs border border-[#0ae448]/30">
                 CHG
               </span>
             )}
           </div>
 
-          <div className="hidden 2xl:flex items-center text-right pr-1 shrink-0 whitespace-nowrap">
-            <div>
-              <span className="block text-[10px] text-white/30 uppercase tracking-widest font-mono">Ecosystem</span>
-              <span className="text-xs font-medium tracking-tight text-white">Founder / Lead at <span className="italic font-serif">DZt</span></span>
-            </div>
-          </div>
+          {/* GSAP Motion Studio Quick Pill */}
+          <button
+            id="btn-header-gsap-studio"
+            onClick={() => setIsGsapStudioOpen(true)}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-[#0ae448]/15 border border-[#0ae448]/30 hover:bg-[#0ae448] hover:text-black text-[#0ae448] text-xs font-mono font-bold uppercase tracking-wider transition-all rounded-xs cursor-pointer shadow-[0_0_15px_rgba(10,228,72,0.2)] shrink-0"
+            title="Configure GSAP Animations & Easing"
+          >
+            <Zap className="w-3.5 h-3.5 fill-current" />
+            <span>GSAP Studio</span>
+          </button>
 
           <button
             id="btn-nav-resume-pdf"
             onClick={() => handleNavigate('resume')}
-            className="hidden sm:inline-block px-4 2xl:px-5 py-2 2xl:py-2.5 bg-white text-black text-xs font-bold font-mono uppercase tracking-widest hover:bg-white/90 transition-colors cursor-pointer rounded-xs glitch-button shrink-0 whitespace-nowrap"
+            className="hidden lg:inline-block px-4 2xl:px-5 py-2 2xl:py-2.5 bg-white text-black text-xs font-bold font-mono uppercase tracking-widest hover:bg-[#0ae448] hover:shadow-[0_0_20px_rgba(10,228,72,0.5)] transition-all cursor-pointer rounded-xs glitch-button shrink-0 whitespace-nowrap"
           >
             Resume.pdf
           </button>
 
-          {/* Navigation drawer toggle for screen sizes below 1280px (tablets, compact desktop, mobile) */}
+          {/* Navigation drawer toggle for screen sizes below 1280px */}
           <button
             id="btn-mobile-menu-toggle"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="xl:hidden min-w-[44px] min-h-[44px] p-2.5 rounded-sm border border-white/10 hover:bg-white/5 text-white/60 hover:text-white transition-all cursor-pointer flex items-center justify-center shrink-0"
+            className="xl:hidden min-w-[44px] min-h-[44px] p-2.5 rounded-xs border border-white/10 hover:border-[#0ae448]/50 hover:bg-white/5 text-white/60 hover:text-white transition-all cursor-pointer flex items-center justify-center shrink-0"
             aria-label="Toggle Navigation Menu"
           >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMobileMenuOpen ? <X className="w-5 h-5 text-[#0ae448]" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </header>
 
-      {/* Responsive Drawer Navigation (Active below 1280px) */}
+      {/* Responsive Drawer Navigation */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="xl:hidden bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/10 px-4 py-4 z-30 space-y-2 no-print relative"
+            className="xl:hidden bg-[#0c0e0f]/95 backdrop-blur-xl border-b border-[#0ae448]/20 px-4 py-4 z-30 space-y-2 no-print relative"
           >
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -331,22 +363,34 @@ export default function App() {
                 <button
                   key={item.id}
                   onClick={() => handleNavigate(item.id)}
-                  className={`w-full min-h-[44px] px-4 py-3 rounded-sm text-xs font-mono uppercase tracking-wider flex items-center gap-3 transition-colors cursor-pointer ${
+                  className={`w-full min-h-[44px] px-4 py-3 rounded-xs text-xs font-mono uppercase tracking-wider flex items-center gap-3 transition-colors cursor-pointer ${
                     isActive 
-                      ? 'bg-white/10 text-white border border-white/20 font-bold' 
+                      ? 'bg-[#0ae448]/15 text-[#0ae448] border border-[#0ae448]/30 font-bold' 
                       : 'text-white/60 hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : item.isLive ? 'text-cyan-400' : 'text-white/40'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#0ae448]' : item.isLive ? 'text-cyan-400' : 'text-white/40'}`} />
                   <span className="flex-1 text-left">{item.label}</span>
                   {item.isLive && (
-                    <span className="text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-xs border border-emerald-500/30">
+                    <span className="text-[10px] font-mono font-bold bg-[#0ae448]/20 text-[#0ae448] px-2 py-0.5 rounded-xs border border-[#0ae448]/30">
                       P2P LIVE
                     </span>
                   )}
                 </button>
               );
             })}
+
+            {/* Mobile GSAP Studio Button */}
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsGsapStudioOpen(true);
+              }}
+              className="w-full min-h-[44px] px-4 py-3 rounded-xs text-xs font-mono uppercase tracking-wider flex items-center gap-3 bg-[#0ae448] text-black font-bold shadow-[0_0_15px_rgba(10,228,72,0.3)] cursor-pointer"
+            >
+              <Zap className="w-4 h-4 fill-current" />
+              <span>Open GSAP Motion Studio</span>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -359,10 +403,10 @@ export default function App() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.35 / gsapConfig.speedMultiplier, ease: [0.16, 1, 0.3, 1] }}
           >
             {activeTab === 'home' && (
-              <Hero onNavigate={handleNavigate} />
+              <Hero onNavigate={handleNavigate} onOpenGsapStudio={() => setIsGsapStudioOpen(true)} />
             )}
             {activeTab === 'about' && (
               <About />
@@ -389,17 +433,24 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Sleek Minimalist Footer */}
-      <footer id="portfolio-minimal-footer" className="py-5 px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between bg-[#080808] border-t border-white/10 gap-3 no-print select-none z-10">
+      {/* Sleek GSAP Themed Footer */}
+      <footer id="portfolio-minimal-footer" className="py-5 px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between bg-[#08090a] border-t border-[#0ae448]/20 gap-3 no-print select-none z-10">
         <div className="flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
-          <a id="footer-link-github" href={AMAL_INFO.github} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
-          <a id="footer-link-linkedin" href={AMAL_INFO.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
-          <a id="footer-link-email" href={`mailto:${AMAL_INFO.email}`} className="hover:text-white transition-colors">Email</a>
+          <a id="footer-link-github" href={AMAL_INFO.github} target="_blank" rel="noopener noreferrer" className="hover:text-[#0ae448] transition-colors">GitHub</a>
+          <a id="footer-link-linkedin" href={AMAL_INFO.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-[#0ae448] transition-colors">LinkedIn</a>
+          <a id="footer-link-email" href={`mailto:${AMAL_INFO.email}`} className="hover:text-[#0ae448] transition-colors">Email</a>
         </div>
-        <div className="text-[10px] uppercase tracking-[0.1em] text-white/30 text-center">
-          © 2026 {AMAL_INFO.name} — Founder of DZt — All Rights Reserved
+        <div className="text-[10px] uppercase tracking-[0.1em] text-white/40 text-center flex items-center gap-2">
+          <span>© 2026 {AMAL_INFO.name} — Founder of DZt</span>
+          <span className="text-[#0ae448]">•</span>
+          <span className="text-[#0ae448] font-mono font-semibold">GSAP Themed</span>
         </div>
         <div className="flex items-center gap-3 text-xs font-mono text-white/40 hidden md:flex">
+          <span className="text-[#0ae448] flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0ae448] shadow-[0_0_6px_#0ae448]" />
+            GSAP_v3.12
+          </span>
+          <span className="text-white/10">|</span>
           <span>BALAGRAM_NODE</span>
           <span className="text-white/10">|</span>
           <span>STABLE_BUILD_v2.0</span>
