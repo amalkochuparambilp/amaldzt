@@ -59,7 +59,7 @@ export default function Projects() {
               {/* Tech Tags */}
               <div className="flex flex-wrap gap-1.5 pt-2">
                 {project.tech.map((t, idx) => (
-                  <span key={idx} className="px-2 py-0.5 bg-[#0ae448]/10 border border-[#0ae448]/25 text-[10px] font-mono text-[#0ae448]">
+                  <span key={idx} className="px-2 py-0.5 bg-white/5 border border-white/10 text-[10px] font-mono text-white/70">
                     {t}
                   </span>
                 ))}
@@ -67,9 +67,9 @@ export default function Projects() {
             </div>
 
             {/* Bottom Link indicator */}
-            <div className="pt-4 border-t border-white/10 flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-white/50 group-hover:text-[#0ae448] transition-colors">
+            <div className="pt-4 border-t border-white/10 flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">
               <span>View Specifications</span>
-              <span className="text-[#0ae448] font-bold">&rarr;</span>
+              <span>&rarr;</span>
             </div>
           </motion.div>
         ))}
@@ -84,19 +84,19 @@ export default function Projects() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#0f1113] border border-[#0ae448]/40 rounded-xs max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-[0_0_50px_rgba(10,228,72,0.25)] relative p-6 sm:p-8 space-y-6 text-white"
+              className="bg-[#111] border border-white/20 rounded-sm max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl relative p-6 sm:p-8 space-y-6 text-white"
             >
               {/* Close Button */}
               <button
                 onClick={() => setSelectedProject(null)}
-                className="absolute top-4 right-4 p-2 rounded-xs border border-white/10 hover:border-[#0ae448] hover:bg-[#0ae448]/10 transition-colors text-gray-400 hover:text-white cursor-pointer"
+                className="absolute top-4 right-4 p-2 rounded-sm border border-white/10 hover:bg-white/10 transition-colors text-gray-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
 
               {/* Header */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs font-mono text-[#0ae448]">
+                <div className="flex items-center gap-2 text-xs font-mono text-white/50">
                   <Tag className="w-3.5 h-3.5" />
                   <span className="uppercase tracking-widest">{selectedProject.category} MODULE</span>
                 </div>
@@ -111,11 +111,11 @@ export default function Projects() {
               {/* Key Features */}
               {selectedProject.features && (
                 <div className="space-y-3 pt-2">
-                  <h4 className="text-xs font-mono uppercase text-[#0ae448] tracking-wider">Key Functional Modules</h4>
+                  <h4 className="text-xs font-mono uppercase text-white/50 tracking-wider">Key Functional Modules</h4>
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-gray-300">
                     {selectedProject.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 bg-white/5 p-2 border border-[#0ae448]/15">
-                        <ShieldCheck className="w-4 h-4 text-[#0ae448] flex-shrink-0 mt-0.5" />
+                      <li key={idx} className="flex items-start gap-2 bg-white/5 p-2 border border-white/5">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}

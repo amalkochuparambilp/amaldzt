@@ -399,7 +399,7 @@ export default function Contact() {
                     className={`w-full p-3 bg-black border rounded-xs text-white focus:outline-none transition-colors ${
                       formErrors.email 
                         ? 'border-red-500/80 focus:border-red-400' 
-                        : 'border-white/15 focus:border-[#0ae448]'
+                        : 'border-white/15 focus:border-white/50'
                     }`}
                   />
                   {formErrors.email && (
@@ -430,7 +430,7 @@ export default function Contact() {
                     className={`w-full p-3 bg-black border rounded-xs text-white focus:outline-none transition-colors resize-none ${
                       formErrors.message 
                         ? 'border-red-500/80 focus:border-red-400' 
-                        : 'border-white/15 focus:border-[#0ae448]'
+                        : 'border-white/15 focus:border-white/50'
                     }`}
                   />
                   {formErrors.message && (
@@ -443,7 +443,7 @@ export default function Contact() {
                   id="btn-contact-submit"
                   type="submit"
                   disabled={status === 'submitting'}
-                  className="w-full min-h-[44px] py-3.5 bg-[#0ae448] text-black text-xs font-bold uppercase tracking-widest hover:bg-[#00ff87] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded-xs shadow-[0_0_20px_rgba(10,228,72,0.35)] mt-2"
+                  className="w-full min-h-[44px] py-3.5 bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed rounded-xs shadow-md mt-2"
                 >
                   {status === 'submitting' ? (
                     <>

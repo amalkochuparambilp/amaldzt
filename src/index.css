@@ -1,31 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,600&family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,600&family=Fira+Code:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Space Grotesk", "Syne", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: "Fira Code", ui-monospace, SFMono-Regular, monospace;
   
-  --color-gsap-green: #0ae448;
-  --color-gsap-neon: #00ff87;
-  --color-gsap-dark: #0c0e0e;
-  --color-gsap-card: #121415;
-  --color-gsap-border: rgba(10, 228, 72, 0.2);
+  --color-cyber-dark: #050505;
+  --color-cyber-card: #111111;
+  --color-cyber-border: rgba(255, 255, 255, 0.1);
 }
 
 @layer base {
-  :root {
-    --gsap-primary: #0ae448;
-    --gsap-glow: rgba(10, 228, 72, 0.35);
-    --gsap-dark: #0c0e0e;
-    --gsap-surface: #121415;
-  }
-
   html {
     scroll-behavior: smooth;
-    background-color: #0b0d0e;
-    color: #e5e7eb;
+    background-color: #050505;
+    color: #e0e0e0;
     font-family: var(--font-sans);
   }
 
@@ -34,73 +25,28 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0b0d0e;
+    background: #050505;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1a221c;
-    border-radius: 2px;
-    border: 1px solid rgba(10, 228, 72, 0.2);
+    background: #222222;
+    border-radius: 0px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #0ae448;
+    background: #333333;
   }
-}
-
-.gsap-grid-bg {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(10, 228, 72, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(10, 228, 72, 0.04) 1px, transparent 1px);
-}
-
-.gsap-radial-glow {
-  background: radial-gradient(ellipse 80% 45% at 50% -10%, rgba(10, 228, 72, 0.12), transparent 70%);
-}
-
-.gsap-card-glow {
-  box-shadow: 0 0 20px -5px rgba(10, 228, 72, 0.15);
-  border: 1px solid rgba(10, 228, 72, 0.2);
-}
-
-.gsap-card-glow:hover {
-  box-shadow: 0 0 30px -2px rgba(10, 228, 72, 0.25);
-  border-color: rgba(10, 228, 72, 0.5);
-}
-
-.gsap-badge {
-  background: rgba(10, 228, 72, 0.08);
-  border: 1px solid rgba(10, 228, 72, 0.3);
-  color: #0ae448;
-}
-
-.gsap-text-glow {
-  text-shadow: 0 0 16px rgba(10, 228, 72, 0.5);
-}
-
-.gsap-button-primary {
-  background: #0ae448;
-  color: #050505;
-  box-shadow: 0 0 20px rgba(10, 228, 72, 0.35);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.gsap-button-primary:hover {
-  background: #00ff87;
-  box-shadow: 0 0 30px rgba(10, 228, 72, 0.6);
-  transform: translateY(-1px);
 }
 
 .grid-bg {
-  background-size: 32px 32px;
+  background-size: 30px 30px;
   background-image: 
-    linear-gradient(to right, rgba(10, 228, 72, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(10, 228, 72, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 
 .glass-panel {
-  background: rgba(18, 20, 22, 0.85);
+  background: rgba(17, 17, 17, 0.85);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(10, 228, 72, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Tech / Hacker Glitch Hover Effect */

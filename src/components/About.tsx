@@ -38,12 +38,12 @@ export default function About() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.02] rounded-full blur-2xl pointer-events-none" />
             
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#0ae448] text-black font-black text-xl flex items-center justify-center rounded-xs shadow-[0_0_15px_rgba(10,228,72,0.4)]">
+              <div className="w-10 h-10 bg-white text-black font-black text-xl flex items-center justify-center rounded-xs">
                 A
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white uppercase tracking-tight">{AMAL_INFO.name}</h3>
-                <p className="text-xs text-[#0ae448] font-mono uppercase font-semibold">{AMAL_INFO.title}</p>
+                <p className="text-xs text-white/50 font-mono uppercase">{AMAL_INFO.title}</p>
               </div>
             </div>
 
@@ -52,23 +52,23 @@ export default function About() {
             </p>
 
             <p className="text-sm text-gray-300 leading-relaxed font-sans">
-              My technical expertise bridges full-stack application development, database design, and creative media. I specialize in building robust web applications with <strong className="text-[#0ae448]">React, TypeScript, Python, Django, PHP, and MySQL</strong>. From engineering specialized college management software to crafting AI-assisted health diagnostic platforms, my goal is to deliver clean, scalable, and high-impact digital solutions.
+              My technical expertise bridges full-stack application development, database design, and creative media. I specialize in building robust web applications with <strong className="text-white">React, TypeScript, Python, Django, PHP, and MySQL</strong>. From engineering specialized college management software to crafting AI-assisted health diagnostic platforms, my goal is to deliver clean, scalable, and high-impact digital solutions.
             </p>
 
             {/* Core Values Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-white/10">
-              <div className="p-3 bg-black/60 border border-white/10 hover:border-[#0ae448]/40 transition-colors space-y-1">
-                <Code className="w-4 h-4 text-[#0ae448]" />
+              <div className="p-3 bg-black/60 border border-white/10 space-y-1">
+                <Code className="w-4 h-4 text-white/70" />
                 <span className="text-xs font-bold text-white block">Full-Stack Dev</span>
                 <span className="text-[10px] text-white/40 block">React, Django & PHP</span>
               </div>
-              <div className="p-3 bg-black/60 border border-white/10 hover:border-[#0ae448]/40 transition-colors space-y-1">
-                <Users className="w-4 h-4 text-[#0ae448]" />
+              <div className="p-3 bg-black/60 border border-white/10 space-y-1">
+                <Users className="w-4 h-4 text-white/70" />
                 <span className="text-xs font-bold text-white block">DZt Founder</span>
                 <span className="text-[10px] text-white/40 block">Tech Community Lead</span>
               </div>
-              <div className="p-3 bg-black/60 border border-white/10 hover:border-[#0ae448]/40 transition-colors space-y-1 col-span-2 sm:col-span-1">
-                <Award className="w-4 h-4 text-[#0ae448]" />
+              <div className="p-3 bg-black/60 border border-white/10 space-y-1 col-span-2 sm:col-span-1">
+                <Award className="w-4 h-4 text-white/70" />
                 <span className="text-xs font-bold text-white block">JNIAS Campus</span>
                 <span className="text-[10px] text-white/40 block">BCA Candidate '26</span>
               </div>
@@ -80,13 +80,13 @@ export default function About() {
         <div className="lg:col-span-5 space-y-4">
           
           {/* Education Card */}
-          <div className="bg-[#0e0e0e] border border-white/10 p-6 space-y-4 hover:border-[#0ae448]/30 transition-colors">
+          <div className="bg-[#0e0e0e] border border-white/10 p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-[#0ae448]" />
+                <GraduationCap className="w-4 h-4 text-white/60" />
                 <span>Academic Institution</span>
               </span>
-              <span className="text-[10px] font-mono text-[#0ae448] bg-[#0ae448]/10 border border-[#0ae448]/30 px-2 py-0.5 font-bold">
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5">
                 ACTIVE
               </span>
             </div>
