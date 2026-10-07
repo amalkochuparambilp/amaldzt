@@ -166,6 +166,11 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const persistLocalState = useCallback((nextState: CMSState) => {
     try {
       localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(nextState));
+      if (typeof BroadcastChannel !== 'undefined') {
+        const bc = new BroadcastChannel('dzt_cms_live_sync');
+        bc.postMessage(nextState);
+        bc.close();
+      }
     } catch {
       // ignore
     }
@@ -189,8 +194,14 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       const res = await cmsFetch(`/api/cms/state?t=${Date.now()}`, { headers });
       if (res.ok) {
         const data = (await res.json()) as CMSState;
-        if (data && data.profile) {
-          applyServerState(data);
+        if (data && data.profile && Array.isArray(data.projects)) {
+          setCms(data);
+          setDbConnected(true);
+          try {
+            localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(data));
+          } catch {
+            // ignore
+          }
         }
       } else {
         setDbConnected(false);
@@ -200,7 +211,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [adminToken, applyServerState]);
+  }, [adminToken]);
 
   // Verify stored admin token on mount
   useEffect(() => {
@@ -274,18 +285,57 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     refreshCMS();
   }, [refreshCMS]);
 
-  // Auto-sync live state when user focuses the window/tab or returns to the site
+  // Auto-sync live state across tabs/windows and from PostgreSQL
   useEffect(() => {
     const onFocusOrVisible = () => {
       if (document.visibilityState === 'visible') {
         refreshCMS();
       }
     };
+
+    const onStorageChange = (e: StorageEvent) => {
+      if (e.key === STATE_CACHE_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue) as CMSState;
+          if (parsed && parsed.profile && Array.isArray(parsed.projects)) {
+            setCms(parsed);
+          }
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    let bc: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        bc = new BroadcastChannel('dzt_cms_live_sync');
+        bc.onmessage = (event) => {
+          const next = event.data as CMSState;
+          if (next && next.profile && Array.isArray(next.projects)) {
+            setCms(next);
+          }
+        };
+      } catch {
+        // ignore
+      }
+    }
+
+    const pollInterval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refreshCMS();
+      }
+    }, 15000);
+
     window.addEventListener('focus', onFocusOrVisible);
+    window.addEventListener('storage', onStorageChange);
     document.addEventListener('visibilitychange', onFocusOrVisible);
     return () => {
+      window.clearInterval(pollInterval);
       window.removeEventListener('focus', onFocusOrVisible);
+      window.removeEventListener('storage', onStorageChange);
       document.removeEventListener('visibilitychange', onFocusOrVisible);
+      bc?.close();
     };
   }, [refreshCMS]);
 
