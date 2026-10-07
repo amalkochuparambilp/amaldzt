@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useCMS } from '../context/CMSContext';
+import { PROJECTS } from '../data';
 import { Project } from '../types';
-import { Github, Tag, ShieldCheck, X } from 'lucide-react';
+import { ExternalLink, Github, ArrowRight, Tag, ShieldCheck, X, Cpu } from 'lucide-react';
 
 export default function Projects() {
-  const { cms } = useCMS();
-  const publishedProjects = cms.projects.filter((p) => p.published !== false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   return (
@@ -15,8 +13,8 @@ export default function Projects() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-white/10 pb-6">
         <div className="space-y-1">
           <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Selected Works</span>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase tabular-nums">
-            PROJECTS ({publishedProjects.length.toString().padStart(2, '0')})
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase">
+            PROJECTS ({PROJECTS.length.toString().padStart(2, '0')})
           </h2>
         </div>
         <p className="text-xs text-white/50 max-w-sm font-sans leading-relaxed">
@@ -26,13 +24,13 @@ export default function Projects() {
 
       {/* Projects Grid - High Density layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {publishedProjects.map((project, index) => (
+        {PROJECTS.map((project, index) => (
           <motion.div
             key={project.id}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.3, delay: index * 0.08 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
             onClick={() => setSelectedProject(project)}
             className="group relative bg-[#111] border border-white/10 p-6 sm:p-8 flex flex-col justify-between hover:bg-[#161616] transition-all cursor-pointer overflow-hidden rounded-sm min-h-[260px]"
           >
@@ -41,8 +39,8 @@ export default function Projects() {
 
             {/* Top row */}
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest tabular-nums">
-                {String(index + 1).padStart(2, '0')} / {project.category}
+              <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                0{index + 1} / {project.category}
               </span>
               <div className="text-lg text-white/60 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
                 ↗
@@ -88,6 +86,7 @@ export default function Projects() {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="bg-[#111] border border-white/20 rounded-sm max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl relative p-6 sm:p-8 space-y-6 text-white"
             >
+              {/* Close Button */}
               <button
                 onClick={() => setSelectedProject(null)}
                 className="absolute top-4 right-4 p-2 rounded-sm border border-white/10 hover:bg-white/10 transition-colors text-gray-400 hover:text-white cursor-pointer"
@@ -95,6 +94,7 @@ export default function Projects() {
                 <X className="w-4 h-4" />
               </button>
 
+              {/* Header */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs font-mono text-white/50">
                   <Tag className="w-3.5 h-3.5" />
@@ -103,11 +103,13 @@ export default function Projects() {
                 <h3 className="text-2xl font-bold tracking-tight text-white">{selectedProject.title}</h3>
               </div>
 
+              {/* Description */}
               <p className="text-sm font-sans text-gray-300 leading-relaxed font-light">
                 {selectedProject.longDescription || selectedProject.description}
               </p>
 
-              {selectedProject.features && selectedProject.features.length > 0 && (
+              {/* Key Features */}
+              {selectedProject.features && (
                 <div className="space-y-3 pt-2">
                   <h4 className="text-xs font-mono uppercase text-white/50 tracking-wider">Key Functional Modules</h4>
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-gray-300">
@@ -121,6 +123,7 @@ export default function Projects() {
                 </div>
               )}
 
+              {/* Tech Stack */}
               <div className="space-y-2">
                 <h4 className="text-xs font-mono uppercase text-white/50 tracking-wider">Architecture Stack</h4>
                 <div className="flex flex-wrap gap-1.5">
@@ -132,18 +135,17 @@ export default function Projects() {
                 </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
-                {selectedProject.githubUrl && (
-                  <a
-                    href={selectedProject.githubUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex-1 px-5 py-3 rounded-sm bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Github className="w-4 h-4" />
-                    Source Repository
-                  </a>
-                )}
+                <a
+                  href={selectedProject.githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 px-5 py-3 rounded-sm bg-white text-black text-xs font-bold uppercase tracking-widest hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Github className="w-4 h-4" />
+                  Source Repository
+                </a>
               </div>
             </motion.div>
           </div>

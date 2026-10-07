@@ -1,11 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index?__path=$1"
-    },
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"

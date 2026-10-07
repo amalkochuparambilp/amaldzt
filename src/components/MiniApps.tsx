@@ -1,15 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  QrCode,
-  HeartPulse,
-  GraduationCap,
-  Network,
-  ArrowLeft,
-  Copy,
-  Check,
-  Search,
+import { 
+  QrCode, 
+  HeartPulse, 
+  GraduationCap, 
+  Network, 
+  ArrowLeft, 
+  ExternalLink, 
+  Copy, 
+  Check, 
+  Play, 
+  Sparkles, 
+  Search, 
+  Terminal, 
+  RefreshCw, 
+  ShieldCheck, 
+  Activity,
+  Layers,
+  Cpu,
   Share2,
+  HardDriveDownload,
+  Sliders,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
@@ -30,6 +41,8 @@ interface MiniAppItem {
   tagline: string;
   category: 'communication' | 'dev' | 'health' | 'education';
   categoryLabel: string;
+  badge: string;
+  badgeColor: string;
   icon: typeof Share2;
   description: string;
   features: string[];
@@ -37,10 +50,12 @@ interface MiniAppItem {
   directUrl: string;
 }
 
-export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps) {
+export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: MiniAppsProps) {
   const [activeApp, setActiveApp] = useState<string | null>(initialAppId || null);
   const [selectedCategory, setSelectedCategory] = useState<MiniAppCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [copiedAppUrl, setCopiedAppUrl] = useState<string | null>(null);
+  const [copiedHubUrl, setCopiedHubUrl] = useState(false);
 
   // Sync initialAppId prop
   useEffect(() => {
@@ -49,7 +64,7 @@ export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps)
     }
   }, [initialAppId]);
 
-  // Handle popstate for browser Back / Forward buttons
+  // Synchronize on browser Back / Forward buttons inside MiniApps
   useEffect(() => {
     const handlePopState = () => {
       const searchParams = new URLSearchParams(window.location.search);
@@ -71,14 +86,31 @@ export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps)
 
   const handleLaunchApp = (appId: string) => {
     setActiveApp(appId);
-    const roomParam = initialRoomId ? `&room=${encodeURIComponent(initialRoomId)}` : '';
-    const url = `/apps?app=${encodeURIComponent(appId)}${roomParam}`;
+    const url = `/apps?app=${encodeURIComponent(appId)}${initialRoomId ? `&room=${encodeURIComponent(initialRoomId)}` : ''}`;
     window.history.pushState({ appId }, '', url);
   };
 
   const handleBackToCatalog = () => {
     setActiveApp(null);
     window.history.pushState(null, '', '/apps');
+  };
+
+  const handleCopyHubUrl = () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const fullUrl = `${origin}/apps`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopiedHubUrl(true);
+      setTimeout(() => setCopiedHubUrl(false), 2000);
+    });
+  };
+
+  const handleCopyAppUrl = (appId: string, directPath: string) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const fullUrl = `${origin}${directPath}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopiedAppUrl(appId);
+      setTimeout(() => setCopiedAppUrl(null), 2000);
+    });
   };
 
   const miniAppsList: MiniAppItem[] = [
@@ -88,6 +120,8 @@ export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps)
       tagline: 'Encrypted Browser-to-Browser File & Clipboard Beam',
       category: 'communication',
       categoryLabel: 'Communication',
+      badge: 'DataChannel • Live',
+      badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
       icon: Share2,
       description: 'Direct browser-to-browser P2P file sharing with zero file size limits, end-to-end DTLS encryption, instant QR phone pairing, and realtime speed gauges.',
       features: ['WebRTC DataChannel Mesh', 'Zero Cloud File Storage', 'Live Speed & ETA Monitor', 'QR Code Phone Connect'],
@@ -100,6 +134,8 @@ export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps)
       tagline: 'Automated Code-128 & QR Accession Tag Generator',
       category: 'dev',
       categoryLabel: 'Developer Tools',
+      badge: 'Library Core • Interactive',
+      badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
       icon: QrCode,
       description: 'Utility for library inventory tracking inspired by JNIAS LibCode. Generates barcode tags, QR accession codes, and customizable book metadata printable labels.',
       features: ['Dynamic SVG Barcode Engine', 'QR Code Generator', 'Custom Prefix & Accession Range', 'Printable Tag Sheet'],
@@ -112,6 +148,8 @@ export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps)
       tagline: 'Framingham Cardiovascular Risk & Biometric Calculator',
       category: 'health',
       categoryLabel: 'Healthcare AI',
+      badge: 'Clinical ML • Calculator',
+      badgeColor: 'text-rose-400 bg-rose-500/10 border-rose-500/30',
       icon: HeartPulse,
       description: 'Interactive cardiovascular health estimation tool inspired by the Hrdiya Cardiac Analysis project. Evaluates 10-year cardiac risk percentages based on blood pressure, lipid profile, and lifestyle markers.',
       features: ['Framingham 10-Year Score', 'Blood Pressure Classification', 'Lifestyle Guidance Engine', 'Interactive Risk Gauge'],
@@ -124,6 +162,8 @@ export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps)
       tagline: 'Timed Mock Practice & Aptitude Quiz Engine',
       category: 'education',
       categoryLabel: 'Academic & Testing',
+      badge: 'Co-op Bank • Practice',
+      badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
       icon: GraduationCap,
       description: 'Practice engine modeled after the Co-operative Bank Online Examination Portal. Features timed multiple-choice banking awareness questions, instant score calculation, and review analysis.',
       features: ['Timed Speed Drills', 'Banking Law & Aptitude Questions', 'Real-Time Score Breakdown', 'Detailed Solution Explanations'],
@@ -136,6 +176,8 @@ export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps)
       tagline: 'IP Network Topology & Host Range Inspector',
       category: 'dev',
       categoryLabel: 'Developer Tools',
+      badge: 'Networking • Ops',
+      badgeColor: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
       icon: Network,
       description: 'Network engineering utility to calculate CIDR prefixes, usable IP host ranges, broadcast addresses, wildcard masks, and binary network visualizations.',
       features: ['CIDR /0 to /32 Support', 'Usable Host Range Compute', 'Binary Bitmask View', 'Classful IP Breakdown'],
@@ -146,179 +188,240 @@ export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps)
 
   const filteredApps = miniAppsList.filter((app) => {
     const matchesCat = selectedCategory === 'all' || app.category === selectedCategory;
-    const matchesSearch =
+    const matchesSearch = 
       app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.features.some((f) => f.toLowerCase().includes(searchQuery.toLowerCase()));
+      app.features.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCat && matchesSearch;
   });
 
   return (
-    <section id="miniapps-section" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-10">
-      {/* Normal Website Section Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-white/10 pb-6">
-        <div className="space-y-1">
-          <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Interactive Utilities</span>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase tabular-nums">
-            DZT MINI APPS ({miniAppsList.length.toString().padStart(2, '0')})
-          </h2>
-        </div>
-        <p className="text-xs text-white/50 max-w-sm font-sans leading-relaxed">
-          Browser-native tools for P2P file sharing, library barcode generation, cardiovascular risk calculation, and network subnetting.
-        </p>
-      </div>
-
+    <div className="space-y-8 animate-fadeIn">
+      {/* If an App is Active -> Show App Full View */}
       {activeApp ? (
         <div className="space-y-6">
-          <div className="flex items-center justify-between gap-4">
-            <button
-              onClick={handleBackToCatalog}
-              className="px-3.5 py-2 bg-[#111] hover:bg-[#161616] border border-white/10 text-white text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer rounded-sm"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Mini Apps</span>
-            </button>
+          {/* Top Return & App Breadcrumb Bar */}
+          <div className="bg-[#0e0e0e] border border-white/15 p-4 rounded-xs flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBackToCatalog}
+                className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/15 text-white text-xs font-mono rounded-xs flex items-center gap-2 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>All MiniApps</span>
+              </button>
+              <div className="h-4 w-[1px] bg-white/20 hidden sm:block" />
+              <div className="flex items-center gap-2 text-xs font-mono">
+                <span className="text-white/40">DZt MiniApp:</span>
+                <span className="text-white font-bold">
+                  {miniAppsList.find(a => a.id === activeApp)?.title || activeApp.toUpperCase()}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="text-[11px] font-mono text-cyan-300 bg-black/60 border border-white/10 px-3 py-1.5 rounded-xs select-all hidden md:block">
+                {typeof window !== 'undefined' ? `${window.location.origin}/apps?app=${activeApp}` : `/apps?app=${activeApp}`}
+              </div>
+              <button
+                onClick={() => handleCopyAppUrl(activeApp, `/apps?app=${activeApp}`)}
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-mono rounded-xs border border-white/20 flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Copy Direct Link to this MiniApp"
+              >
+                {copiedAppUrl === activeApp ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedAppUrl === activeApp ? 'Copied' : 'Share App URL'}</span>
+              </button>
+            </div>
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeApp}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              {(activeApp === 'drop' || activeApp === 'share' || activeApp === 'fileshare') && (
-                <div className="border border-white/10 rounded-sm bg-[#111]">
-                  <FileShareRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
-                </div>
-              )}
+          {/* Render Active MiniApp Container */}
+          {(activeApp === 'drop' || activeApp === 'share' || activeApp === 'fileshare') && (
+            <div className="border border-white/10 rounded-xs bg-[#080808]">
+              <FileShareRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
+            </div>
+          )}
 
-              {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}
-              {activeApp === 'hrdiya' && <HrdiyaApp onBack={handleBackToCatalog} />}
-              {activeApp === 'bankexam' && <BankExamApp onBack={handleBackToCatalog} />}
-              {activeApp === 'subnet' && <SubnetCalculatorApp onBack={handleBackToCatalog} />}
-            </motion.div>
-          </AnimatePresence>
+          {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}
+          {activeApp === 'hrdiya' && <HrdiyaApp onBack={handleBackToCatalog} />}
+          {activeApp === 'bankexam' && <BankExamApp onBack={handleBackToCatalog} />}
+          {activeApp === 'subnet' && <SubnetCalculatorApp onBack={handleBackToCatalog} />}
         </div>
       ) : (
+        /* MiniApp Hub Catalog View */
         <div className="space-y-8">
-          {/* Filter & Search Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-              {(
-                [
-                  { id: 'all', label: 'All' },
-                  { id: 'communication', label: 'Communication' },
-                  { id: 'dev', label: 'Dev Tools' },
-                  { id: 'health', label: 'Healthcare AI' },
-                  { id: 'education', label: 'Education' }
-                ] as const
-              ).map((cat) => (
+          {/* Header Banner */}
+          <div className="bg-[#0a0a0a] border border-white/15 p-6 sm:p-8 space-y-4 relative overflow-hidden rounded-xs">
+            <div className="absolute -right-16 -top-16 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 font-bold uppercase tracking-widest">
+                  <Sparkles className="w-4 h-4" />
+                  <span>DZt Cloud Micro-Application Ecosystem</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight uppercase">
+                  DZt MiniApps Hub
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-400 max-w-2xl font-sans">
+                  Interactive real-time web applications, P2P file transfer, and engineering calculators developed by Amal K P.
+                </p>
+              </div>
+
+              {/* Shareable Hub URL Card */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 bg-black/60 border border-white/15 p-3 rounded-xs">
+                <div className="space-y-0.5">
+                  <span className="text-[9px] font-mono text-white/40 uppercase tracking-widest block">Dedicated Hub URL</span>
+                  <span className="text-xs font-mono text-cyan-300 font-bold">/apps</span>
+                </div>
                 <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3 py-1.5 text-xs font-mono uppercase tracking-wider rounded-sm transition-all cursor-pointer whitespace-nowrap border ${
-                    selectedCategory === cat.id
-                      ? 'bg-white text-black border-white font-bold'
-                      : 'bg-[#111] text-white/50 hover:text-white hover:bg-[#161616] border-white/10'
-                  }`}
+                  onClick={handleCopyHubUrl}
+                  className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-mono rounded-xs border border-white/20 flex items-center gap-1.5 transition-colors cursor-pointer ml-auto"
                 >
-                  {cat.label}
+                  {copiedHubUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedHubUrl ? 'Copied' : 'Copy URL'}</span>
                 </button>
-              ))}
+              </div>
             </div>
 
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-              <label htmlFor="miniapps-search" className="sr-only">Search MiniApps</label>
-              <input
-                id="miniapps-search"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search mini apps..."
-                className="w-full bg-[#111] border border-white/10 pl-9 pr-3 py-1.5 text-xs font-mono text-white placeholder:text-white/30 rounded-sm focus:outline-none focus:border-white/30"
-              />
+            {/* Quick Filter & Search Bar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+              {/* Category Pills */}
+              <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+                {(
+                  [
+                    { id: 'all', label: 'All MiniApps' },
+                    { id: 'communication', label: 'Communication' },
+                    { id: 'dev', label: 'Dev & Utilities' },
+                    { id: 'health', label: 'Healthcare AI' },
+                    { id: 'education', label: 'Education' }
+                  ] as const
+                ).map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-3 py-1.5 text-xs font-mono rounded-xs transition-all cursor-pointer whitespace-nowrap ${
+                      selectedCategory === cat.id
+                        ? 'bg-white text-black font-bold'
+                        : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search Box */}
+              <div className="relative w-full sm:w-64">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+                <label htmlFor="miniapps-search" className="sr-only">Search MiniApps</label>
+                <input
+                  id="miniapps-search"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search MiniApps..."
+                  className="w-full bg-black/60 border border-white/15 pl-9 pr-3 py-1.5 text-xs font-mono text-white placeholder:text-white/30 rounded-xs focus:outline-none focus:border-white/40"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Normal Website Cards Grid (Matches Projects.tsx) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredApps.map((app, index) => (
-              <motion.div
-                key={app.id}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: index * 0.08 }}
-                onClick={() => handleLaunchApp(app.id)}
-                className="group relative bg-[#111] border border-white/10 p-6 sm:p-8 flex flex-col justify-between hover:bg-[#161616] transition-all cursor-pointer overflow-hidden rounded-sm min-h-[260px]"
-              >
-                {/* Corner ambient shine */}
-                <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors pointer-events-none" />
+          {/* MiniApps Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredApps.map((app) => {
+              const Icon = app.icon;
+              return (
+                <div
+                  key={app.id}
+                  className="bg-[#0a0a0a] border border-white/15 hover:border-white/30 rounded-xs p-6 flex flex-col justify-between space-y-6 transition-all group"
+                >
+                  <div className="space-y-4">
+                    {/* Card Top Row */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xs border bg-white/5 border-white/10 text-white">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest block">
+                            {app.categoryLabel}
+                          </span>
+                          <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors uppercase">
+                            {app.title}
+                          </h3>
+                        </div>
+                      </div>
 
-                {/* Top row */}
-                <div className="flex justify-between items-start">
-                  <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest tabular-nums">
-                    {String(index + 1).padStart(2, '0')} / {app.categoryLabel}
-                  </span>
-                  <div className="text-lg text-white/60 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
-                    ↗
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="space-y-3 z-10 py-4">
-                  <h3 className="text-2xl font-bold tracking-tight text-white group-hover:text-white/90">
-                    {app.title}
-                  </h3>
-                  <p className="text-xs text-white/50 line-clamp-3 leading-relaxed font-sans">
-                    {app.description}
-                  </p>
-
-                  {/* Tech Tags */}
-                  <div className="flex flex-wrap gap-1.5 pt-2">
-                    {app.techStack.map((tech, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 bg-white/5 border border-white/10 text-[10px] font-mono text-white/70"
-                      >
-                        {tech}
+                      <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-xs border uppercase tracking-wider ${app.badgeColor}`}>
+                        {app.badge}
                       </span>
-                    ))}
+                    </div>
+
+                    <p className="text-xs text-gray-400 font-sans leading-relaxed">
+                      {app.description}
+                    </p>
+
+                    {/* Features List */}
+                    <div className="grid grid-cols-2 gap-1.5 pt-1">
+                      {app.features.map((feat, i) => (
+                        <div key={i} className="flex items-center gap-1.5 text-[11px] font-mono text-white/70">
+                          <span className="w-1 h-1 rounded-full bg-cyan-400" />
+                          <span className="truncate">{feat}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Tech Tags */}
+                    <div className="flex flex-wrap gap-1.5 pt-2">
+                      {app.techStack.map((tech, i) => (
+                        <span key={i} className="text-[9px] font-mono text-white/40 bg-white/5 border border-white/10 px-2 py-0.5 rounded-xs">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Card Bottom CTA */}
+                  <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/10">
+                    <button
+                      onClick={() => handleCopyAppUrl(app.id, app.directUrl)}
+                      className="text-[11px] font-mono text-white/50 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                      title="Copy Direct Link"
+                    >
+                      {copiedAppUrl === app.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+                      <span>{copiedAppUrl === app.id ? 'Copied' : app.directUrl}</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleLaunchApp(app.id)}
+                      className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider rounded-xs flex items-center gap-2 transition-all cursor-pointer bg-white hover:bg-neutral-200 text-black"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Launch App</span>
+                    </button>
                   </div>
                 </div>
-
-                {/* Bottom Link indicator */}
-                <div className="pt-4 border-t border-white/10 flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">
-                  <span>Open Mini App</span>
-                  <span>&rarr;</span>
-                </div>
-              </motion.div>
-            ))}
+              );
+            })}
           </div>
 
           {filteredApps.length === 0 && (
-            <div className="bg-[#111] border border-white/10 p-12 text-center space-y-3 rounded-sm">
+            <div className="bg-[#0a0a0a] border border-white/15 p-12 text-center space-y-3 rounded-xs">
               <Search className="w-8 h-8 text-white/30 mx-auto" />
-              <h3 className="text-sm font-bold uppercase text-white font-mono">No Mini Apps Found</h3>
-              <p className="text-xs text-white/50 font-mono">Try searching with different keywords or reset categories.</p>
+              <h3 className="text-sm font-bold uppercase text-white font-mono">No MiniApps Found</h3>
+              <p className="text-xs text-white/50 font-mono">Try searching with different keywords or switch categories.</p>
               <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('all');
-                }}
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-mono rounded-sm transition-colors cursor-pointer"
+                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-mono rounded-xs transition-colors cursor-pointer"
               >
-                Reset Filter
+                Reset Search
               </button>
             </div>
           )}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -354,7 +457,7 @@ function LibCodeApp({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="bg-[#0c0c0c] border border-white/15 p-6 sm:p-8 space-y-6 rounded-xs">
+    <div className="bg-[#0a0a0a] border border-white/15 p-6 sm:p-8 space-y-6 rounded-xs">
       <div className="border-b border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">LibCode JNIAS Subsystem</span>
@@ -558,7 +661,7 @@ function HrdiyaApp({ onBack }: { onBack: () => void }) {
   const tier = getRiskTier(riskPercent);
 
   return (
-    <div className="bg-[#0c0c0c] border border-white/15 p-6 sm:p-8 space-y-6 rounded-xs">
+    <div className="bg-[#0a0a0a] border border-white/15 p-6 sm:p-8 space-y-6 rounded-xs">
       <div className="border-b border-white/10 pb-4">
         <span className="text-[10px] font-mono text-rose-400 uppercase tracking-widest block">Hrdiya Clinical AI Subsystem</span>
         <h2 className="text-xl font-bold uppercase text-white font-mono">10-Year Cardiovascular Risk Estimator</h2>
@@ -744,7 +847,7 @@ function BankExamApp({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="bg-[#0c0c0c] border border-white/15 p-6 sm:p-8 space-y-6 rounded-xs">
+    <div className="bg-[#0a0a0a] border border-white/15 p-6 sm:p-8 space-y-6 rounded-xs">
       <div className="border-b border-white/10 pb-4 flex items-center justify-between">
         <div>
           <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest block">Bank Exam Portal Engine</span>
@@ -917,7 +1020,7 @@ function SubnetCalculatorApp({ onBack }: { onBack: () => void }) {
   const results = calculateSubnet();
 
   return (
-    <div className="bg-[#0c0c0c] border border-white/15 p-6 sm:p-8 space-y-6 rounded-xs">
+    <div className="bg-[#0a0a0a] border border-white/15 p-6 sm:p-8 space-y-6 rounded-xs">
       <div className="border-b border-white/10 pb-4">
         <span className="text-[10px] font-mono text-purple-400 uppercase tracking-widest block">DZt Network Ops Subsystem</span>
         <h2 className="text-xl font-bold uppercase text-white font-mono">CIDR & IP Subnet Mask Calculator</h2>

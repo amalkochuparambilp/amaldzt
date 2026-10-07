@@ -1,9 +1,10 @@
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import { WebSocketServer, WebSocket } from 'ws';
-import { app } from './src/serverApp';
+import { createServer as createViteServer } from 'vite';
 
 dotenv.config();
 
@@ -15,25 +16,28 @@ interface ClientInfo {
   isAlive: boolean;
 }
 
+const app = express();
 const PORT = 3000;
 const server = http.createServer(app);
 
-// ============================================================================
-// WEBRTC SIGNALING SERVER
-// ============================================================================
-const rooms = new Map<string, Map<string, ClientInfo>>();
-const wss = new WebSocketServer({ noServer: true });
-
-server.on('upgrade', (request, socket, head) => {
-  const pathname = request.url ? request.url.split('?')[0] : '';
-  if (pathname === '/ws') {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request);
-    });
-  } else {
-    socket.destroy();
+// Middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
   }
+  next();
 });
+app.use(express.json());
+
+// In-memory rooms for WebRTC Signaling
+// roomId -> Map<peerId, ClientInfo>
+const rooms = new Map<string, Map<string, ClientInfo>>();
+
+// WebSocket Server for WebRTC Signaling
+const wss = new WebSocketServer({ server, path: '/ws' });
 
 function getRoomPeers(roomId: string, excludePeerId?: string) {
   const room = rooms.get(roomId);
@@ -50,9 +54,10 @@ function getRoomPeers(roomId: string, excludePeerId?: string) {
 wss.on('connection', (ws: WebSocket) => {
   let currentRoomId: string | null = null;
   let currentPeerId: string | null = null;
+  let isAlive = true;
 
   ws.on('pong', () => {
-    (ws as WebSocket & { isAlive?: boolean }).isAlive = true;
+    isAlive = true;
   });
 
   ws.on('message', (rawMessage: string) => {
@@ -82,26 +87,26 @@ wss.on('connection', (ws: WebSocket) => {
           };
 
           room.set(peerId, clientInfo);
+
+          // Get list of existing peers in the room
           const existingPeers = getRoomPeers(roomId, peerId);
 
-          ws.send(
-            JSON.stringify({
-              type: 'joined-room',
-              roomId,
-              peerId,
-              peers: existingPeers
-            })
-          );
+          // Send confirmation & existing peer list to the joining peer
+          ws.send(JSON.stringify({
+            type: 'joined-room',
+            roomId,
+            peerId,
+            peers: existingPeers
+          }));
 
+          // Notify all existing peers that a new peer has joined
           room.forEach((client, pid) => {
             if (pid !== peerId && client.ws.readyState === WebSocket.OPEN) {
-              client.ws.send(
-                JSON.stringify({
-                  type: 'peer-joined',
-                  peerId,
-                  displayName: clientInfo.displayName
-                })
-              );
+              client.ws.send(JSON.stringify({
+                type: 'peer-joined',
+                peerId,
+                displayName: clientInfo.displayName
+              }));
             }
           });
           break;
@@ -115,14 +120,12 @@ wss.on('connection', (ws: WebSocket) => {
           if (room) {
             const targetClient = room.get(targetId);
             if (targetClient && targetClient.ws.readyState === WebSocket.OPEN) {
-              targetClient.ws.send(
-                JSON.stringify({
-                  type: 'signal',
-                  roomId,
-                  senderId: senderId || currentPeerId,
-                  signalData
-                })
-              );
+              targetClient.ws.send(JSON.stringify({
+                type: 'signal',
+                roomId,
+                senderId: senderId || currentPeerId,
+                signalData
+              }));
             }
           }
           break;
@@ -191,6 +194,7 @@ wss.on('connection', (ws: WebSocket) => {
                 targetClient.ws.send(rawPayload);
               }
             } else {
+              // Broadcast to all other peers in the room
               room.forEach((client, pid) => {
                 if (pid !== (senderId || currentPeerId) && client.ws.readyState === WebSocket.OPEN) {
                   client.ws.send(rawPayload);
@@ -221,14 +225,13 @@ wss.on('connection', (ws: WebSocket) => {
       const room = rooms.get(rId)!;
       room.delete(pId);
 
+      // Notify remaining peers
       room.forEach((client) => {
         if (client.ws.readyState === WebSocket.OPEN) {
-          client.ws.send(
-            JSON.stringify({
-              type: 'peer-left',
-              peerId: pId
-            })
-          );
+          client.ws.send(JSON.stringify({
+            type: 'peer-left',
+            peerId: pId
+          }));
         }
       });
 
@@ -247,35 +250,333 @@ wss.on('connection', (ws: WebSocket) => {
   });
 });
 
-if (!process.env.VERCEL) {
-  const heartbeatInterval = setInterval(() => {
-    wss.clients.forEach((ws) => {
-      const extWs = ws as WebSocket & { isAlive?: boolean };
-      if (extWs.isAlive === false) {
-        return ws.terminate();
-      }
-      extWs.isAlive = false;
-      ws.ping();
-    });
-  }, 30000);
-  heartbeatInterval.unref?.();
-
-  wss.on('close', () => {
-    clearInterval(heartbeatInterval);
+// Periodic heartbeat to keep connections healthy
+const heartbeatInterval = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    const extWs = ws as WebSocket & { isAlive?: boolean };
+    if (extWs.isAlive === false) {
+      return ws.terminate();
+    }
+    extWs.isAlive = false;
+    ws.ping();
   });
+}, 30000);
+
+wss.on('close', () => {
+  clearInterval(heartbeatInterval);
+});
+
+// Rate Limiter for Contact Form Submissions
+interface ContactRateLimit {
+  count: number;
+  resetTime: number;
+  lastRequestTime: number;
 }
+const contactRateLimits = new Map<string, ContactRateLimit>();
+
+// Clean up expired rate limit entries every 2 minutes
+setInterval(() => {
+  const now = Date.now();
+  contactRateLimits.forEach((record, ip) => {
+    if (now > record.resetTime) {
+      contactRateLimits.delete(ip);
+    }
+  });
+}, 120000);
+
+// API Routes
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+// Contact API status check
+app.get('/api/contact/status', (_req, res) => {
+  const hasToken = Boolean(process.env.TELEGRAM_BOT_TOKEN);
+  const hasChatId = Boolean(process.env.TELEGRAM_CHAT_ID);
+  res.json({
+    configured: hasToken && hasChatId,
+    service: 'telegram'
+  });
+});
+
+// Knowledge layer profile endpoint
+app.get('/api/knowledge/profile', (_req, res) => {
+  const profilePath = path.join(process.cwd(), 'public', 'ai', 'profile.json');
+  res.sendFile(profilePath, (err) => {
+    if (err) {
+      res.status(404).json({ error: 'Profile not found' });
+    }
+  });
+});
+
+// Contact Form Submission Endpoint
+app.post('/api/contact', async (req, res) => {
+  try {
+    const rawIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+
+    // 1. Rate Limit Checks (max 5 per 10 minutes, minimum 5 seconds between consecutive attempts)
+    const existingLimit = contactRateLimits.get(rawIp);
+    if (existingLimit) {
+      if (now < existingLimit.resetTime) {
+        if (now - existingLimit.lastRequestTime < 5000) {
+          return res.status(429).json({
+            success: false,
+            error: 'Please wait a few seconds before submitting again.'
+          });
+        }
+        if (existingLimit.count >= 5) {
+          const waitMinutes = Math.ceil((existingLimit.resetTime - now) / 60000);
+          return res.status(429).json({
+            success: false,
+            error: `Too many submissions from this connection. Please wait ${waitMinutes} minute${waitMinutes > 1 ? 's' : ''} before trying again.`
+          });
+        }
+        existingLimit.count += 1;
+        existingLimit.lastRequestTime = now;
+      } else {
+        contactRateLimits.set(rawIp, {
+          count: 1,
+          resetTime: now + 600000,
+          lastRequestTime: now
+        });
+      }
+    } else {
+      contactRateLimits.set(rawIp, {
+        count: 1,
+        resetTime: now + 600000,
+        lastRequestTime: now
+      });
+    }
+
+    const { name, email, message, _hp } = req.body || {};
+
+    // 2. Honeypot Spam Protection: If hidden bot field is filled, silently discard without notifying spammer
+    if (_hp && typeof _hp === 'string' && _hp.trim().length > 0) {
+      console.warn(`[Anti-Spam] Honeypot triggered from IP: ${rawIp}`);
+      return res.json({
+        success: true,
+        message: 'Message sent successfully!'
+      });
+    }
+
+    // 3. Server-side Validation
+    if (typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please enter your name.'
+      });
+    }
+    const cleanName = name.trim();
+    if (cleanName.length < 2 || cleanName.length > 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name must be between 2 and 100 characters.'
+      });
+    }
+
+    if (typeof email !== 'string' || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please enter your email address.'
+      });
+    }
+    const cleanEmail = email.trim();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(cleanEmail) || cleanEmail.length > 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide a valid email address (e.g. name@example.com).'
+      });
+    }
+
+    if (typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please enter your message.'
+      });
+    }
+    const cleanMessage = message.trim();
+    if (cleanMessage.length < 5) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message must be at least 5 characters long.'
+      });
+    }
+    if (cleanMessage.length > 3000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message is too long (maximum 3000 characters).'
+      });
+    }
+
+    // 4. Secure Telegram Configuration
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+
+    if (!botToken || !chatId) {
+      console.error('[Contact API] Telegram BOT token or Chat ID is not configured.');
+      return res.status(500).json({
+        success: false,
+        error: 'Telegram delivery is currently unconfigured on the server. Please email directly.'
+      });
+    }
+
+    // 5. Construct clearly formatted Telegram text
+    const formattedTelegramMessage = [
+      '📩 New Contact Form Submission',
+      '',
+      `👤 Name: ${cleanName}`,
+      `📧 Email: ${cleanEmail}`,
+      `💬 Message: ${cleanMessage}`
+    ].join('\n');
+
+    // 6. Send to Telegram Bot API
+    const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    const response = await fetch(telegramApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: formattedTelegramMessage,
+        disable_web_page_preview: true
+      })
+    });
+
+    const data = (await response.json()) as { ok: boolean; description?: string; error_code?: number };
+
+    if (!response.ok || !data.ok) {
+      console.error('[Contact API] Telegram API error:', data);
+      const errorMsg = data.description || 'Unable to deliver message to Telegram.';
+      return res.status(502).json({
+        success: false,
+        error: `Telegram delivery failed: ${errorMsg}`
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Message sent successfully!'
+    });
+  } catch (error: any) {
+    console.error('[Contact API] Internal error processing submission:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An internal server error occurred while sending your message. Please try again later.'
+    });
+  }
+});
+
+const getActiveRoomsList = () => {
+  const activeRooms: { id: string; userCount: number }[] = [];
+  rooms.forEach((room, id) => {
+    activeRooms.push({ id, userCount: room.size });
+  });
+  return activeRooms;
+};
+
+app.get('/api/logos', async (_req, res) => {
+  try {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    const logosDir = path.join(process.cwd(), 'public', 'logos');
+    if (!fs.existsSync(logosDir)) {
+      return res.json({ logos: [], count: 0 });
+    }
+    const files = await fs.promises.readdir(logosDir);
+    const validExtensions = ['.png', '.svg', '.jpg', '.jpeg', '.webp', '.gif', '.ico', '.avif'];
+    
+    // Filter valid image files that are not empty (size > 0)
+    const logoFiles: string[] = [];
+    for (const file of files) {
+      const lower = file.toLowerCase();
+      if (validExtensions.some(ext => lower.endsWith(ext))) {
+        try {
+          const stat = await fs.promises.stat(path.join(logosDir, file));
+          if (stat.size > 0) {
+            logoFiles.push(file);
+          }
+        } catch {
+          // ignore stat errors
+        }
+      }
+    }
+
+    const logos = logoFiles.map((file, index) => {
+      // Strip extensions recursively (e.g. .svg.webp -> base)
+      let baseName = file;
+      for (const ext of validExtensions) {
+        if (baseName.toLowerCase().endsWith(ext)) {
+          baseName = baseName.slice(0, -ext.length);
+        }
+      }
+      for (const ext of validExtensions) {
+        if (baseName.toLowerCase().endsWith(ext)) {
+          baseName = baseName.slice(0, -ext.length);
+        }
+      }
+
+      let cleanName = baseName
+        .replace(/[_\-.]+/g, ' ')
+        .replace(/\blogo\b|\b20\d\d\b/gi, '')
+        .trim()
+        .toUpperCase();
+
+      if (!cleanName || cleanName.startsWith('ID') || cleanName.length > 25) {
+        cleanName = 'PARTNER';
+      }
+
+      return {
+        id: `logo-${baseName.replace(/\s+/g, '-')}-${index}`,
+        fileName: file,
+        name: cleanName,
+        src: `/logos/${encodeURIComponent(file)}`,
+        alt: `${cleanName} Logo`
+      };
+    });
+
+    return res.json({ logos, count: logos.length });
+  } catch (error) {
+    console.error('[API Logos] Error reading logos dir:', error);
+    return res.json({ logos: [], count: 0 });
+  }
+});
+
+// SEO, AEO & AI Discovery Endpoints
+app.get('/robots.txt', (_req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'robots.txt');
+  if (fs.existsSync(filePath)) {
+    res.type('text/plain').sendFile(filePath);
+  } else {
+    res.type('text/plain').send("User-agent: *\nAllow: /\nSitemap: https://amalkp.online/sitemap.xml\n");
+  }
+});
+
+app.get('/sitemap.xml', (_req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'sitemap.xml');
+  if (fs.existsSync(filePath)) {
+    res.type('application/xml').sendFile(filePath);
+  } else {
+    res.status(404).send('Not Found');
+  }
+});
+
+app.get(['/llms.txt', '/.well-known/llms.txt'], (_req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'llms.txt');
+  if (fs.existsSync(filePath)) {
+    res.type('text/plain; charset=utf-8').sendFile(filePath);
+  } else {
+    res.status(404).send('Not Found');
+  }
+});
 
 // Start server with Vite middleware in dev or static files in prod
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
-    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: {
-        middlewareMode: true,
-        hmr: false,
-        watch: null
-      },
-      appType: 'spa'
+      server: { middlewareMode: true },
+      appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
@@ -287,13 +588,8 @@ async function startServer() {
   }
 
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`DZt Server & PostgreSQL CMS running on http://0.0.0.0:${PORT}`);
+    console.log(`DZt Server running on http://0.0.0.0:${PORT}`);
   });
 }
 
-if (!process.env.VERCEL) {
-  startServer();
-}
-
-export { app };
-export default app;
+startServer();

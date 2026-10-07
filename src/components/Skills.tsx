@@ -1,11 +1,8 @@
 import { motion } from 'motion/react';
-import { useCMS } from '../context/CMSContext';
+import { SKILLS, AMAL_INFO } from '../data';
 import * as Icons from 'lucide-react';
 
 export default function Skills() {
-  const { cms } = useCMS();
-  const { skills, profile } = cms;
-
   const renderIcon = (iconName: string) => {
     const LucideIcon = (Icons as any)[iconName];
     if (LucideIcon) {
@@ -50,7 +47,7 @@ export default function Skills() {
       <div className="space-y-3">
         <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Core Stack Overview</span>
         <div className="flex flex-wrap gap-2">
-          {profile.skillsList.map((skill) => (
+          {AMAL_INFO.skillsList.map((skill) => (
             <span key={skill} className="px-3 py-1.5 bg-[#111] border border-white/10 text-xs font-mono text-white/90">
               {skill}
             </span>
@@ -61,7 +58,7 @@ export default function Skills() {
       {/* Grid of Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {categories.map((category) => {
-          const categorySkills = skills.filter((s) => s.category === category);
+          const categorySkills = SKILLS.filter(s => s.category === category);
           if (categorySkills.length === 0) return null;
 
           return (
@@ -71,7 +68,7 @@ export default function Skills() {
                 {category} Competencies
               </h3>
 
-              <motion.div
+              <motion.div 
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -80,7 +77,7 @@ export default function Skills() {
               >
                 {categorySkills.map((skill) => (
                   <motion.div
-                    key={skill.id || skill.name}
+                    key={skill.name}
                     variants={cardVariants}
                     className="bg-[#111] border border-white/10 rounded-sm p-4 flex flex-col gap-3 hover:border-white/30 transition-colors"
                   >
@@ -89,9 +86,9 @@ export default function Skills() {
                         {renderIcon(skill.icon)}
                         <span className="font-sans text-xs text-gray-200 font-medium">{skill.name}</span>
                       </div>
-                      <span className="font-mono text-xs text-white/80 tabular-nums">{skill.level}%</span>
+                      <span className="font-mono text-xs text-white/80">{skill.level}%</span>
                     </div>
-
+                    
                     {/* Meter bar */}
                     <div className="w-full h-1 bg-black rounded-sm overflow-hidden border border-white/5">
                       <motion.div
