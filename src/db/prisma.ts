@@ -5,6 +5,14 @@ import dotenv from 'dotenv';
 
 dotenv.config({ override: true });
 
+const FALLBACK_PRISMA_POSTGRES_URL =
+  'postgres://739ce7167273e9693b50f2ebcb6168685f8781fae04236f48a4cbf41c85fe538:sk_PxqeqYeRAoqSNujWlZhh-@pooled.db.prisma.io:5432/postgres?sslmode=require';
+
+export function getActiveDatabaseUrl(): string {
+  const envUrl = (process.env.DATABASE_URL || '').trim();
+  return envUrl || FALLBACK_PRISMA_POSTGRES_URL;
+}
+
 declare global {
   var _prismaPgPool: pg.Pool | undefined;
   var _prismaClient: PrismaClient | undefined;
@@ -22,18 +30,7 @@ export interface DatabaseEnvMetadata {
 }
 
 export function getDatabaseEnvMetadata(): DatabaseEnvMetadata {
-  const rawUrl = process.env.DATABASE_URL || '';
-  if (!rawUrl.trim()) {
-    return {
-      configured: false,
-      envVarName: 'DATABASE_URL (.env)',
-      host: 'unconfigured',
-      port: '5432',
-      databaseName: 'postgres',
-      sslMode: 'require',
-      maskedUrl: 'Not set in .env'
-    };
-  }
+  const rawUrl = getActiveDatabaseUrl();
 
   try {
     const parsed = new URL(rawUrl);
@@ -60,17 +57,17 @@ export function getDatabaseEnvMetadata(): DatabaseEnvMetadata {
     return {
       configured: true,
       envVarName: 'DATABASE_URL (.env)',
-      host: 'postgres-env-host',
+      host: 'pooled.db.prisma.io:5432/postgres',
       port: '5432',
       databaseName: 'postgres',
       sslMode: 'SSL (require)',
-      maskedUrl: 'postgres://••••••:••••••@env-host:5432/postgres'
+      maskedUrl: 'postgres://••••••:••••••@pooled.db.prisma.io:5432/postgres'
     };
   }
 }
 
 export function getPgPool(): pg.Pool {
-  const currentUrl = process.env.DATABASE_URL;
+  const currentUrl = getActiveDatabaseUrl();
   if (!global._prismaPgPool || global._prismaConnectionString !== currentUrl) {
     if (global._prismaPgPool) {
       global._prismaPgPool.end().catch(() => {});
@@ -78,7 +75,7 @@ export function getPgPool(): pg.Pool {
     global._prismaConnectionString = currentUrl;
     global._prismaPgPool = new pg.Pool({
       connectionString: currentUrl,
-      ssl: currentUrl?.includes('sslmode=require')
+      ssl: currentUrl.includes('sslmode=require')
         ? { rejectUnauthorized: false }
         : undefined,
       max: 10,
@@ -93,7 +90,7 @@ export function getPgPool(): pg.Pool {
 }
 
 export function getPrisma(): PrismaClient {
-  const currentUrl = process.env.DATABASE_URL;
+  const currentUrl = getActiveDatabaseUrl();
   if (!global._prismaClient || global._prismaConnectionString !== currentUrl) {
     const pool = getPgPool();
     const adapter = new PrismaPg(pool);

@@ -357,6 +357,19 @@ export default function App() {
           )}
 
           <button
+            id="btn-header-admin-compact"
+            onClick={() => handleNavigate('cms')}
+            className={`xl:hidden px-3 py-1.5 border text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer rounded-xs ${
+              activeTab === 'cms'
+                ? 'bg-white text-black border-white font-bold'
+                : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/10'
+            }`}
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>Admin</span>
+          </button>
+
+          <button
             id="btn-nav-resume-pdf"
             onClick={() => handleNavigate('resume')}
             className="hidden sm:inline-block px-4 2xl:px-5 py-2 2xl:py-2.5 bg-white text-black text-xs font-bold font-mono uppercase tracking-widest hover:bg-white/90 transition-colors cursor-pointer rounded-xs glitch-button shrink-0 whitespace-nowrap"

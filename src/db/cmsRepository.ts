@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
-import { prisma, pgPool, getDatabaseEnvMetadata, reloadDatabaseConnection } from './prisma.ts';
-import { DEFAULT_CMS_STATE } from '../cms/defaultState.ts';
+import { prisma, pgPool, getDatabaseEnvMetadata, reloadDatabaseConnection } from './prisma';
+import { DEFAULT_CMS_STATE } from '../cms/defaultState';
 import {
   CMSState,
   SiteProfileData,
@@ -15,7 +15,7 @@ import {
   KnowledgeLayerData,
   ContactSubmissionItem,
   NavItemConfig
-} from '../types.ts';
+} from '../types';
 
 let isSeeded = false;
 
@@ -527,12 +527,19 @@ export async function verifyAdminLoginInDb(
   email?: string,
   password?: string
 ): Promise<{ valid: boolean; adminEmail: string; error?: string }> {
-  await ensureDatabaseSeeded();
-  const adminRow = await prisma.adminUser.findUnique({ where: { id: 'admin-primary' } });
-  const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  let expectedEmail = 'amalkochuparambilp@gmail.com';
+  let dbPass = 'dzt2026';
 
-  const expectedEmail = (adminRow?.email || settings?.adminEmail || 'amalkochuparambilp@gmail.com').trim();
-  const dbPass = (adminRow?.password || settings?.adminPasscode || 'dzt2026').trim();
+  try {
+    await ensureDatabaseSeeded();
+    const adminRow = await prisma.adminUser.findUnique({ where: { id: 'admin-primary' } });
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+
+    expectedEmail = (adminRow?.email || settings?.adminEmail || 'amalkochuparambilp@gmail.com').trim();
+    dbPass = (adminRow?.password || settings?.adminPasscode || 'dzt2026').trim();
+  } catch (err) {
+    console.warn('[CMS Auth] Using fallback admin credentials due to DB query warning:', err);
+  }
 
   const cleanEmail = (email || '').trim().toLowerCase();
   if (!cleanEmail) {

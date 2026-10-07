@@ -5,8 +5,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import { WebSocketServer, WebSocket } from 'ws';
-import { createServer as createViteServer } from 'vite';
-import { prisma, getDatabaseEnvMetadata } from './src/db/prisma.ts';
+import { prisma, getDatabaseEnvMetadata } from './src/db/prisma';
 import {
   ensureDatabaseSeeded,
   fetchFullCMSStateFromPostgres,
@@ -22,14 +21,14 @@ import {
   insertTableRowInPostgres,
   deleteTableRowInPostgres,
   executeSqlQueryInPostgres
-} from './src/db/cmsRepository.ts';
-import { DEFAULT_CMS_STATE } from './src/cms/defaultState.ts';
+} from './src/db/cmsRepository';
+import { DEFAULT_CMS_STATE } from './src/cms/defaultState';
 import {
   CMSState,
   Project,
   Skill,
   Collaboration
-} from './src/types.ts';
+} from './src/types';
 
 dotenv.config();
 
@@ -310,20 +309,22 @@ wss.on('connection', (ws: WebSocket) => {
   });
 });
 
-const heartbeatInterval = setInterval(() => {
-  wss.clients.forEach((ws) => {
-    const extWs = ws as WebSocket & { isAlive?: boolean };
-    if (extWs.isAlive === false) {
-      return ws.terminate();
-    }
-    extWs.isAlive = false;
-    ws.ping();
-  });
-}, 30000);
+if (!process.env.VERCEL) {
+  const heartbeatInterval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      const extWs = ws as WebSocket & { isAlive?: boolean };
+      if (extWs.isAlive === false) {
+        return ws.terminate();
+      }
+      extWs.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
 
-wss.on('close', () => {
-  clearInterval(heartbeatInterval);
-});
+  wss.on('close', () => {
+    clearInterval(heartbeatInterval);
+  });
+}
 
 // ============================================================================
 // ADMIN-ONLY JWT / HMAC-SHA256 SESSION AUTHENTICATION (.env CREDENTIALS)
@@ -1561,6 +1562,7 @@ app.get(['/llms.txt', '/.well-known/llms.txt'], (_req, res) => {
 // Start server with Vite middleware in dev or static files in prod
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa'
