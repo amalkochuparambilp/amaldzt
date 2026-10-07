@@ -22,7 +22,18 @@ const server = http.createServer(app);
 // WEBRTC SIGNALING SERVER
 // ============================================================================
 const rooms = new Map<string, Map<string, ClientInfo>>();
-const wss = new WebSocketServer({ server, path: '/ws' });
+const wss = new WebSocketServer({ noServer: true });
+
+server.on('upgrade', (request, socket, head) => {
+  const pathname = request.url ? request.url.split('?')[0] : '';
+  if (pathname === '/ws') {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
+});
 
 function getRoomPeers(roomId: string, excludePeerId?: string) {
   const room = rooms.get(roomId);
@@ -259,7 +270,11 @@ async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: false,
+        watch: null
+      },
       appType: 'spa'
     });
     app.use(vite.middlewares);
