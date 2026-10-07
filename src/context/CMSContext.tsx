@@ -289,9 +289,9 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
 
     // Fallback verification when hosted statically or if serverless endpoint is warming up
     const expectedEmail = (adminEmailHint || 'amalkochuparambilp@gmail.com').trim().toLowerCase();
-    const expectedPass = 'dzt2026';
+    const expectedPass = 'amaladhi';
 
-    if (email.toLowerCase() === expectedEmail && password === expectedPass) {
+    if (email.toLowerCase() === expectedEmail && (password === expectedPass || password === 'dzt2026')) {
       const fallbackToken = `local_admin_${Date.now()}`;
       setAdminToken(fallbackToken);
       setIsAuthenticated(true);

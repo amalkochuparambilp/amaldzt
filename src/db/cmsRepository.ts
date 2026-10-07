@@ -528,7 +528,7 @@ export async function verifyAdminLoginInDb(
   password?: string
 ): Promise<{ valid: boolean; adminEmail: string; error?: string }> {
   let expectedEmail = 'amalkochuparambilp@gmail.com';
-  let dbPass = 'dzt2026';
+  let dbPass = 'amaladhi';
 
   try {
     await ensureDatabaseSeeded();
@@ -536,7 +536,7 @@ export async function verifyAdminLoginInDb(
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
 
     expectedEmail = (adminRow?.email || settings?.adminEmail || 'amalkochuparambilp@gmail.com').trim();
-    dbPass = (adminRow?.password || settings?.adminPasscode || 'dzt2026').trim();
+    dbPass = (adminRow?.password || settings?.adminPasscode || 'amaladhi').trim();
   } catch (err) {
     console.warn('[CMS Auth] Using fallback admin credentials due to DB query warning:', err);
   }

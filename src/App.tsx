@@ -313,7 +313,6 @@ export default function App() {
             );
           })}
 
-          {/* Minimal Admin Button */}
           <button
             id="tab-btn-cms"
             onClick={() => handleNavigate('cms')}
@@ -323,8 +322,8 @@ export default function App() {
                 : 'text-white/50 border-transparent hover:text-white hover:bg-white/[0.02]'
             }`}
           >
-            <Lock className={`w-3.5 h-3.5 ${activeTab === 'cms' ? 'text-white' : 'text-white/40'}`} />
-            <span className="uppercase tracking-wider">Admin</span>
+            <Database className={`w-3.5 h-3.5 ${activeTab === 'cms' ? 'text-white' : 'text-white/40'}`} />
+            <span className="uppercase tracking-wider">CMS</span>
             {activeTab === 'cms' && (
               <motion.span
                 layoutId="active-tab-glow"
@@ -355,19 +354,6 @@ export default function App() {
               )}
             </div>
           )}
-
-          <button
-            id="btn-header-admin-compact"
-            onClick={() => handleNavigate('cms')}
-            className={`xl:hidden px-3 py-1.5 border text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer rounded-xs ${
-              activeTab === 'cms'
-                ? 'bg-white text-black border-white font-bold'
-                : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/10'
-            }`}
-          >
-            <Lock className="w-3.5 h-3.5" />
-            <span>Admin</span>
-          </button>
 
           <button
             id="btn-nav-resume-pdf"
@@ -429,8 +415,8 @@ export default function App() {
                   : 'text-white/60 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Lock className={`w-4 h-4 ${activeTab === 'cms' ? 'text-white' : 'text-white/40'}`} />
-              <span className="flex-1 text-left">Admin</span>
+              <Database className={`w-4 h-4 ${activeTab === 'cms' ? 'text-white' : 'text-white/40'}`} />
+              <span className="flex-1 text-left">CMS</span>
             </button>
           </motion.div>
         )}
