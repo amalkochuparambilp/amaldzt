@@ -1,39 +1,20 @@
-import { useState, useEffect, useId, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  QrCode, 
-  HeartPulse, 
-  GraduationCap, 
-  Network, 
-  ArrowLeft, 
-  ExternalLink, 
-  Copy, 
-  Check, 
-  Play, 
-  Sparkles, 
-  Search, 
-  Terminal, 
-  RefreshCw, 
-  ShieldCheck, 
-  Activity,
-  Layers,
-  Cpu,
+import {
+  QrCode,
+  HeartPulse,
+  GraduationCap,
+  Network,
+  ArrowLeft,
+  Copy,
+  Check,
+  Search,
   Share2,
-  HardDriveDownload,
-  Sliders,
   CheckCircle2,
-  AlertCircle,
-  Maximize2,
-  Minimize2,
-  Home,
-  Monitor,
-  Zap,
-  Info,
-  ChevronDown
+  AlertCircle
 } from 'lucide-react';
 import FileShareRoom from './p2p/FileShareRoom';
 import QRCodeDisplay from './QRCodeDisplay';
-import DZtSplashScreen from './p2p/DZtSplashScreen';
 
 interface MiniAppsProps {
   initialAppId?: string;
@@ -49,41 +30,17 @@ interface MiniAppItem {
   tagline: string;
   category: 'communication' | 'dev' | 'health' | 'education';
   categoryLabel: string;
-  badge: string;
-  badgeColor: string;
   icon: typeof Share2;
   description: string;
   features: string[];
   techStack: string[];
   directUrl: string;
-  shortcutKey: string;
 }
 
-export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: MiniAppsProps) {
+export default function MiniApps({ initialAppId, initialRoomId }: MiniAppsProps) {
   const [activeApp, setActiveApp] = useState<string | null>(initialAppId || null);
   const [selectedCategory, setSelectedCategory] = useState<MiniAppCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [copiedAppUrl, setCopiedAppUrl] = useState<string | null>(null);
-  const [copiedHubUrl, setCopiedHubUrl] = useState(false);
-  
-  // Dedicated UI state: Fullscreen Immersive Mode & Splash Screen
-  const [isImmersive, setIsImmersive] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const searchParams = new URLSearchParams(window.location.search);
-      return searchParams.get('mode') === 'immersive';
-    }
-    return false;
-  });
-
-  const [showSplash, setShowSplash] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const hasSeen = sessionStorage.getItem('dzt_miniapp_splash_shown');
-      return !hasSeen;
-    }
-    return false;
-  });
-
-  const [isAppDropdownOpen, setIsAppDropdownOpen] = useState(false);
 
   // Sync initialAppId prop
   useEffect(() => {
@@ -112,78 +69,16 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Keyboard shortcut listeners (1-5 to quick-switch apps, 0 to Hub, F to toggle immersive)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
-        return;
-      }
-
-      if (e.key === '0') {
-        handleBackToCatalog();
-      } else if (e.key === '1') {
-        handleLaunchApp('drop');
-      } else if (e.key === '2') {
-        handleLaunchApp('libcode');
-      } else if (e.key === '3') {
-        handleLaunchApp('hrdiya');
-      } else if (e.key === '4') {
-        handleLaunchApp('bankexam');
-      } else if (e.key === '5') {
-        handleLaunchApp('subnet');
-      } else if (e.key.toLowerCase() === 'f' && !e.metaKey && !e.ctrlKey) {
-        setIsImmersive(prev => !prev);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   const handleLaunchApp = (appId: string) => {
     setActiveApp(appId);
-    setIsAppDropdownOpen(false);
-    const modeParam = isImmersive ? '&mode=immersive' : '';
     const roomParam = initialRoomId ? `&room=${encodeURIComponent(initialRoomId)}` : '';
-    const url = `/apps?app=${encodeURIComponent(appId)}${roomParam}${modeParam}`;
+    const url = `/apps?app=${encodeURIComponent(appId)}${roomParam}`;
     window.history.pushState({ appId }, '', url);
   };
 
   const handleBackToCatalog = () => {
     setActiveApp(null);
-    setIsAppDropdownOpen(false);
-    const modeParam = isImmersive ? '?mode=immersive' : '';
-    window.history.pushState(null, '', `/apps${modeParam}`);
-  };
-
-  const handleCopyHubUrl = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const fullUrl = `${origin}/apps`;
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      setCopiedHubUrl(true);
-      setTimeout(() => setCopiedHubUrl(false), 2000);
-    });
-  };
-
-  const handleCopyAppUrl = (appId: string, directPath: string) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const fullUrl = `${origin}${directPath}`;
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      setCopiedAppUrl(appId);
-      setTimeout(() => setCopiedAppUrl(null), 2000);
-    });
-  };
-
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('dzt_miniapp_splash_shown', 'true');
-    }
-  };
-
-  const handleReplaySplash = () => {
-    setShowSplash(true);
+    window.history.pushState(null, '', '/apps');
   };
 
   const miniAppsList: MiniAppItem[] = [
@@ -193,14 +88,11 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
       tagline: 'Encrypted Browser-to-Browser File & Clipboard Beam',
       category: 'communication',
       categoryLabel: 'Communication',
-      badge: 'DataChannel • Live',
-      badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
       icon: Share2,
       description: 'Direct browser-to-browser P2P file sharing with zero file size limits, end-to-end DTLS encryption, instant QR phone pairing, and realtime speed gauges.',
       features: ['WebRTC DataChannel Mesh', 'Zero Cloud File Storage', 'Live Speed & ETA Monitor', 'QR Code Phone Connect'],
       techStack: ['WebRTC DataChannel', 'DTLS/SCTP', 'Binary Chunks', 'Web Audio API'],
-      directUrl: '/apps?app=drop',
-      shortcutKey: '1'
+      directUrl: '/apps?app=drop'
     },
     {
       id: 'libcode',
@@ -208,14 +100,11 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
       tagline: 'Automated Code-128 & QR Accession Tag Generator',
       category: 'dev',
       categoryLabel: 'Developer Tools',
-      badge: 'Library Core • Interactive',
-      badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
       icon: QrCode,
       description: 'Utility for library inventory tracking inspired by JNIAS LibCode. Generates barcode tags, QR accession codes, and customizable book metadata printable labels.',
       features: ['Dynamic SVG Barcode Engine', 'QR Code Generator', 'Custom Prefix & Accession Range', 'Printable Tag Sheet'],
       techStack: ['TypeScript', 'SVG Generator', 'Canvas API', 'DOM Rasterizer'],
-      directUrl: '/apps?app=libcode',
-      shortcutKey: '2'
+      directUrl: '/apps?app=libcode'
     },
     {
       id: 'hrdiya',
@@ -223,14 +112,11 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
       tagline: 'Framingham Cardiovascular Risk & Biometric Calculator',
       category: 'health',
       categoryLabel: 'Healthcare AI',
-      badge: 'Clinical ML • Calculator',
-      badgeColor: 'text-rose-400 bg-rose-500/10 border-rose-500/30',
       icon: HeartPulse,
       description: 'Interactive cardiovascular health estimation tool inspired by the Hrdiya Cardiac Analysis project. Evaluates 10-year cardiac risk percentages based on blood pressure, lipid profile, and lifestyle markers.',
       features: ['Framingham 10-Year Score', 'Blood Pressure Classification', 'Lifestyle Guidance Engine', 'Interactive Risk Gauge'],
       techStack: ['Algorithmic Health Risk Model', 'React State', 'SVG Gauge'],
-      directUrl: '/apps?app=hrdiya',
-      shortcutKey: '3'
+      directUrl: '/apps?app=hrdiya'
     },
     {
       id: 'bankexam',
@@ -238,14 +124,11 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
       tagline: 'Timed Mock Practice & Aptitude Quiz Engine',
       category: 'education',
       categoryLabel: 'Academic & Testing',
-      badge: 'Co-op Bank • Practice',
-      badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
       icon: GraduationCap,
       description: 'Practice engine modeled after the Co-operative Bank Online Examination Portal. Features timed multiple-choice banking awareness questions, instant score calculation, and review analysis.',
       features: ['Timed Speed Drills', 'Banking Law & Aptitude Questions', 'Real-Time Score Breakdown', 'Detailed Solution Explanations'],
       techStack: ['Question Bank DB', 'Timer Hook', 'Quiz State Machine'],
-      directUrl: '/apps?app=bankexam',
-      shortcutKey: '4'
+      directUrl: '/apps?app=bankexam'
     },
     {
       id: 'subnet',
@@ -253,471 +136,189 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
       tagline: 'IP Network Topology & Host Range Inspector',
       category: 'dev',
       categoryLabel: 'Developer Tools',
-      badge: 'Networking • Ops',
-      badgeColor: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
       icon: Network,
       description: 'Network engineering utility to calculate CIDR prefixes, usable IP host ranges, broadcast addresses, wildcard masks, and binary network visualizations.',
       features: ['CIDR /0 to /32 Support', 'Usable Host Range Compute', 'Binary Bitmask View', 'Classful IP Breakdown'],
       techStack: ['Bitwise Arithmetic', 'CIDR Engine', 'IP Parser'],
-      directUrl: '/apps?app=subnet',
-      shortcutKey: '5'
+      directUrl: '/apps?app=subnet'
     }
   ];
 
-  const currentAppItem = miniAppsList.find(a => a.id === activeApp);
-
   const filteredApps = miniAppsList.filter((app) => {
     const matchesCat = selectedCategory === 'all' || app.category === selectedCategory;
-    const matchesSearch = 
+    const matchesSearch =
       app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.features.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()));
+      app.features.some((f) => f.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCat && matchesSearch;
   });
 
   return (
-    <>
-      {/* Dedicated Splash Screen */}
-      <AnimatePresence>
-        {showSplash && (
-          <DZtSplashScreen 
-            onComplete={handleSplashComplete} 
-            appName={currentAppItem ? currentAppItem.title : 'DZt MiniApp Ecosystem'}
-          />
-        )}
-      </AnimatePresence>
+    <section id="miniapps-section" className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-10">
+      {/* Normal Website Section Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-white/10 pb-6">
+        <div className="space-y-1">
+          <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Interactive Utilities</span>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white uppercase tabular-nums">
+            DZT MINI APPS ({miniAppsList.length.toString().padStart(2, '0')})
+          </h2>
+        </div>
+        <p className="text-xs text-white/50 max-w-sm font-sans leading-relaxed">
+          Browser-native tools for P2P file sharing, library barcode generation, cardiovascular risk calculation, and network subnetting.
+        </p>
+      </div>
 
-      {/* Container Wrapper - Standard or Fullscreen Immersive Mode */}
-      <div className={`transition-all duration-300 ${
-        isImmersive 
-          ? 'fixed inset-0 z-50 bg-[#050505] overflow-y-auto px-4 sm:px-8 py-4 sm:py-6 flex flex-col justify-between' 
-          : 'space-y-6 animate-fadeIn'
-      }`}>
-
-        {/* 1. DEDICATED APP OS TOP BAR */}
-        <header className="bg-[#0c0c0c] border border-white/15 px-4 sm:px-6 py-3 rounded-xs flex flex-wrap items-center justify-between gap-3 shadow-xl backdrop-blur-xl">
-          {/* Left: Brand Identity & Active App Switcher */}
-          <div className="flex items-center gap-3">
-            {/* DZt Monogram Badge */}
-            <div className="w-8 h-8 bg-white text-black font-mono font-bold flex items-center justify-center text-xs rounded-xs shadow-sm shrink-0">
-              DZt
-            </div>
-
-            <div className="h-5 w-[1px] bg-white/15 hidden sm:block" />
-
-            {/* Quick App Switcher Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsAppDropdownOpen(!isAppDropdownOpen)}
-                className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/15 rounded-xs text-xs font-mono text-white transition-colors cursor-pointer"
-                title="Switch MiniApp"
-              >
-                <span className="text-white/40 uppercase hidden md:inline">App:</span>
-                <span className="font-bold text-white max-w-[140px] sm:max-w-[200px] truncate">
-                  {currentAppItem ? currentAppItem.title : 'MiniApps Catalog Hub'}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-white/50" />
-              </button>
-
-              {/* Dropdown Menu */}
-              <AnimatePresence>
-                {isAppDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 4 }}
-                    className="absolute left-0 top-full mt-2 w-72 bg-[#0e0e0e] border border-white/20 rounded-xs shadow-2xl p-2 z-50 space-y-1 font-mono text-xs"
-                  >
-                    <button
-                      onClick={handleBackToCatalog}
-                      className={`w-full text-left px-3 py-2 rounded-xs flex items-center justify-between transition-colors ${
-                        activeApp === null ? 'bg-white/10 text-white font-bold' : 'text-white/70 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Monitor className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>All MiniApps Catalog</span>
-                      </div>
-                      <span className="text-[10px] text-white/40">Key 0</span>
-                    </button>
-                    <div className="h-[1px] bg-white/10 my-1" />
-
-                    {miniAppsList.map((app) => {
-                      const Icon = app.icon;
-                      const isCur = activeApp === app.id;
-                      return (
-                        <button
-                          key={app.id}
-                          onClick={() => handleLaunchApp(app.id)}
-                          className={`w-full text-left px-3 py-2 rounded-xs flex items-center justify-between transition-colors ${
-                            isCur ? 'bg-white/10 text-white font-bold' : 'text-white/70 hover:bg-white/5 hover:text-white'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 truncate pr-2">
-                            <Icon className={`w-3.5 h-3.5 ${isCur ? 'text-cyan-400' : 'text-white/40'}`} />
-                            <span className="truncate">{app.title}</span>
-                          </div>
-                          <span className="text-[10px] text-white/40 shrink-0">Key {app.shortcutKey}</span>
-                        </button>
-                      );
-                    })}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Live Operational Status Tag */}
-            <div className="hidden lg:flex items-center gap-2 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>WebRTC Subsystem Ready</span>
-            </div>
+      {activeApp ? (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between gap-4">
+            <button
+              onClick={handleBackToCatalog}
+              className="px-3.5 py-2 bg-[#111] hover:bg-[#161616] border border-white/10 text-white text-xs font-mono uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer rounded-sm"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Mini Apps</span>
+            </button>
           </div>
 
-          {/* Right: Actions (Share, Replay Splash, Immersive Mode, Home Exit) */}
-          <div className="flex items-center gap-2">
-            {/* Share URL Button */}
-            {activeApp ? (
-              <button
-                onClick={() => handleCopyAppUrl(activeApp, `/apps?app=${activeApp}`)}
-                className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-white text-xs font-mono rounded-xs border border-white/15 flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Copy Direct Link to this MiniApp"
-              >
-                {copiedAppUrl === activeApp ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{copiedAppUrl === activeApp ? 'Copied' : 'Share App'}</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleCopyHubUrl}
-                className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-white text-xs font-mono rounded-xs border border-white/15 flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Copy MiniApps Hub URL"
-              >
-                {copiedHubUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{copiedHubUrl ? 'Copied' : 'Share Hub'}</span>
-              </button>
-            )}
-
-            {/* Replay Splash Screen Button */}
-            <button
-              onClick={handleReplaySplash}
-              className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-white text-xs font-mono rounded-xs border border-white/15 flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Replay DZt Splash Screen"
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeApp}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
             >
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden md:inline">Splash</span>
-            </button>
-
-            {/* Fullscreen Immersive Mode Toggle */}
-            <button
-              onClick={() => setIsImmersive(!isImmersive)}
-              className={`px-2.5 py-1.5 text-xs font-mono rounded-xs border flex items-center gap-1.5 transition-colors cursor-pointer ${
-                isImmersive 
-                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold' 
-                  : 'bg-white/5 hover:bg-white/10 text-white border-white/15'
-              }`}
-              title={isImmersive ? 'Exit Fullscreen Dedicated Mode (Press F)' : 'Enter Fullscreen Dedicated Mode (Press F)'}
-            >
-              {isImmersive ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{isImmersive ? 'Windowed' : 'Immersive'}</span>
-            </button>
-
-            {/* Exit to Portfolio Home */}
-            {onExitToHome && (
-              <button
-                onClick={onExitToHome}
-                className="px-3 py-1.5 bg-white text-black hover:bg-neutral-200 text-xs font-mono font-bold uppercase rounded-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Return to Portfolio Home"
-              >
-                <Home className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Portfolio</span>
-              </button>
-            )}
-          </div>
-        </header>
-
-        {/* 2. MAIN ACTIVE VIEW: ACTIVE APP OR CATALOG HUB */}
-        <main className="flex-1">
-          {activeApp ? (
-            <div className="space-y-4">
-              {/* Back to Catalog Breadcrumb Row */}
-              <div className="flex items-center justify-between gap-4 py-1">
-                <button
-                  onClick={handleBackToCatalog}
-                  className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-white text-xs font-mono rounded-xs flex items-center gap-2 transition-colors cursor-pointer"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Back to Catalog</span>
-                  <span className="text-[10px] text-white/40 hidden sm:inline">(Key 0)</span>
-                </button>
-
-                <div className="text-[11px] font-mono text-white/40 hidden sm:flex items-center gap-2">
-                  <span>Ecosystem:</span>
-                  <span className="text-white font-bold">DZt Micro-Engine</span>
-                  <span>•</span>
-                  <span>Direct WebRTC Mesh</span>
-                </div>
-              </div>
-
-              {/* Render Active MiniApp Container */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeApp}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {(activeApp === 'drop' || activeApp === 'share' || activeApp === 'fileshare') && (
-                    <div className="border border-white/10 rounded-xs bg-[#080808]">
-                      <FileShareRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
-                    </div>
-                  )}
-
-                  {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}
-                  {activeApp === 'hrdiya' && <HrdiyaApp onBack={handleBackToCatalog} />}
-                  {activeApp === 'bankexam' && <BankExamApp onBack={handleBackToCatalog} />}
-                  {activeApp === 'subnet' && <SubnetCalculatorApp onBack={handleBackToCatalog} />}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          ) : (
-            /* MiniApp Hub Catalog View */
-            <div className="space-y-6">
-              {/* Header Hero Banner */}
-              <div className="bg-[#0c0c0c] border border-white/15 p-6 sm:p-8 space-y-6 relative overflow-hidden rounded-xs">
-                <div className="absolute -right-16 -top-16 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-                
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/10 pb-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 font-bold uppercase tracking-widest">
-                      <Sparkles className="w-4 h-4" />
-                      <span>Decentralized Zone Technology • Micro-App Platform</span>
-                    </div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight uppercase font-mono">
-                      DZt MiniApps Hub
-                    </h1>
-                    <p className="text-xs sm:text-sm text-gray-400 max-w-2xl font-sans leading-relaxed">
-                      High-throughput WebRTC peer-to-peer file sharing, library accession automation, Framingham cardiovascular diagnostic modeling, and networking utilities crafted by Amal K P.
-                    </p>
-                  </div>
-
-                  {/* Architecture & Telemetry Specs Box */}
-                  <div className="bg-black/60 border border-white/15 p-4 rounded-xs font-mono text-xs space-y-2 shrink-0 max-w-xs">
-                    <span className="text-[10px] text-white/40 uppercase tracking-widest block">Runtime Specifications</span>
-                    <div className="space-y-1 text-[11px] text-white/70">
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/40">Transport:</span>
-                        <span className="text-white font-bold">WebRTC DataChannel</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/40">Encryption:</span>
-                        <span className="text-emerald-400 font-bold">DTLS 1.3 / AES-GCM</span>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-white/40">Storage:</span>
-                        <span className="text-cyan-300 font-bold">0% Cloud / Pure P2P</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Filter & Search Bar */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-1">
-                  {/* Category Buttons */}
-                  <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-                    {(
-                      [
-                        { id: 'all', label: 'All MiniApps' },
-                        { id: 'communication', label: 'Communication' },
-                        { id: 'dev', label: 'Dev & Utilities' },
-                        { id: 'health', label: 'Healthcare AI' },
-                        { id: 'education', label: 'Education' }
-                      ] as const
-                    ).map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedCategory(cat.id)}
-                        className={`px-3 py-1.5 text-xs font-mono rounded-xs transition-all cursor-pointer whitespace-nowrap ${
-                          selectedCategory === cat.id
-                            ? 'bg-white text-black font-bold shadow-sm'
-                            : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10'
-                        }`}
-                      >
-                        {cat.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Search Box */}
-                  <div className="relative w-full sm:w-72">
-                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-                    <label htmlFor="miniapps-search" className="sr-only">Search MiniApps</label>
-                    <input
-                      id="miniapps-search"
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search applications..."
-                      className="w-full bg-black/60 border border-white/15 pl-9 pr-3 py-1.5 text-xs font-mono text-white placeholder:text-white/30 rounded-xs focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* MiniApps Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredApps.map((app) => {
-                  const Icon = app.icon;
-                  return (
-                    <div
-                      key={app.id}
-                      className="bg-[#0c0c0c] border border-white/15 hover:border-white/30 rounded-xs p-6 flex flex-col justify-between space-y-6 transition-all group relative overflow-hidden"
-                    >
-                      <div className="space-y-4">
-                        {/* Card Top Row */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-xs border bg-white/5 border-white/10 text-white group-hover:scale-105 group-hover:border-cyan-500/40 transition-all">
-                              <Icon className="w-5 h-5 text-cyan-400" />
-                            </div>
-                            <div>
-                              <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest block">
-                                {app.categoryLabel}
-                              </span>
-                              <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors uppercase font-mono">
-                                {app.title}
-                              </h3>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col items-end gap-1">
-                            <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-xs border uppercase tracking-wider ${app.badgeColor}`}>
-                              {app.badge}
-                            </span>
-                            <span className="text-[9px] font-mono text-white/30">Shortcut: Key {app.shortcutKey}</span>
-                          </div>
-                        </div>
-
-                        <p className="text-xs text-gray-400 font-sans leading-relaxed">
-                          {app.description}
-                        </p>
-
-                        {/* Features List */}
-                        <div className="grid grid-cols-2 gap-1.5 pt-1">
-                          {app.features.map((feat, i) => (
-                            <div key={i} className="flex items-center gap-1.5 text-[11px] font-mono text-white/70">
-                              <span className="w-1 h-1 rounded-full bg-cyan-400 shrink-0" />
-                              <span className="truncate">{feat}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Tech Tags */}
-                        <div className="flex flex-wrap gap-1.5 pt-2">
-                          {app.techStack.map((tech, i) => (
-                            <span key={i} className="text-[9px] font-mono text-white/40 bg-white/5 border border-white/10 px-2 py-0.5 rounded-xs">
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Card Bottom CTA */}
-                      <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/10">
-                        <button
-                          onClick={() => handleCopyAppUrl(app.id, app.directUrl)}
-                          className="text-[11px] font-mono text-white/50 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
-                          title="Copy Direct Link"
-                        >
-                          {copiedAppUrl === app.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
-                          <span>{copiedAppUrl === app.id ? 'Copied' : app.directUrl}</span>
-                        </button>
-
-                        <button
-                          onClick={() => handleLaunchApp(app.id)}
-                          className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider rounded-xs flex items-center gap-2 transition-all cursor-pointer bg-white hover:bg-neutral-200 text-black shadow-md"
-                        >
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                          <span>Launch App</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {filteredApps.length === 0 && (
-                <div className="bg-[#0c0c0c] border border-white/15 p-12 text-center space-y-3 rounded-xs">
-                  <Search className="w-8 h-8 text-white/30 mx-auto" />
-                  <h3 className="text-sm font-bold uppercase text-white font-mono">No MiniApps Found</h3>
-                  <p className="text-xs text-white/50 font-mono">Try searching with different keywords or reset categories.</p>
-                  <button
-                    onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-mono rounded-xs transition-colors cursor-pointer"
-                  >
-                    Reset Filter
-                  </button>
+              {(activeApp === 'drop' || activeApp === 'share' || activeApp === 'fileshare') && (
+                <div className="border border-white/10 rounded-sm bg-[#111]">
+                  <FileShareRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
                 </div>
               )}
-            </div>
-          )}
-        </main>
 
-        {/* 3. DEDICATED FLOATING MINIAPPS DOCK */}
-        <footer className="pt-6">
-          <div className="bg-[#0c0c0c]/90 backdrop-blur-md border border-white/15 p-2 rounded-xs flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-            {/* Quick Switch Dock Buttons */}
-            <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
-              <span className="text-[10px] text-white/40 uppercase tracking-widest px-2 hidden sm:inline">
-                Quick Dock:
-              </span>
-
-              <button
-                onClick={handleBackToCatalog}
-                className={`px-2.5 py-1.5 rounded-xs flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
-                  activeApp === null 
-                    ? 'bg-white text-black font-bold' 
-                    : 'text-white/60 hover:text-white hover:bg-white/10'
-                }`}
-                title="MiniApps Catalog (Key 0)"
-              >
-                <Monitor className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Catalog</span>
-              </button>
-
-              {miniAppsList.map((app) => {
-                const Icon = app.icon;
-                const isCur = activeApp === app.id;
-                return (
-                  <button
-                    key={app.id}
-                    onClick={() => handleLaunchApp(app.id)}
-                    className={`px-2.5 py-1.5 rounded-xs flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
-                      isCur 
-                        ? 'bg-white text-black font-bold' 
-                        : 'text-white/60 hover:text-white hover:bg-white/10'
-                    }`}
-                    title={`${app.title} (Key ${app.shortcutKey})`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span className="hidden lg:inline">{app.title.split(' ')[0]}</span>
-                    <span className="text-[10px] opacity-40 font-bold">[{app.shortcutKey}]</span>
-                  </button>
-                );
-              })}
+              {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}
+              {activeApp === 'hrdiya' && <HrdiyaApp onBack={handleBackToCatalog} />}
+              {activeApp === 'bankexam' && <BankExamApp onBack={handleBackToCatalog} />}
+              {activeApp === 'subnet' && <SubnetCalculatorApp onBack={handleBackToCatalog} />}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {/* Filter & Search Row */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+              {(
+                [
+                  { id: 'all', label: 'All' },
+                  { id: 'communication', label: 'Communication' },
+                  { id: 'dev', label: 'Dev Tools' },
+                  { id: 'health', label: 'Healthcare AI' },
+                  { id: 'education', label: 'Education' }
+                ] as const
+              ).map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-3 py-1.5 text-xs font-mono uppercase tracking-wider rounded-sm transition-all cursor-pointer whitespace-nowrap border ${
+                    selectedCategory === cat.id
+                      ? 'bg-white text-black border-white font-bold'
+                      : 'bg-[#111] text-white/50 hover:text-white hover:bg-[#161616] border-white/10'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
 
-            {/* Right: Keyboard Shortcuts Hint */}
-            <div className="text-[11px] text-white/40 hidden xl:flex items-center gap-3">
-              <span>Shortcuts: <kbd className="bg-white/10 px-1 py-0.5 rounded-xs text-white">0-5</kbd> Switch App</span>
-              <span>•</span>
-              <span><kbd className="bg-white/10 px-1 py-0.5 rounded-xs text-white">F</kbd> Immersive Mode</span>
+            <div className="relative w-full sm:w-64">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+              <label htmlFor="miniapps-search" className="sr-only">Search MiniApps</label>
+              <input
+                id="miniapps-search"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search mini apps..."
+                className="w-full bg-[#111] border border-white/10 pl-9 pr-3 py-1.5 text-xs font-mono text-white placeholder:text-white/30 rounded-sm focus:outline-none focus:border-white/30"
+              />
             </div>
           </div>
-        </footer>
 
-      </div>
-    </>
+          {/* Normal Website Cards Grid (Matches Projects.tsx) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredApps.map((app, index) => (
+              <motion.div
+                key={app.id}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: index * 0.08 }}
+                onClick={() => handleLaunchApp(app.id)}
+                className="group relative bg-[#111] border border-white/10 p-6 sm:p-8 flex flex-col justify-between hover:bg-[#161616] transition-all cursor-pointer overflow-hidden rounded-sm min-h-[260px]"
+              >
+                {/* Corner ambient shine */}
+                <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors pointer-events-none" />
+
+                {/* Top row */}
+                <div className="flex justify-between items-start">
+                  <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest tabular-nums">
+                    {String(index + 1).padStart(2, '0')} / {app.categoryLabel}
+                  </span>
+                  <div className="text-lg text-white/60 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
+                    ↗
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="space-y-3 z-10 py-4">
+                  <h3 className="text-2xl font-bold tracking-tight text-white group-hover:text-white/90">
+                    {app.title}
+                  </h3>
+                  <p className="text-xs text-white/50 line-clamp-3 leading-relaxed font-sans">
+                    {app.description}
+                  </p>
+
+                  {/* Tech Tags */}
+                  <div className="flex flex-wrap gap-1.5 pt-2">
+                    {app.techStack.map((tech, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 bg-white/5 border border-white/10 text-[10px] font-mono text-white/70"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bottom Link indicator */}
+                <div className="pt-4 border-t border-white/10 flex justify-between items-center text-[10px] font-mono uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">
+                  <span>Open Mini App</span>
+                  <span>&rarr;</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {filteredApps.length === 0 && (
+            <div className="bg-[#111] border border-white/10 p-12 text-center space-y-3 rounded-sm">
+              <Search className="w-8 h-8 text-white/30 mx-auto" />
+              <h3 className="text-sm font-bold uppercase text-white font-mono">No Mini Apps Found</h3>
+              <p className="text-xs text-white/50 font-mono">Try searching with different keywords or reset categories.</p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('all');
+                }}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-mono rounded-sm transition-colors cursor-pointer"
+              >
+                Reset Filter
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   );
 }
 

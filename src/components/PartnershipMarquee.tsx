@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useCMS } from '../context/CMSContext';
 
 interface PartnershipMarqueeProps {
   onNavigate?: (tab: string) => void;
@@ -12,71 +13,16 @@ export interface LogoItem {
   fileName: string;
 }
 
-// Baseline known logo registry to render immediately with 0ms delay
-const INITIAL_LOGOS: LogoItem[] = [
-  {
-    id: 'logo-openai',
-    name: 'OPENAI',
-    src: '/logos/openai-wordmark-dark.svg',
-    alt: 'OpenAI Logo',
-    fileName: 'openai-wordmark-dark.svg'
-  },
-  {
-    id: 'logo-axis-bank',
-    name: 'AXIS BANK',
-    src: '/logos/axis-bank.svg',
-    alt: 'Axis Bank Logo',
-    fileName: 'axis-bank.svg'
-  },
-  {
-    id: 'logo-shopify',
-    name: 'SHOPIFY',
-    src: '/logos/shopify.svg',
-    alt: 'Shopify Logo',
-    fileName: 'shopify.svg'
-  },
-  {
-    id: 'logo-nss',
-    name: 'NSS',
-    src: '/logos/new-nss-seeklogo.png',
-    alt: 'National Service Scheme',
-    fileName: 'new-nss-seeklogo.png'
-  },
-  {
-    id: 'logo-uxbjxoi',
-    name: 'PARTNER LOGO',
-    src: '/logos/idUxbjXOi-_logos.svg',
-    alt: 'Partner Logo',
-    fileName: 'idUxbjXOi-_logos.svg'
-  },
-  {
-    id: 'logo-hf5lcjo',
-    name: 'TECH PARTNER',
-    src: '/logos/idhf5lcjoR_1789676848779.svg',
-    alt: 'Tech Partner Logo',
-    fileName: 'idhf5lcjoR_1789676848779.svg'
-  },
-  {
-    id: 'logo-jps0yq',
-    name: 'CLOUD ECOSYSTEM',
-    src: '/logos/idJPs0Yq7Y_1789677081540.svg',
-    alt: 'Cloud Ecosystem Logo',
-    fileName: 'idJPs0Yq7Y_1789677081540.svg'
-  },
-  {
-    id: 'logo-jsce-imz',
-    name: 'DZT NETWORK',
-    src: '/logos/idJsCe_Imz_1789677158066.png',
-    alt: 'DZt Network Logo',
-    fileName: 'idJsCe_Imz_1789677158066.png'
-  }
-];
-
 export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueeProps) {
-  const [logos, setLogos] = useState<LogoItem[]>(INITIAL_LOGOS);
+  const { cms } = useCMS();
+  const cmsActiveLogos = useMemo(
+    () => cms.logos.filter((l) => l.active !== false),
+    [cms.logos]
+  );
+
+  const [serverLogos, setServerLogos] = useState<LogoItem[] | null>(null);
   const [erroredLogos, setErroredLogos] = useState<Record<string, boolean>>({});
 
-  // Dynamic Poller: automatically fetches any newly uploaded files in /public/logos/
   useEffect(() => {
     let isMounted = true;
 
@@ -85,40 +31,26 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
         const response = await fetch(`/api/logos?t=${Date.now()}`);
         if (!response.ok) return;
         const data = await response.json();
-        if (isMounted && data.logos && Array.isArray(data.logos) && data.logos.length > 0) {
-          setLogos(data.logos);
+        if (isMounted && data.logos && Array.isArray(data.logos)) {
+          setServerLogos(data.logos);
         }
       } catch {
-        // Retains base list safely on static edge hosts
+        // Fallback to CMS context state
       }
     };
 
     fetchDynamicLogos();
-
-    const interval = setInterval(fetchDynamicLogos, 2500);
-    const onFocus = () => fetchDynamicLogos();
-    window.addEventListener('focus', onFocus);
-    window.addEventListener('visibilitychange', onFocus);
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-      window.removeEventListener('focus', onFocus);
-      window.removeEventListener('visibilitychange', onFocus);
-    };
-  }, []);
+  }, [cms.logos]);
 
   const handleImageError = (logoSrc: string) => {
     setErroredLogos((prev) => ({ ...prev, [logoSrc]: true }));
   };
 
-  // Keep only active, working logo items
   const validLogos = useMemo(() => {
-    const list = logos.length > 0 ? logos : INITIAL_LOGOS;
-    return list.filter((item) => !erroredLogos[item.src]);
-  }, [logos, erroredLogos]);
+    const sourceList = cmsActiveLogos.length > 0 ? cmsActiveLogos : serverLogos || [];
+    return sourceList.filter((item) => !erroredLogos[item.src]);
+  }, [cmsActiveLogos, serverLogos, erroredLogos]);
 
-  // Distribute across Track 1 and Track 2
   const { track1, track2 } = useMemo(() => {
     if (validLogos.length === 0) return { track1: [], track2: [] };
 
@@ -140,7 +72,6 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
       if (t1.length === 0) t1.push(...t2);
     }
 
-    // Multiply elements so track length is sufficient for seamless continuous loop
     const makeSeamlessTrack = (arr: LogoItem[]): LogoItem[] => {
       if (arr.length === 0) return [];
       let expanded = [...arr];
@@ -162,8 +93,6 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
 
   return (
     <div id="partnership-marquee-section" className="relative w-full py-6 sm:py-8 border-y border-white/10 bg-[#060606] overflow-hidden select-none space-y-3.5 z-10">
-      
-      {/* Self-contained CSS Animation */}
       <style>{`
         @keyframes marqueeLoopLeft {
           0% { transform: translate3d(0, 0, 0); }
@@ -211,7 +140,7 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
         )}
       </div>
 
-      {/* Track 1: Smooth Leftward Scroll — ONLY Pure Logos */}
+      {/* Track 1: Smooth Leftward Scroll */}
       <div className="relative w-full overflow-hidden marquee-container flex items-center">
         <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-36 bg-gradient-to-r from-[#060606] via-[#060606]/90 to-transparent z-10 pointer-events-none" />
         <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-36 bg-gradient-to-l from-[#060606] via-[#060606]/90 to-transparent z-10 pointer-events-none" />
@@ -236,7 +165,7 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
         </div>
       </div>
 
-      {/* Track 2: Smooth Rightward Scroll — ONLY Pure Logos */}
+      {/* Track 2: Smooth Rightward Scroll */}
       <div className="relative w-full overflow-hidden marquee-container flex items-center">
         <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-36 bg-gradient-to-r from-[#060606] via-[#060606]/90 to-transparent z-10 pointer-events-none" />
         <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-36 bg-gradient-to-l from-[#060606] via-[#060606]/90 to-transparent z-10 pointer-events-none" />
@@ -260,7 +189,6 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
           ))}
         </div>
       </div>
-
     </div>
   );
 }
