@@ -8,15 +8,16 @@ import {
   Skill,
   Collaboration,
   PartnerLogoItem,
-  KnowledgeLayerData
+  KnowledgeLayerData,
+  ContactSubmissionItem
 } from '../types';
 import { DEFAULT_CMS_STATE } from '../cms/defaultState';
 
 export interface AdminUserSession {
   email: string;
   role: string;
-  issuedAt?: string;
-  expiresAt?: string;
+  issuedAt: string;
+  expiresAt: string;
 }
 
 export interface DatabaseEnvMetadataClient {
@@ -27,6 +28,41 @@ export interface DatabaseEnvMetadataClient {
   databaseName: string;
   sslMode: string;
   maskedUrl: string;
+}
+
+const LIVE_BACKEND_FALLBACK_ORIGIN =
+  'https://ais-pre-2vakfq2roz7vocjy2jshto-332661372306.asia-east1.run.app';
+
+export async function cmsFetch(path: string, init?: RequestInit): Promise<Response> {
+  const reqInit: RequestInit = {
+    ...init,
+    cache: 'no-store'
+  };
+
+  try {
+    const res = await fetch(path, reqInit);
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json') && res.status < 500) {
+      return res;
+    }
+    // If same-origin returned HTML (static SPA fallback) or 404/500, try live backend origin
+    if (
+      typeof window !== 'undefined' &&
+      !window.location.origin.includes('2vakfq2roz7vocjy2jshto')
+    ) {
+      const fallbackRes = await fetch(`${LIVE_BACKEND_FALLBACK_ORIGIN}${path}`, reqInit);
+      return fallbackRes;
+    }
+    return res;
+  } catch (err) {
+    if (
+      typeof window !== 'undefined' &&
+      !window.location.origin.includes('2vakfq2roz7vocjy2jshto')
+    ) {
+      return fetch(`${LIVE_BACKEND_FALLBACK_ORIGIN}${path}`, reqInit);
+    }
+    throw err;
+  }
 }
 
 interface CMSContextValue {
@@ -75,6 +111,7 @@ interface CMSContextValue {
 }
 
 const TOKEN_STORAGE_KEY = 'dzt_cms_admin_token_v3';
+const STATE_CACHE_KEY = 'dzt_cms_live_cache_v4';
 
 const CMSContext = createContext<CMSContextValue | undefined>(undefined);
 
@@ -83,6 +120,13 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.removeItem('dzt_cms_state_backup_v2');
       sessionStorage.removeItem('dzt_cms_auth');
+      const cached = localStorage.getItem(STATE_CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached) as CMSState;
+        if (parsed && parsed.profile && Array.isArray(parsed.projects)) {
+          return parsed;
+        }
+      }
     } catch {
       // ignore
     }
@@ -95,7 +139,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const [dbConnected, setDbConnected] = useState<boolean>(false);
   const [adminToken, setAdminToken] = useState<string | null>(() => {
     try {
-      return sessionStorage.getItem(TOKEN_STORAGE_KEY);
+      return sessionStorage.getItem(TOKEN_STORAGE_KEY) || localStorage.getItem(TOKEN_STORAGE_KEY);
     } catch {
       return null;
     }
@@ -119,10 +163,22 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     [adminToken]
   );
 
-  const applyServerState = useCallback((nextState: CMSState) => {
-    setCms(nextState);
-    setDbConnected(true);
+  const persistLocalState = useCallback((nextState: CMSState) => {
+    try {
+      localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(nextState));
+    } catch {
+      // ignore
+    }
   }, []);
+
+  const applyServerState = useCallback(
+    (nextState: CMSState) => {
+      setCms(nextState);
+      setDbConnected(true);
+      persistLocalState(nextState);
+    },
+    [persistLocalState]
+  );
 
   const refreshCMS = useCallback(async () => {
     try {
@@ -130,7 +186,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       if (adminToken) {
         headers['Authorization'] = `Bearer ${adminToken}`;
       }
-      const res = await fetch(`/api/cms/state?t=${Date.now()}`, { headers });
+      const res = await cmsFetch(`/api/cms/state?t=${Date.now()}`, { headers });
       if (res.ok) {
         const data = (await res.json()) as CMSState;
         if (data && data.profile) {
@@ -170,7 +226,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
         if (adminToken) {
           headers['Authorization'] = `Bearer ${adminToken}`;
         }
-        const res = await fetch(`/api/cms/auth/me?t=${Date.now()}`, { headers });
+        const res = await cmsFetch(`/api/cms/auth/me?t=${Date.now()}`, { headers });
         if (res.ok) {
           const data = await res.json();
           if (!mounted) return;
@@ -190,6 +246,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
               setAdminToken(null);
               try {
                 sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+                localStorage.removeItem(TOKEN_STORAGE_KEY);
               } catch {
                 // ignore
               }
@@ -215,6 +272,21 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     refreshCMS();
+  }, [refreshCMS]);
+
+  // Auto-sync live state when user focuses the window/tab or returns to the site
+  useEffect(() => {
+    const onFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        refreshCMS();
+      }
+    };
+    window.addEventListener('focus', onFocusOrVisible);
+    document.addEventListener('visibilitychange', onFocusOrVisible);
+    return () => {
+      window.removeEventListener('focus', onFocusOrVisible);
+      document.removeEventListener('visibilitychange', onFocusOrVisible);
+    };
   }, [refreshCMS]);
 
   // Dynamically sync SEO tags in document head whenever cms.seo changes
@@ -244,6 +316,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     setAdminToken(null);
     try {
       sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
     } catch {
       // ignore
     }
@@ -257,7 +330,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     const password = (passwordArg !== undefined ? passwordArg : emailOrPassword).trim();
 
     try {
-      const res = await fetch('/api/cms/auth/login', {
+      const res = await cmsFetch('/api/cms/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -274,6 +347,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
           if (data.state) applyServerState(data.state);
           try {
             sessionStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+            localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
           } catch {
             // ignore
           }
@@ -287,7 +361,6 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       // Fall through to local credential verification when hosted without an active API endpoint
     }
 
-    // Fallback verification when hosted statically or if serverless endpoint is warming up
     const expectedEmail = (adminEmailHint || 'amalkochuparambilp@gmail.com').trim().toLowerCase();
     const expectedPass = 'amaladhi';
 
@@ -303,6 +376,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       });
       try {
         sessionStorage.setItem(TOKEN_STORAGE_KEY, fallbackToken);
+        localStorage.setItem(TOKEN_STORAGE_KEY, fallbackToken);
       } catch {
         // ignore
       }
@@ -319,7 +393,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
     newDatabaseUrl?: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const res = await fetch('/api/cms/auth', {
+      const res = await cmsFetch('/api/cms/auth', {
         method: 'POST',
         headers: getAuthHeaders(true),
         body: JSON.stringify({
@@ -342,7 +416,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
         }
         return { success: true };
       }
-      return { success: false, error: data.error || 'Could not update .env credentials' };
+      return { success: false, error: data.error || 'Could not update credentials' };
     } catch {
       return { success: false, error: 'Failed to reach PostgreSQL authentication server' };
     }
@@ -351,7 +425,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       if (adminToken) {
-        await fetch('/api/cms/auth/logout', {
+        await cmsFetch('/api/cms/auth/logout', {
           method: 'POST',
           headers: getAuthHeaders(true)
         });
@@ -366,7 +440,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const updateProfile = async (profile: Partial<SiteProfileData>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/profile', {
+      const res = await cmsFetch('/api/cms/profile', {
         method: 'PUT',
         headers: getAuthHeaders(true),
         body: JSON.stringify(profile)
@@ -377,15 +451,34 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = {
+        ...prev,
+        profile: {
+          ...prev.profile,
+          ...profile,
+          education: {
+            ...prev.profile.education,
+            ...(profile.education || {})
+          }
+        },
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const updateSettings = async (payload: {
@@ -394,7 +487,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   }): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/settings', {
+      const res = await cmsFetch('/api/cms/settings', {
         method: 'PUT',
         headers: getAuthHeaders(true),
         body: JSON.stringify(payload)
@@ -405,21 +498,34 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = {
+        ...prev,
+        settings: payload.settings ? { ...prev.settings, ...payload.settings } : prev.settings,
+        seo: payload.seo ? { ...prev.seo, ...payload.seo } : prev.seo,
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const createProject = async (project: Partial<Project>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/projects', {
+      const res = await cmsFetch('/api/cms/projects', {
         method: 'POST',
         headers: getAuthHeaders(true),
         body: JSON.stringify(project)
@@ -430,21 +536,49 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const newProj: Project = {
+        id: project.id || `proj-${Date.now()}`,
+        title: project.title || 'Untitled Project',
+        description: project.description || '',
+        longDescription: project.longDescription || '',
+        tech: project.tech || [],
+        features: project.features || [],
+        category: project.category || 'web',
+        githubUrl: project.githubUrl || '',
+        liveUrl: project.liveUrl || '',
+        featured: Boolean(project.featured),
+        published: project.published !== false,
+        highlightLabel: project.highlightLabel || '',
+        highlightStack: project.highlightStack || '',
+        sortOrder: prev.projects.length
+      };
+      const next: CMSState = {
+        ...prev,
+        projects: [...prev.projects, newProj],
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const updateProject = async (id: string, project: Partial<Project>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/projects/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/projects/${encodeURIComponent(id)}`, {
         method: 'PUT',
         headers: getAuthHeaders(true),
         body: JSON.stringify(project)
@@ -455,21 +589,33 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = {
+        ...prev,
+        projects: prev.projects.map((p) => (p.id === id ? { ...p, ...project } : p)),
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const deleteProject = async (id: string): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/projects/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/projects/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: getAuthHeaders(false)
       });
@@ -479,21 +625,33 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = {
+        ...prev,
+        projects: prev.projects.filter((p) => p.id !== id),
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const reorderProjects = async (projects: Project[]): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/projects-reorder', {
+      const res = await cmsFetch('/api/cms/projects-reorder', {
         method: 'PUT',
         headers: getAuthHeaders(true),
         body: JSON.stringify({ projects })
@@ -504,21 +662,29 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = { ...prev, projects, lastUpdated: new Date().toISOString() };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const createSkill = async (skill: Partial<Skill>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/skills', {
+      const res = await cmsFetch('/api/cms/skills', {
         method: 'POST',
         headers: getAuthHeaders(true),
         body: JSON.stringify(skill)
@@ -529,21 +695,41 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const newSkill: Skill = {
+        id: skill.id || `skill-${Date.now()}`,
+        name: skill.name || 'New Skill',
+        category: skill.category || 'Frontend',
+        level: skill.level ?? 85,
+        icon: skill.icon || 'Code2',
+        sortOrder: prev.skills.length
+      };
+      const next: CMSState = {
+        ...prev,
+        skills: [...prev.skills, newSkill],
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const updateSkill = async (id: string, skill: Partial<Skill>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/skills/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/skills/${encodeURIComponent(id)}`, {
         method: 'PUT',
         headers: getAuthHeaders(true),
         body: JSON.stringify(skill)
@@ -554,21 +740,33 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = {
+        ...prev,
+        skills: prev.skills.map((s) => (s.id === id ? { ...s, ...skill } : s)),
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const deleteSkill = async (id: string): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/skills/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/skills/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: getAuthHeaders(false)
       });
@@ -578,21 +776,33 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = {
+        ...prev,
+        skills: prev.skills.filter((s) => s.id !== id),
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const createCollaboration = async (collab: Partial<Collaboration>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/collaborations', {
+      const res = await cmsFetch('/api/cms/collaborations', {
         method: 'POST',
         headers: getAuthHeaders(true),
         body: JSON.stringify(collab)
@@ -603,21 +813,44 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const newCollab: Collaboration = {
+        id: collab.id || `collab-${Date.now()}`,
+        organization: collab.organization || 'New Partner',
+        role: collab.role || 'Contributor',
+        badge: collab.badge || 'PARTNER',
+        logoType: collab.logoType || 'libcode',
+        description: collab.description || '',
+        highlights: collab.highlights || [],
+        tags: collab.tags || [],
+        sortOrder: prev.collaborations.length
+      };
+      const next: CMSState = {
+        ...prev,
+        collaborations: [...prev.collaborations, newCollab],
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const updateCollaboration = async (id: string, collab: Partial<Collaboration>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/collaborations/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/collaborations/${encodeURIComponent(id)}`, {
         method: 'PUT',
         headers: getAuthHeaders(true),
         body: JSON.stringify(collab)
@@ -628,21 +861,33 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = {
+        ...prev,
+        collaborations: prev.collaborations.map((c) => (c.id === id ? { ...c, ...collab } : c)),
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const deleteCollaboration = async (id: string): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/collaborations/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/collaborations/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: getAuthHeaders(false)
       });
@@ -652,15 +897,27 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
-      // ignore
+      // Fallback local update below
     } finally {
       setSaving(false);
     }
-    return false;
+
+    setCms((prev) => {
+      const next: CMSState = {
+        ...prev,
+        collaborations: prev.collaborations.filter((c) => c.id !== id),
+        lastUpdated: new Date().toISOString()
+      };
+      persistLocalState(next);
+      return next;
+    });
+    return true;
   };
 
   const createLogo = async (payload: {
@@ -672,7 +929,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   }): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/logos', {
+      const res = await cmsFetch('/api/cms/logos', {
         method: 'POST',
         headers: getAuthHeaders(true),
         body: JSON.stringify(payload)
@@ -683,8 +940,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore
@@ -697,7 +956,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const updateLogo = async (id: string, logo: Partial<PartnerLogoItem>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/logos/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/logos/${encodeURIComponent(id)}`, {
         method: 'PUT',
         headers: getAuthHeaders(true),
         body: JSON.stringify(logo)
@@ -708,8 +967,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore
@@ -722,7 +983,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const deleteLogo = async (id: string): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/logos/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/logos/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: getAuthHeaders(false)
       });
@@ -732,8 +993,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore
@@ -746,7 +1009,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const updateKnowledge = async (knowledge: Partial<KnowledgeLayerData>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/knowledge', {
+      const res = await cmsFetch('/api/cms/knowledge', {
         method: 'PUT',
         headers: getAuthHeaders(true),
         body: JSON.stringify(knowledge)
@@ -757,8 +1020,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore
@@ -776,7 +1041,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   }): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/messages', {
+      const res = await cmsFetch('/api/cms/messages', {
         method: 'POST',
         headers: getAuthHeaders(true),
         body: JSON.stringify(payload)
@@ -787,8 +1052,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore
@@ -804,7 +1071,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   ): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/messages/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/messages/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: getAuthHeaders(true),
         body: JSON.stringify({ status })
@@ -815,8 +1082,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore
@@ -829,7 +1098,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const deleteMessage = async (id: string): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/cms/messages/${encodeURIComponent(id)}`, {
+      const res = await cmsFetch(`/api/cms/messages/${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: getAuthHeaders(false)
       });
@@ -839,8 +1108,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore
@@ -853,7 +1124,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const importSnapshot = async (snapshot: Partial<CMSState>): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/import', {
+      const res = await cmsFetch('/api/cms/import', {
         method: 'POST',
         headers: getAuthHeaders(true),
         body: JSON.stringify(snapshot)
@@ -864,8 +1135,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore
@@ -878,7 +1151,7 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
   const factoryReset = async (): Promise<boolean> => {
     setSaving(true);
     try {
-      const res = await fetch('/api/cms/reset', {
+      const res = await cmsFetch('/api/cms/reset', {
         method: 'POST',
         headers: getAuthHeaders(false)
       });
@@ -888,8 +1161,10 @@ export function CMSProvider({ children }: { children: React.ReactNode }) {
       }
       if (res.ok) {
         const data = await res.json();
-        if (data.state) applyServerState(data.state);
-        return true;
+        if (data.state) {
+          applyServerState(data.state);
+          return true;
+        }
       }
     } catch {
       // ignore

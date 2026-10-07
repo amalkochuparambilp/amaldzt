@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useCMS } from '../context/CMSContext';
+import { useCMS, cmsFetch } from '../context/CMSContext';
 import {
   PRISMA_SCHEMA_SOURCE,
   generatePostgresSqlDump,
@@ -168,7 +168,7 @@ export default function CMSDatabaseSection({ notify, onSyncDrafts }: CMSDatabase
   const fetchDbStatus = useCallback(async () => {
     setStatusLoading(true);
     try {
-      const res = await fetch(`/api/cms/db/status?t=${Date.now()}`, {
+      const res = await cmsFetch(`/api/cms/db/status?t=${Date.now()}`, {
         headers: getAuthHeaders(false)
       });
       if (res.ok) {
@@ -186,7 +186,7 @@ export default function CMSDatabaseSection({ notify, onSyncDrafts }: CMSDatabase
     async (tableName: string) => {
       setTableLoading(true);
       try {
-        const res = await fetch(`/api/cms/db/table/${encodeURIComponent(tableName)}?t=${Date.now()}`, {
+        const res = await cmsFetch(`/api/cms/db/table/${encodeURIComponent(tableName)}?t=${Date.now()}`, {
           headers: getAuthHeaders(false)
         });
         if (res.ok) {
@@ -213,7 +213,7 @@ export default function CMSDatabaseSection({ notify, onSyncDrafts }: CMSDatabase
   const handleSyncDatabase = async () => {
     setSyncingDb(true);
     try {
-      const res = await fetch('/api/cms/db/sync', {
+      const res = await cmsFetch('/api/cms/db/sync', {
         method: 'POST',
         headers: getAuthHeaders(false)
       });
@@ -338,7 +338,7 @@ export default function CMSDatabaseSection({ notify, onSyncDrafts }: CMSDatabase
         : `/api/cms/db/table/${encodeURIComponent(selectedTable)}/${encodeURIComponent(editingRow.id)}`;
       const method = isInsertingRow ? 'POST' : 'PUT';
 
-      const res = await fetch(url, {
+      const res = await cmsFetch(url, {
         method,
         headers: getAuthHeaders(true),
         body: JSON.stringify(parsed)
@@ -366,7 +366,7 @@ export default function CMSDatabaseSection({ notify, onSyncDrafts }: CMSDatabase
 
   const handleDeleteRow = async (rowId: string) => {
     try {
-      const res = await fetch(
+      const res = await cmsFetch(
         `/api/cms/db/table/${encodeURIComponent(selectedTable)}/${encodeURIComponent(rowId)}`,
         {
           method: 'DELETE',
@@ -393,7 +393,7 @@ export default function CMSDatabaseSection({ notify, onSyncDrafts }: CMSDatabase
     setSqlRunning(true);
     setSqlError(null);
     try {
-      const res = await fetch('/api/cms/db/query', {
+      const res = await cmsFetch('/api/cms/db/query', {
         method: 'POST',
         headers: getAuthHeaders(true),
         body: JSON.stringify({ sql: queryToRun })
