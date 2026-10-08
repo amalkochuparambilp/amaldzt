@@ -22,10 +22,12 @@ import {
   HardDriveDownload,
   Sliders,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Wand2
 } from 'lucide-react';
 import FileShareRoom from './p2p/FileShareRoom';
 import QRCodeDisplay from './QRCodeDisplay';
+import WatermarkRemoverApp from './WatermarkRemoverApp';
 
 interface MiniAppsProps {
   initialAppId?: string;
@@ -73,6 +75,8 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
 
       if (path.startsWith('/drop') || path.startsWith('/share')) {
         setActiveApp('drop');
+      } else if (path.startsWith('/watermark') || path.startsWith('/gemini-watermark-remover')) {
+        setActiveApp('watermark');
       } else if (app) {
         setActiveApp(app);
       } else if (path.startsWith('/apps')) {
@@ -114,6 +118,20 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
   };
 
   const miniAppsList: MiniAppItem[] = [
+    {
+      id: 'watermark',
+      title: 'Gemini & Veo Watermark Remover',
+      tagline: 'Mathematical Reverse-Alpha Unblending for Images & Videos',
+      category: 'dev',
+      categoryLabel: 'AI Media & Utilities',
+      badge: 'Zero-Loss • WebCodecs',
+      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+      icon: Wand2,
+      description: '100% client-side mathematical reverse-alpha watermark remover for Google Gemini, Nano Banana, Google Flow, and Veo 3 images and videos with live multi-scale auto-detection and zoomed ROI tuner.',
+      features: ['Reverse-Alpha Pixel Recovery', 'Veo 3 & Flow MP4 + Audio', 'Multi-Scale Auto-Detection', 'Dual Zoomed Live Tuner'],
+      techStack: ['Canvas 2D Unblending', 'WebCodecs H.264', 'NCC Edge Pyramid', 'Zero Blur'],
+      directUrl: '/apps?app=watermark'
+    },
     {
       id: 'drop',
       title: 'DZt Drop (P2P File Transfer)',
@@ -240,6 +258,10 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
             <div className="border border-white/10 rounded-xs bg-[#080808]">
               <FileShareRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
             </div>
+          )}
+
+          {(activeApp === 'watermark' || activeApp === 'gemini-watermark-remover') && (
+            <WatermarkRemoverApp onBack={handleBackToCatalog} />
           )}
 
           {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}

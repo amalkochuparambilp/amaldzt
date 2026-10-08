@@ -108,13 +108,24 @@ export default function Hero({ onNavigate }: HeroProps) {
         </motion.div>
 
         {/* Flagship DZt Core Ecosystem Highlights Strip */}
-        <motion.div variants={itemVariants} className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <motion.div variants={itemVariants} className="pt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div 
+            onClick={() => onNavigate('watermark')}
+            className="p-3.5 bg-white/5 border border-emerald-500/30 hover:border-emerald-400/60 rounded-xs transition-all cursor-pointer group space-y-1"
+          >
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-emerald-400 font-bold">01. GEMINI WATERMARK REMOVER</span>
+              <span className="text-white/40 group-hover:text-white transition-colors">WebCodecs / Live</span>
+            </div>
+            <p className="text-xs text-white/80 font-mono">Reverse-Alpha Image &amp; Veo 3 Video Unblender</p>
+          </div>
+
           <div 
             onClick={() => onNavigate('projects')}
             className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
           >
             <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-emerald-400 font-bold">01. LIBCODE JNIAS</span>
+              <span className="text-cyan-400 font-bold">02. LIBCODE JNIAS</span>
               <span className="text-white/40 group-hover:text-white transition-colors">PHP / MySQL</span>
             </div>
             <p className="text-xs text-white/80 font-mono">College Library Automation System with Barcode Scanning</p>
@@ -125,10 +136,10 @@ export default function Hero({ onNavigate }: HeroProps) {
             className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
           >
             <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-amber-400 font-bold">02. BANK EXAM PORTAL</span>
+              <span className="text-amber-400 font-bold">03. BANK EXAM PORTAL</span>
               <span className="text-white/40 group-hover:text-white transition-colors">PHP / MySQL</span>
             </div>
-            <p className="text-xs text-white/80 font-mono">Co-operative Bank Online Examination & Grading Engine</p>
+            <p className="text-xs text-white/80 font-mono">Co-operative Bank Online Examination &amp; Grading Engine</p>
           </div>
 
           <div 
@@ -136,10 +147,10 @@ export default function Hero({ onNavigate }: HeroProps) {
             className="p-3.5 bg-white/5 border border-white/10 hover:border-white/30 rounded-xs transition-all cursor-pointer group space-y-1"
           >
             <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-cyan-400 font-bold">03. HRDIYA HEALTH</span>
+              <span className="text-rose-400 font-bold">04. HRDIYA HEALTH</span>
               <span className="text-white/40 group-hover:text-white transition-colors">Python / Django</span>
             </div>
-            <p className="text-xs text-white/80 font-mono">Cardiac Disease Risk Analysis & Consultation Platform</p>
+            <p className="text-xs text-white/80 font-mono">Cardiac Disease Risk Analysis &amp; Consultation Platform</p>
           </div>
         </motion.div>
 

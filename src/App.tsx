@@ -28,12 +28,16 @@ export default function App() {
         path.startsWith('/share') ||
         path.startsWith('/send') ||
         path.startsWith('/files') ||
+        path.startsWith('/watermark') ||
+        path.startsWith('/gemini-watermark-remover') ||
         hash.startsWith('#apps') ||
         hash.startsWith('#miniapp') ||
         hash.startsWith('#drop') ||
         hash.startsWith('#share') ||
+        hash.startsWith('#watermark') ||
         hash.includes('/apps') ||
         hash.includes('/drop') ||
+        hash.includes('/watermark') ||
         search.includes('room=') ||
         search.includes('app=')
       ) {
@@ -57,6 +61,14 @@ export default function App() {
       if (appParam) return appParam;
 
       const path = window.location.pathname.toLowerCase();
+      if (
+        path.startsWith('/watermark') ||
+        path.startsWith('/gemini-watermark-remover') ||
+        window.location.hash.includes('watermark')
+      ) {
+        return 'watermark';
+      }
+
       if (
         path.startsWith('/drop') ||
         path.startsWith('/share') ||
@@ -161,6 +173,15 @@ export default function App() {
 
   const handleNavigate = (tab: string) => {
     let targetTab = tab as Tab;
+    if (tab === 'watermark') {
+      targetTab = 'apps';
+      setInitialAppId('watermark');
+      setActiveTab(targetTab);
+      setIsMobileMenuOpen(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.history.pushState({ appId: 'watermark' }, '', '/apps?app=watermark');
+      return;
+    }
     if (tab === 'miniapp' || tab === 'apps') {
       targetTab = 'apps';
       setInitialAppId(undefined);

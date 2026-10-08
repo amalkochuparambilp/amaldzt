@@ -71,6 +71,23 @@ export const PROJECTS: Project[] = [
     featured: true
   },
   {
+    id: 'gemini-watermark-remover',
+    title: 'Gemini & Veo Watermark Remover',
+    description: '100% client-side mathematical reverse-alpha watermark remover for Google Gemini, Nano Banana, Flow, and Veo 3 images and videos.',
+    longDescription: 'Integrated client-side media unblending tool using exact mathematical reverse-alpha subtraction, multi-scale NCC + gradient edge auto-detection, live dual-zoomed ROI alignment, and WebCodecs H.264 MP4 muxing with audio passthrough.',
+    category: 'web',
+    tech: ['TypeScript', 'Canvas 2D API', 'WebCodecs', 'MediaBunny', 'Reverse-Alpha Math'],
+    features: [
+      'Mathematical reverse-alpha pixel restoration with zero quality loss',
+      'Fused multi-scale NCC & gradient edge watermark auto-detection',
+      'Live interactive tuner with dual zoomed ROI comparison views',
+      'WebCodecs hardware-accelerated Veo 3 & Google Flow MP4 video cleaning with audio preservation'
+    ],
+    githubUrl: 'https://github.com/ishara-madu/gemini-watermark-remover',
+    liveUrl: '/apps?app=watermark',
+    featured: true
+  },
+  {
     id: 'dzt-developer-platform',
     title: 'DZt Developer Platform & Ecosystem',
     description: 'Modern developer suite, portfolio engine, and diagnostic console built for the DZt initiative.',

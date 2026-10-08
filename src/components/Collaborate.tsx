@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { COLLABORATIONS, AMAL_INFO } from '../data';
+import { useCMS } from '../context/CMSContext';
 import { Collaboration } from '../types';
-import { 
-  Heart, 
-  BookOpen, 
-  Building2, 
-  Activity, 
-  CheckCircle2, 
-  ChevronRight, 
-  Sparkles, 
-  Handshake, 
-  Users, 
+import {
+  Heart,
+  BookOpen,
+  Building2,
+  Activity,
+  CheckCircle2,
+  ChevronRight,
+  Sparkles,
+  Handshake,
+  Users,
   MessageSquare,
-  ArrowRight,
   Award
 } from 'lucide-react';
 
@@ -22,9 +21,10 @@ interface CollaborateProps {
 }
 
 export default function Collaborate({ onNavigate }: CollaborateProps) {
+  const { cms } = useCMS();
+  const { collaborations } = cms;
   const [selectedCollab, setSelectedCollab] = useState<Collaboration | null>(null);
 
-  // Helper render function for custom logos/emblems
   const renderLogo = (logoType: Collaboration['logoType']) => {
     if (logoType === 'libcode') {
       return (
@@ -58,7 +58,6 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
 
   return (
     <section className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">
-      
       {/* Top Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-white/10 pb-6">
         <div className="space-y-1">
@@ -83,7 +82,9 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
           <div className="p-2 bg-white/10 border border-white/20 text-white rounded-xs">
             <Users className="w-5 h-5" />
           </div>
-          <span className="text-xs font-mono text-white/40 uppercase tracking-widest">ECOSYSTEM VOLUNTEERING & LEADERSHIP</span>
+          <span className="text-xs font-mono text-white/40 uppercase tracking-widest">
+            ECOSYSTEM VOLUNTEERING & LEADERSHIP
+          </span>
         </div>
         <p className="text-sm sm:text-base text-gray-200 leading-relaxed max-w-4xl font-sans">
           Beyond core engineering, I actively volunteer and collaborate with educational institutions, security research initiatives, and digital broadcasting channels. Here is an overview of my key software implementations, cybersecurity visual designs, and media branding leadership.
@@ -92,61 +93,55 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
 
       {/* Main Collaborations Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {COLLABORATIONS.map((collab) => {
-          return (
-            <motion.div
-              key={collab.id}
-              whileHover={{ y: -5 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setSelectedCollab(collab)}
-              className="bg-[#0e0e0e] border border-white/10 hover:border-white/30 p-6 sm:p-7 flex flex-col justify-between space-y-6 cursor-pointer group relative overflow-hidden rounded-xs"
-            >
-              <div className="space-y-5">
-                {/* Header: Logo & Badge */}
-                <div className="flex items-start justify-between gap-3">
-                  {renderLogo(collab.logoType)}
-                  <span className="text-[9px] font-mono text-white/60 bg-white/5 border border-white/15 px-2.5 py-1 uppercase tracking-widest font-bold text-right">
-                    {collab.badge}
+        {collaborations.map((collab) => (
+          <motion.div
+            key={collab.id}
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setSelectedCollab(collab)}
+            className="bg-[#0e0e0e] border border-white/10 hover:border-white/30 p-6 sm:p-7 flex flex-col justify-between space-y-6 cursor-pointer group relative overflow-hidden rounded-xs"
+          >
+            <div className="space-y-5">
+              <div className="flex items-start justify-between gap-3">
+                {renderLogo(collab.logoType)}
+                <span className="text-[9px] font-mono text-white/60 bg-white/5 border border-white/15 px-2.5 py-1 uppercase tracking-widest font-bold text-right">
+                  {collab.badge}
+                </span>
+              </div>
+
+              <div className="space-y-1.5 pt-1">
+                <h3 className="text-lg font-bold text-white group-hover:text-white transition-colors leading-snug">
+                  {collab.organization}
+                </h3>
+                <p className="text-xs font-mono text-white/50">{collab.role}</p>
+              </div>
+
+              <p className="text-xs text-gray-300 leading-relaxed font-sans line-clamp-3">
+                {collab.description}
+              </p>
+            </div>
+
+            <div className="space-y-4 pt-4 border-t border-white/10">
+              <div className="flex flex-wrap gap-1.5">
+                {collab.tags.slice(0, 3).map((tag, idx) => (
+                  <span key={idx} className="text-[9px] font-mono bg-black border border-white/10 text-white/70 px-2.5 py-1">
+                    #{tag}
                   </span>
-                </div>
-
-                {/* Organization & Role */}
-                <div className="space-y-1.5 pt-1">
-                  <h3 className="text-lg font-bold text-white group-hover:text-white transition-colors leading-snug">
-                    {collab.organization}
-                  </h3>
-                  <p className="text-xs font-mono text-white/50">{collab.role}</p>
-                </div>
-
-                {/* Description */}
-                <p className="text-xs text-gray-300 leading-relaxed font-sans line-clamp-3">
-                  {collab.description}
-                </p>
+                ))}
+                {collab.tags.length > 3 && (
+                  <span className="text-[9px] font-mono text-white/40 self-center">
+                    +{collab.tags.length - 3}
+                  </span>
+                )}
               </div>
 
-              {/* Footer Tags & Inspect Action */}
-              <div className="space-y-4 pt-4 border-t border-white/10">
-                <div className="flex flex-wrap gap-1.5">
-                  {collab.tags.slice(0, 3).map((tag, idx) => (
-                    <span key={idx} className="text-[9px] font-mono bg-black border border-white/10 text-white/70 px-2.5 py-1">
-                      #{tag}
-                    </span>
-                  ))}
-                  {collab.tags.length > 3 && (
-                    <span className="text-[9px] font-mono text-white/40 self-center">
-                      +{collab.tags.length - 3}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between text-xs font-mono text-white/70 group-hover:text-white pt-1">
-                  <span className="font-semibold uppercase tracking-wider text-[11px]">Inspect Details</span>
-                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform text-white" />
-                </div>
+              <div className="flex items-center justify-between text-xs font-mono text-white/70 group-hover:text-white pt-1">
+                <span className="font-semibold uppercase tracking-wider text-[11px]">Inspect Details</span>
+                <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1.5 transition-transform text-white" />
               </div>
-            </motion.div>
-          );
-        })}
+            </div>
+          </motion.div>
+        ))}
       </div>
 
       {/* Call to Action Box */}
@@ -190,7 +185,6 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-[#0d0d0d] border border-white/20 p-6 sm:p-8 max-w-2xl w-full space-y-6 relative rounded-sm shadow-2xl"
             >
-              {/* Modal Header */}
               <div className="flex justify-between items-start border-b border-white/10 pb-4 pr-6">
                 <div className="flex items-center gap-4">
                   {renderLogo(selectedCollab.logoType)}
@@ -212,13 +206,11 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
                 </button>
               </div>
 
-              {/* Description & Details */}
               <div className="space-y-4">
                 <p className="text-xs sm:text-sm text-gray-200 font-sans leading-relaxed">
                   {selectedCollab.description}
                 </p>
 
-                {/* Key Deliverables */}
                 <div className="space-y-2 bg-black/60 border border-white/10 p-4">
                   <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest block mb-2">
                     Key Deliverables & Responsibilities:
@@ -231,7 +223,6 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
                   ))}
                 </div>
 
-                {/* Tag List */}
                 <div className="flex flex-wrap gap-2 pt-2">
                   {selectedCollab.tags.map((t, i) => (
                     <span key={i} className="text-[10px] font-mono bg-white/5 border border-white/10 text-white/70 px-2.5 py-1">
@@ -241,7 +232,6 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
                 </div>
               </div>
 
-              {/* Modal Footer */}
               <div className="pt-4 border-t border-white/10 flex justify-end">
                 <button
                   onClick={() => setSelectedCollab(null)}
@@ -254,7 +244,6 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
           </div>
         )}
       </AnimatePresence>
-
     </section>
   );
 }

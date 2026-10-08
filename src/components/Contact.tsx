@@ -1,6 +1,6 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { AMAL_INFO } from '../data';
+import { useCMS } from '../context/CMSContext';
 import { 
   Mail, 
   Phone, 
@@ -29,6 +29,9 @@ interface FormErrors {
 }
 
 export default function Contact() {
+  const { cms, refreshCMS } = useCMS();
+  const AMAL_INFO = cms.profile;
+
   const [formData, setFormData] = useState<FormState>({
     name: '',
     email: '',
@@ -138,6 +141,7 @@ export default function Contact() {
         setStatus('success');
         setFormData({ name: '', email: '', message: '', honeypot: '' });
         setFormErrors({});
+        refreshCMS();
         return;
       }
 

@@ -399,6 +399,7 @@ export default function HeroTelemetry() {
       case 'help':
         addOut('Available commands:');
         addOut('  whoami    - Display founder bio & qualifications');
+        addOut('  cms       - Open Full-Control CMS & Prisma Postgres Studio (/cms)');
         addOut('  apps      - Open DZt MiniApp Suite & Tools (/apps)');
         addOut('  drop      - Launch DZt Drop P2P Encrypted File Sharing (/apps?app=drop)');
         addOut('  projects  - List active platforms (LibCode, Bank Exam Portal, Hrdiya)');
@@ -407,6 +408,13 @@ export default function HeroTelemetry() {
         addOut('  ping      - Measure system network response latency');
         addOut('  contact   - Display direct email & communication channels');
         addOut('  clear     - Wipe terminal screen buffer');
+        break;
+      case 'cms':
+      case 'admin':
+        addOut('LAUNCHING DZT FULL-CONTROL CMS & PRISMA STUDIO...');
+        setTimeout(() => {
+          window.location.hash = '#cms';
+        }, 600);
         break;
       case 'apps':
       case 'miniapp':
@@ -705,7 +713,7 @@ export default function HeroTelemetry() {
             {/* Quick Command Pills */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-white/10 text-[10px]">
               <span className="text-white/40 uppercase tracking-widest mr-1">Quick Run:</span>
-              {['whoami', 'projects', 'skills', 'ip', 'ping', 'contact', 'clear'].map(cmd => (
+              {['whoami', 'cms', 'projects', 'skills', 'ip', 'ping', 'contact', 'clear'].map(cmd => (
                 <button
                   key={cmd}
                   onClick={() => executeCommand(cmd)}
