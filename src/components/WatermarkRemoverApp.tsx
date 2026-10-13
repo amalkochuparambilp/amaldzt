@@ -13,7 +13,6 @@ import {
   Layers,
   Info,
   AlertTriangle,
-  Wand2,
   ShieldCheck,
   RefreshCw,
 } from 'lucide-react';
@@ -265,19 +264,6 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
     }
   };
 
-  const handleLoadSampleImage = async () => {
-    setIsImgLoading(true);
-    try {
-      const res = await fetch('/watermark/before.webp');
-      const blob = await res.blob();
-      const sampleFile = new File([blob], 'gemini_sample_watermarked.webp', { type: 'image/webp' });
-      await handleImageUpload(sampleFile);
-    } catch (e) {
-      console.error('Failed to load sample image:', e);
-      setIsImgLoading(false);
-    }
-  };
-
   const handleSelectImagePreset = (presetKey: 'new' | 'classic') => {
     setImgPreset(presetKey);
     const w = imgFrame ? imgFrame.width : 1536;
@@ -463,88 +449,62 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
       {/* ================= IMAGE REMOVER PANEL ================= */}
       {activeTab === 'image' && (
         <div className="space-y-6">
-          {/* Upload Dropzone + Quick Sample Button */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div
-              onClick={() => !isImgLoading && imgInputRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault();
-                if (!isImgLoading) setImgDragOver(true);
-              }}
-              onDragLeave={() => setImgDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setImgDragOver(false);
-                if (!isImgLoading && e.dataTransfer.files.length) {
-                  handleImageUpload(e.dataTransfer.files[0]);
+          {/* Upload Dropzone */}
+          <div
+            onClick={() => !isImgLoading && imgInputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              if (!isImgLoading) setImgDragOver(true);
+            }}
+            onDragLeave={() => setImgDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setImgDragOver(false);
+              if (!isImgLoading && e.dataTransfer.files.length) {
+                handleImageUpload(e.dataTransfer.files[0]);
+              }
+            }}
+            className={`w-full border-2 border-dashed rounded-xs p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
+              imgDragOver
+                ? 'border-cyan-400 bg-cyan-500/10'
+                : 'border-white/20 bg-black/40 hover:border-white/40 hover:bg-white/[0.02]'
+            }`}
+          >
+            <input
+              ref={imgInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files?.length) {
+                  handleImageUpload(e.target.files[0]);
+                  e.target.value = '';
                 }
               }}
-              className={`lg:col-span-3 border-2 border-dashed rounded-xs p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
-                imgDragOver
-                  ? 'border-cyan-400 bg-cyan-500/10'
-                  : 'border-white/20 bg-black/40 hover:border-white/40 hover:bg-white/[0.02]'
-              }`}
-            >
-              <input
-                ref={imgInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files?.length) {
-                    handleImageUpload(e.target.files[0]);
-                    e.target.value = '';
-                  }
-                }}
-              />
-              {isImgLoading ? (
-                <>
-                  <RefreshCw className="w-7 h-7 text-cyan-400 animate-spin" />
-                  <p className="text-sm font-mono font-bold text-cyan-300 uppercase">
-                    Processing &amp; Detecting Watermark...
-                  </p>
-                  <p className="text-xs font-mono text-white/40">
-                    Running multi-scale NCC &amp; gradient edge analysis...
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="w-11 h-11 rounded-xs bg-white/5 border border-white/15 flex items-center justify-center text-cyan-400">
-                    <Upload className="w-5 h-5" />
-                  </div>
-                  <p className="text-sm font-mono font-bold text-white uppercase">
-                    {imgFile ? `Loaded: ${imgFile.name} (Click or Drop to Replace)` : 'Upload or Drag Your Gemini / Nano Banana Image'}
-                  </p>
-                  <p className="text-xs font-mono text-white/40">
-                    Supports PNG, JPG, WebP • 100% Local Browser Processing
-                  </p>
-                </>
-              )}
-            </div>
-
-            {/* 1-Click Sample Watermarked Image Loader */}
-            <div className="bg-black/50 border border-white/15 p-5 rounded-xs flex flex-col justify-between space-y-3">
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">
-                  Instant Demo Test
-                </span>
-                <h3 className="text-xs font-mono font-bold text-white uppercase">
-                  Don't have a watermarked photo handy?
-                </h3>
-                <p className="text-[11px] text-white/50 font-sans leading-relaxed">
-                  Load the calibrated Gemini sample image to test auto-detection, live zoom alignment, and pixel-perfect unblending immediately.
+            />
+            {isImgLoading ? (
+              <>
+                <RefreshCw className="w-7 h-7 text-cyan-400 animate-spin" />
+                <p className="text-sm font-mono font-bold text-cyan-300 uppercase">
+                  Processing &amp; Detecting Watermark...
                 </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleLoadSampleImage}
-                disabled={isImgLoading}
-                className="w-full py-2.5 px-3 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold uppercase tracking-wider rounded-xs flex items-center justify-center gap-2 transition-colors cursor-pointer whitespace-nowrap"
-              >
-                <Wand2 className="w-3.5 h-3.5" />
-                <span>Load Sample Image</span>
-              </button>
-            </div>
+                <p className="text-xs font-mono text-white/40">
+                  Running multi-scale NCC &amp; gradient edge analysis...
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-11 h-11 rounded-xs bg-white/5 border border-white/15 flex items-center justify-center text-cyan-400">
+                  <Upload className="w-5 h-5" />
+                </div>
+                <p className="text-sm font-mono font-bold text-white uppercase">
+                  {imgFile ? `Loaded: ${imgFile.name} (Click or Drop to Replace)` : 'Upload or Drag Your Gemini / Nano Banana Image'}
+                </p>
+                <p className="text-xs font-mono text-white/40">
+                  Supports PNG, JPG, WebP • 100% Local Browser Processing
+                </p>
+              </>
+            )}
           </div>
 
           {/* Live Image Tuner */}
@@ -1124,22 +1084,18 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
         </div>
       )}
 
-      {/* Mathematical Unblending Reference & Before/After Showcase */}
-      <div className="border-t border-white/10 pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-        <div className="lg:col-span-5 space-y-3">
-          <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">
-            Zero-Blur Mathematical Restoration
-          </span>
-          <h3 className="text-base font-mono font-bold text-white uppercase">
-            Why Reverse-Alpha Beats AI Inpainting
-          </h3>
-          <p className="text-xs text-gray-400 font-sans leading-relaxed">
-            Google Gemini, Imagen 3, Nano Banana, Google Flow, and Veo 3 embed visible watermarks using semi-transparent alpha blending. Because original pixel data remains underneath, exact reverse-alpha subtraction restores 100% of original clarity:
-          </p>
-          <div className="bg-black/70 border border-white/15 p-3 rounded-xs font-mono text-xs text-cyan-300 text-center">
-            Original = (Watermarked − Logo × α) / (1 − α)
+      {/* Mathematical Unblending Reference */}
+      <div className="border-t border-white/10 pt-6 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">
+              Zero-Blur Mathematical Restoration
+            </span>
+            <h3 className="text-base font-mono font-bold text-white uppercase">
+              Why Reverse-Alpha Beats AI Inpainting
+            </h3>
           </div>
-          <div className="flex flex-wrap gap-3 text-[11px] font-mono text-white/60 pt-1">
+          <div className="flex flex-wrap gap-3 text-[11px] font-mono text-white/60">
             <span>100% Client-Side Privacy</span>
             <span>·</span>
             <span>Zero Quality Loss</span>
@@ -1147,32 +1103,11 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
             <span>WebCodecs GPU Muxing</span>
           </div>
         </div>
-
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-black/50 border border-white/10 p-3 rounded-xs space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-rose-400 font-bold uppercase">Before (Gemini Sparkle)</span>
-              <span className="text-white/40">Visible Watermark</span>
-            </div>
-            <img
-              src="/watermark/before.webp"
-              alt="Before Gemini watermark removal"
-              referrerPolicy="no-referrer"
-              className="w-full h-48 object-cover rounded-2xs border border-white/10"
-            />
-          </div>
-          <div className="bg-black/50 border border-emerald-500/25 p-3 rounded-xs space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-emerald-400 font-bold uppercase">After (Alpha Unblended)</span>
-              <span className="text-emerald-400/60">100% Pixel Recovery</span>
-            </div>
-            <img
-              src="/watermark/after.webp"
-              alt="After Gemini watermark removal"
-              referrerPolicy="no-referrer"
-              className="w-full h-48 object-cover rounded-2xs border border-emerald-500/20"
-            />
-          </div>
+        <p className="text-xs text-gray-400 font-sans leading-relaxed max-w-3xl">
+          Google Gemini, Imagen 3, Nano Banana, Google Flow, and Veo 3 embed visible watermarks using semi-transparent alpha blending. Because original pixel data remains underneath, exact reverse-alpha subtraction restores 100% of original clarity:
+        </p>
+        <div className="bg-black/70 border border-white/15 p-3 rounded-xs font-mono text-xs text-cyan-300 text-center max-w-xl">
+          Original = (Watermarked − Logo × α) / (1 − α)
         </div>
       </div>
     </div>
