@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useCMS } from '../context/CMSContext';
+import { PROJECTS } from '../data';
 import { Project } from '../types';
 import { Github, Tag, ShieldCheck, X } from 'lucide-react';
 
 export default function Projects() {
-  const { cms } = useCMS();
-  const publishedProjects = cms.projects.filter((p) => p.published !== false);
+  const publishedProjects = PROJECTS.filter((p) => p.published !== false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   return (

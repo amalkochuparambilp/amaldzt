@@ -23,11 +23,14 @@ import {
   Sliders,
   CheckCircle2,
   AlertCircle,
-  Wand2
+  Wand2,
+  PhoneCall
 } from 'lucide-react';
+import { copyToClipboard } from '../utils/clipboard';
 import FileShareRoom from './p2p/FileShareRoom';
 import QRCodeDisplay from './QRCodeDisplay';
 import WatermarkRemoverApp from './WatermarkRemoverApp';
+import PhoneCallApp from './PhoneCallApp';
 
 interface MiniAppsProps {
   initialAppId?: string;
@@ -77,6 +80,8 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
         setActiveApp('drop');
       } else if (path.startsWith('/watermark') || path.startsWith('/gemini-watermark-remover')) {
         setActiveApp('watermark');
+      } else if (path.startsWith('/phone') || path.startsWith('/call') || path.startsWith('/dialer')) {
+        setActiveApp('phone');
       } else if (app) {
         setActiveApp(app);
       } else if (path.startsWith('/apps')) {
@@ -102,22 +107,40 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
   const handleCopyHubUrl = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const fullUrl = `${origin}/apps`;
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      setCopiedHubUrl(true);
-      setTimeout(() => setCopiedHubUrl(false), 2000);
-    });
+    copyToClipboard(fullUrl).then((ok) => {
+      if (ok) {
+        setCopiedHubUrl(true);
+        setTimeout(() => setCopiedHubUrl(false), 2000);
+      }
+    }).catch(() => {});
   };
 
   const handleCopyAppUrl = (appId: string, directPath: string) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const fullUrl = `${origin}${directPath}`;
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      setCopiedAppUrl(appId);
-      setTimeout(() => setCopiedAppUrl(null), 2000);
-    });
+    copyToClipboard(fullUrl).then((ok) => {
+      if (ok) {
+        setCopiedAppUrl(appId);
+        setTimeout(() => setCopiedAppUrl(null), 2000);
+      }
+    }).catch(() => {});
   };
 
   const miniAppsList: MiniAppItem[] = [
+    {
+      id: 'phone',
+      title: 'India WebPhone (+91 Caller)',
+      tagline: 'Browser VoIP Calling with Real DTMF & India Gateway',
+      category: 'communication',
+      categoryLabel: 'Communication & VoIP',
+      badge: '+91 India • Live Audio',
+      badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+      icon: PhoneCall,
+      description: 'PopTox-inspired web dialer exclusively configured for Indian phone numbers (+91). Dial landline and mobile numbers with authentic DTMF dual-frequency sound synthesis, live microphone activity meter, and quick-dial presets.',
+      features: ['Exclusively +91 India Gateways', 'Real DTMF Audio Oscillators', 'Live Mic Activity VU Meter', 'Speed Dial & Recent Logs'],
+      techStack: ['Web Audio API', 'MediaStream WebRTC', 'DTMF Synthesizer', 'India Numbering Plan'],
+      directUrl: '/apps?app=phone'
+    },
     {
       id: 'watermark',
       title: 'Gemini & Veo Watermark Remover',
@@ -262,6 +285,10 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
 
           {(activeApp === 'watermark' || activeApp === 'gemini-watermark-remover') && (
             <WatermarkRemoverApp onBack={handleBackToCatalog} />
+          )}
+
+          {(activeApp === 'phone' || activeApp === 'call' || activeApp === 'dialer') && (
+            <PhoneCallApp onBack={handleBackToCatalog} />
           )}
 
           {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}
@@ -472,10 +499,12 @@ function LibCodeApp({ onBack }: { onBack: () => void }) {
 
   const handleCopyTag = () => {
     const text = `LIBCODE ACCESSION TAG\nAccession ID: ${accessionNumber}\nTitle: ${bookTitle}\nAuthor: ${authorName}\nShelf: ${shelfLocation}`;
-    navigator.clipboard.writeText(text).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    });
+    copyToClipboard(text).then((ok) => {
+      if (ok) {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      }
+    }).catch(() => {});
   };
 
   return (

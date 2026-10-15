@@ -10,6 +10,11 @@ export const AMAL_INFO = {
   linkedin: 'https://linkedin.com/in/amalkochuparambilp',
   github: 'https://github.com/amalkochuparambilp',
   summary: 'BCA candidate at Jawaharlal Nehru Institute of Arts and Science (JNIAS) with strong technical expertise in React, Python, Django, PHP, MySQL, and modern web architectures. Founder and Lead at DZt digital platform, developer of LibCode JNIAS, Co-operative Bank Exam Portal, and Hrdiya health analytics application.',
+  campusBadge: 'JNIAS BALAGRAM (BCA 2026)',
+  ecosystemNode: 'BALAGRAM_NODE',
+  resumeSummary: 'Recent BCA graduate seeking entry-level opportunity to apply foundational skills and grow professionally. Passionate developer specializing in high-performance user interfaces, Python/Django health analytics platforms, and co-operative bank portal solutions.',
+  aboutBioParagraph1: 'I am a passionate software developer and Founder/Lead at DZt, currently pursuing my Bachelor of Computer Application (BCA) degree at Jawaharlal Nehru Institute of Arts and Science (JNIAS) in Balagram, Idukki.',
+  aboutBioParagraph2: 'My technical expertise bridges full-stack application development, database design, and creative media. I specialize in building robust web applications with React, TypeScript, Python, Django, PHP, and MySQL. From engineering specialized college management software to crafting AI-assisted health diagnostic platforms, my goal is to deliver clean, scalable, and high-impact digital solutions.',
   education: {
     degree: 'Bachelor of Computer Application (BCA)',
     institution: 'Jawaharlal Nehru Institute of Arts and Science (JNIAS)',
@@ -36,7 +41,11 @@ export const PROJECTS: Project[] = [
       'Admin analytics dashboard for circulation & fine tracking'
     ],
     githubUrl: 'https://jnias.com',
-    featured: true
+    published: true,
+    featured: true,
+    sortOrder: 0,
+    highlightLabel: '01. LIBCODE JNIAS',
+    highlightStack: 'PHP / MySQL'
   },
   {
     id: 'bank-exam-portal',
@@ -52,7 +61,11 @@ export const PROJECTS: Project[] = [
       'Admin portal for candidate management, question creation, and score export'
     ],
     githubUrl: 'https://github.com/amalkp/co-operative-bank-exam-portal',
-    featured: true
+    published: true,
+    featured: true,
+    sortOrder: 1,
+    highlightLabel: '02. BANK EXAM PORTAL',
+    highlightStack: 'PHP / MySQL'
   },
   {
     id: 'hrdiya-health-analysis',
@@ -68,7 +81,11 @@ export const PROJECTS: Project[] = [
       'Responsive patient portal and admin medical record panel'
     ],
     githubUrl: 'https://github.com/amalkp/hrdiya-health-analysis',
-    featured: true
+    published: true,
+    featured: true,
+    sortOrder: 2,
+    highlightLabel: '03. HRDIYA HEALTH',
+    highlightStack: 'Python / Django'
   },
   {
     id: 'gemini-watermark-remover',
@@ -85,7 +102,11 @@ export const PROJECTS: Project[] = [
     ],
     githubUrl: 'https://github.com/ishara-madu/gemini-watermark-remover',
     liveUrl: '/apps?app=watermark',
-    featured: true
+    published: true,
+    featured: true,
+    sortOrder: 3,
+    highlightLabel: '04. WATERMARK REMOVER',
+    highlightStack: 'TypeScript / Canvas'
   },
   {
     id: 'dzt-developer-platform',
@@ -100,31 +121,28 @@ export const PROJECTS: Project[] = [
       'High-contrast accessible dark theme design system'
     ],
     githubUrl: 'https://github.com/amalkp/dzt-platform',
-    featured: false
+    published: true,
+    featured: false,
+    sortOrder: 4,
+    highlightLabel: '05. DZT PLATFORM',
+    highlightStack: 'React / Vite'
   }
 ];
 
 export const SKILLS: Skill[] = [
-  { name: 'React', level: 90, category: 'Frontend', icon: 'Code2' },
-  { name: 'PHP', level: 85, category: 'Backend', icon: 'Server' },
-  { name: 'Python', level: 88, category: 'Backend', icon: 'Terminal' },
-  { name: 'Django', level: 85, category: 'Backend', icon: 'Database' },
-  { name: 'SQLite / MySQL', level: 82, category: 'Backend', icon: 'HardDrive' },
-  { name: 'JavaScript / TS', level: 88, category: 'Frontend', icon: 'Cpu' },
-  { name: 'Tailwind CSS', level: 92, category: 'Frontend', icon: 'Layout' },
-  { name: 'Computer Literacy', level: 95, category: 'Core & Tools', icon: 'Monitor' },
-  { name: 'Git & Version Control', level: 85, category: 'Core & Tools', icon: 'GitBranch' },
-  { name: 'Team Work & Collaboration', level: 95, category: 'Professional', icon: 'Users' },
-  { name: 'System Architecture', level: 80, category: 'Core & Tools', icon: 'Layers' },
-  { name: 'UI/UX Design', level: 86, category: 'Frontend', icon: 'Palette' },
-  { name: 'Affinity', level: 89, category: 'Core & Tools', icon: 'Palette' }
-];
-
-export const ECOSYSTEM_NODES = [
-  { id: 'libcode-node', name: 'LibCode JNIAS Core', status: 'ACTIVE', type: 'Library Engine', latency: '3ms' },
-  { id: 'bankexam-node', name: 'Co-op Bank Exam Portal', status: 'ONLINE', type: 'Exam Engine', latency: '4ms' },
-  { id: 'hrdiya-node', name: 'Hrdiya Health Analytics', status: 'OPERATIONAL', type: 'Django Hub', latency: '5ms' },
-  { id: 'dzt-core', name: 'DZt Platform Kernel', status: 'READY', type: 'Interface', latency: '1ms' }
+  { id: 'skill-1', name: 'React', level: 90, category: 'Frontend', icon: 'Code2', sortOrder: 0 },
+  { id: 'skill-2', name: 'PHP', level: 85, category: 'Backend', icon: 'Server', sortOrder: 1 },
+  { id: 'skill-3', name: 'Python', level: 88, category: 'Backend', icon: 'Terminal', sortOrder: 2 },
+  { id: 'skill-4', name: 'Django', level: 85, category: 'Backend', icon: 'Database', sortOrder: 3 },
+  { id: 'skill-5', name: 'SQLite / MySQL', level: 82, category: 'Backend', icon: 'HardDrive', sortOrder: 4 },
+  { id: 'skill-6', name: 'JavaScript / TS', level: 88, category: 'Frontend', icon: 'Cpu', sortOrder: 5 },
+  { id: 'skill-7', name: 'Tailwind CSS', level: 92, category: 'Frontend', icon: 'Layout', sortOrder: 6 },
+  { id: 'skill-8', name: 'Computer Literacy', level: 95, category: 'Core & Tools', icon: 'Monitor', sortOrder: 7 },
+  { id: 'skill-9', name: 'Git & Version Control', level: 85, category: 'Core & Tools', icon: 'GitBranch', sortOrder: 8 },
+  { id: 'skill-10', name: 'Team Work & Collaboration', level: 95, category: 'Professional', icon: 'Users', sortOrder: 9 },
+  { id: 'skill-11', name: 'System Architecture', level: 80, category: 'Core & Tools', icon: 'Layers', sortOrder: 10 },
+  { id: 'skill-12', name: 'UI/UX Design', level: 86, category: 'Frontend', icon: 'Palette', sortOrder: 11 },
+  { id: 'skill-13', name: 'Affinity', level: 89, category: 'Core & Tools', icon: 'Palette', sortOrder: 12 }
 ];
 
 export const COLLABORATIONS: Collaboration[] = [
@@ -141,7 +159,8 @@ export const COLLABORATIONS: Collaboration[] = [
       'High-throughput search engine for fast library book discovery',
       'Admin analytics dashboard for library usage and book circulation statistics'
     ],
-    tags: ['Library Management', 'JNIAS', 'PHP / MySQL', 'Barcode Scanning', 'System Automation']
+    tags: ['Library Management', 'JNIAS', 'PHP / MySQL', 'Barcode Scanning', 'System Automation'],
+    sortOrder: 0
   },
   {
     id: 'coop-bank-portal',
@@ -156,7 +175,8 @@ export const COLLABORATIONS: Collaboration[] = [
       'Candidate verification, score audit trails, and result export options',
       'High-concurrency PHP & MySQL database architecture'
     ],
-    tags: ['Bank Recruitment', 'PHP / MySQL', 'Exam Automation', 'Auto Grading', 'Security Audit']
+    tags: ['Bank Recruitment', 'PHP / MySQL', 'Exam Automation', 'Auto Grading', 'Security Audit'],
+    sortOrder: 1
   },
   {
     id: 'hrdiya-health',
@@ -171,6 +191,18 @@ export const COLLABORATIONS: Collaboration[] = [
       'Doctor appointment and consultation message routing',
       'Secure healthcare data handling and responsive user dashboard'
     ],
-    tags: ['Python', 'Django', 'Healthcare Tech', 'Cardiac Risk Analysis', 'SQLite']
+    tags: ['Python', 'Django', 'Healthcare Tech', 'Cardiac Risk Analysis', 'SQLite'],
+    sortOrder: 2
   }
+];
+
+export const PARTNER_LOGOS = [
+  { id: 'logo-openai', name: 'OPENAI', src: '/logos/openai-wordmark-dark.svg', alt: 'OpenAI Logo', fileName: 'openai-wordmark-dark.svg', active: true, sortOrder: 0 },
+  { id: 'logo-axis-bank', name: 'AXIS BANK', src: '/logos/axis-bank.svg', alt: 'Axis Bank Logo', fileName: 'axis-bank.svg', active: true, sortOrder: 1 },
+  { id: 'logo-shopify', name: 'SHOPIFY', src: '/logos/shopify.svg', alt: 'Shopify Logo', fileName: 'shopify.svg', active: true, sortOrder: 2 },
+  { id: 'logo-nss', name: 'NSS', src: '/logos/new-nss-seeklogo.png', alt: 'National Service Scheme', fileName: 'new-nss-seeklogo.png', active: true, sortOrder: 3 },
+  { id: 'logo-uxbjxoi', name: 'PARTNER LOGO', src: '/logos/idUxbjXOi-_logos.svg', alt: 'Partner Logo', fileName: 'idUxbjXOi-_logos.svg', active: true, sortOrder: 4 },
+  { id: 'logo-hf5lcjo', name: 'TECH PARTNER', src: '/logos/idhf5lcjoR_1789676848779.svg', alt: 'Tech Partner Logo', fileName: 'idhf5lcjoR_1789676848779.svg', active: true, sortOrder: 5 },
+  { id: 'logo-jps0yq', name: 'CLOUD ECOSYSTEM', src: '/logos/idJPs0Yq7Y_1789677081540.svg', alt: 'Cloud Ecosystem Logo', fileName: 'idJPs0Yq7Y_1789677081540.svg', active: true, sortOrder: 6 },
+  { id: 'logo-jsce-imz', name: 'DZT NETWORK', src: '/logos/idJsCe_Imz_1789677158066.png', alt: 'DZt Network Logo', fileName: 'idJsCe_Imz_1789677158066.png', active: true, sortOrder: 7 }
 ];

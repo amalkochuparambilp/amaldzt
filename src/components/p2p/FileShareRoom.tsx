@@ -34,6 +34,7 @@ import {
   Smartphone,
   Laptop
 } from 'lucide-react';
+import { copyToClipboard } from '../../utils/clipboard';
 import {
   P2PFileManager,
   TransferMeta,
@@ -376,24 +377,30 @@ export default function FileShareRoom({ initialRoomId, onExit }: FileShareRoomPr
   const handleCopyLink = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const link = `${origin}/apps?app=drop&room=${encodeURIComponent(roomId)}`;
-    navigator.clipboard.writeText(link).then(() => {
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    });
+    copyToClipboard(link).then((ok) => {
+      if (ok) {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+      }
+    }).catch(() => {});
   };
 
   const handleCopyPin = () => {
-    navigator.clipboard.writeText(roomId).then(() => {
-      setCopiedPin(true);
-      setTimeout(() => setCopiedPin(false), 2000);
-    });
+    copyToClipboard(roomId).then((ok) => {
+      if (ok) {
+        setCopiedPin(true);
+        setTimeout(() => setCopiedPin(false), 2000);
+      }
+    }).catch(() => {});
   };
 
   const handleCopyNote = (id: string, text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedTextId(id);
-      setTimeout(() => setCopiedTextId(null), 2000);
-    });
+    copyToClipboard(text).then((ok) => {
+      if (ok) {
+        setCopiedTextId(id);
+        setTimeout(() => setCopiedTextId(null), 2000);
+      }
+    }).catch(() => {});
   };
 
   // Download all completed received files

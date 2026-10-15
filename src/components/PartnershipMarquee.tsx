@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useCMS } from '../context/CMSContext';
+import { useState, useMemo } from 'react';
+import { PARTNER_LOGOS } from '../data';
 
 interface PartnershipMarqueeProps {
   onNavigate?: (tab: string) => void;
@@ -14,42 +14,20 @@ export interface LogoItem {
 }
 
 export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueeProps) {
-  const { cms } = useCMS();
-  const cmsActiveLogos = useMemo(
-    () => cms.logos.filter((l) => l.active !== false),
-    [cms.logos]
+  const activeLogos = useMemo(
+    () => PARTNER_LOGOS.filter((l) => l.active !== false),
+    []
   );
 
-  const [serverLogos, setServerLogos] = useState<LogoItem[] | null>(null);
   const [erroredLogos, setErroredLogos] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchDynamicLogos = async () => {
-      try {
-        const response = await fetch(`/api/logos?t=${Date.now()}`);
-        if (!response.ok) return;
-        const data = await response.json();
-        if (isMounted && data.logos && Array.isArray(data.logos)) {
-          setServerLogos(data.logos);
-        }
-      } catch {
-        // Fallback to CMS context state
-      }
-    };
-
-    fetchDynamicLogos();
-  }, [cms.logos]);
 
   const handleImageError = (logoSrc: string) => {
     setErroredLogos((prev) => ({ ...prev, [logoSrc]: true }));
   };
 
   const validLogos = useMemo(() => {
-    const sourceList = cmsActiveLogos.length > 0 ? cmsActiveLogos : serverLogos || [];
-    return sourceList.filter((item) => !erroredLogos[item.src]);
-  }, [cmsActiveLogos, serverLogos, erroredLogos]);
+    return activeLogos.filter((item) => !erroredLogos[item.src]);
+  }, [activeLogos, erroredLogos]);
 
   const { track1, track2 } = useMemo(() => {
     if (validLogos.length === 0) return { track1: [], track2: [] };
