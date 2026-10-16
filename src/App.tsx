@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Radio, LayoutGrid, Boxes, AppWindow } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, UserCheck, Handshake, Battery, BatteryCharging, LayoutGrid } from 'lucide-react';
 
 import Hero from './components/Hero';
 import About from './components/About';
@@ -10,9 +10,12 @@ import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import MiniApps from './components/MiniApps';
+import Privacy from './components/Privacy';
+import Terms from './components/Terms';
+import Support from './components/Support';
 import { AMAL_INFO } from './data';
 
-type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact';
+type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact' | 'privacy' | 'terms' | 'support';
 
 export default function App() {
   const getInitialTab = (): Tab => {
@@ -20,6 +23,11 @@ export default function App() {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search;
+
+      if (path.startsWith('/privacy') || hash.includes('privacy')) return 'privacy';
+      if (path.startsWith('/terms') || hash.includes('terms')) return 'terms';
+      if (path.startsWith('/support') || hash.includes('support')) return 'support';
+
       if (
         path.startsWith('/apps') ||
         path.startsWith('/miniapp') ||
@@ -53,7 +61,7 @@ export default function App() {
 
       // Check standard section hashes
       const cleanHash = hash.replace('#', '') as Tab;
-      const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact'];
+      const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact', 'privacy', 'terms', 'support'];
       if (validTabs.includes(cleanHash)) {
         return cleanHash;
       }
@@ -199,15 +207,6 @@ export default function App() {
       window.history.pushState({ appId: 'watermark' }, '', '/apps?app=watermark');
       return;
     }
-    if (tab === 'phone' || tab === 'call' || tab === 'dialer') {
-      targetTab = 'apps';
-      setInitialAppId('phone');
-      setActiveTab(targetTab);
-      setIsMobileMenuOpen(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      window.history.pushState({ appId: 'phone' }, '', '/apps?app=phone');
-      return;
-    }
     if (tab === 'miniapp' || tab === 'apps') {
       targetTab = 'apps';
       setInitialAppId(undefined);
@@ -219,6 +218,14 @@ export default function App() {
 
     if (targetTab === 'apps') {
       window.history.pushState(null, '', '/apps');
+    } else if (targetTab === 'privacy') {
+      window.history.pushState(null, '', '/privacy');
+    } else if (targetTab === 'terms') {
+      window.history.pushState(null, '', '/terms');
+    } else if (targetTab === 'support') {
+      window.history.pushState(null, '', '/support');
+    } else if (targetTab === 'home') {
+      window.history.pushState(null, '', '/');
     } else {
       window.history.pushState(null, '', `/#${targetTab}`);
     }
@@ -231,7 +238,7 @@ export default function App() {
     { id: 'projects', label: 'Projects', icon: Layers },
     { id: 'skills', label: 'Skills', icon: Cpu },
     { id: 'resume', label: 'Resume', icon: BookOpen },
-    { id: 'apps', label: 'DZt MiniApp', icon: LayoutGrid, isLive: true },
+    { id: 'apps', label: 'WebDev', icon: LayoutGrid, isLive: true },
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 
@@ -260,9 +267,9 @@ export default function App() {
           <div className="space-y-0.5">
             <h1 className="text-sm font-bold tracking-tight uppercase leading-none text-white flex items-center gap-1.5 whitespace-nowrap">
               <span>Amal K P</span>
-              <span className="text-[9px] font-mono text-white/30 border border-white/20 px-1 py-0.2 rounded-xs font-normal">DZt</span>
+              <span className="text-[9px] font-mono text-white/30 border border-white/20 px-1 py-0.2 rounded-xs font-normal">Devzoft</span>
             </h1>
-            <p className="text-[10px] text-white/40 tracking-[0.08em] uppercase leading-none whitespace-nowrap">BCA Candidate • JNIAS Balagram</p>
+            <p className="text-[10px] text-white/40 tracking-[0.08em] uppercase leading-none whitespace-nowrap">WebDev &bull; JNIAS Balagram</p>
           </div>
         </button>
 
@@ -321,8 +328,8 @@ export default function App() {
 
           <div className="hidden 2xl:flex items-center text-right pr-1 shrink-0 whitespace-nowrap">
             <div>
-              <span className="block text-[10px] text-white/30 uppercase tracking-widest font-mono">Ecosystem</span>
-              <span className="text-xs font-medium tracking-tight text-white">Founder / Lead at <span className="italic font-serif">DZt</span></span>
+              <span className="block text-[10px] text-white/30 uppercase tracking-widest font-mono">Brand</span>
+              <span className="text-xs font-medium tracking-tight text-white">Devzoft Publisher</span>
             </div>
           </div>
 
@@ -372,7 +379,7 @@ export default function App() {
                   <span className="flex-1 text-left">{item.label}</span>
                   {item.isLive && (
                     <span className="text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-xs border border-emerald-500/30">
-                      P2P LIVE
+                      WEBDEV
                     </span>
                   )}
                 </button>
@@ -416,19 +423,30 @@ export default function App() {
             {activeTab === 'contact' && (
               <Contact />
             )}
+            {activeTab === 'privacy' && (
+              <Privacy onNavigate={handleNavigate} />
+            )}
+            {activeTab === 'terms' && (
+              <Terms onNavigate={handleNavigate} />
+            )}
+            {activeTab === 'support' && (
+              <Support onNavigate={handleNavigate} />
+            )}
           </motion.div>
         </AnimatePresence>
       </main>
 
       {/* Sleek Minimalist Footer */}
       <footer id="portfolio-minimal-footer" className="py-5 px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between bg-[#080808] border-t border-white/10 gap-3 no-print select-none z-10">
-        <div className="flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
+        <div className="flex items-center gap-5 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold flex-wrap">
+          <button onClick={() => handleNavigate('privacy')} className="hover:text-white transition-colors cursor-pointer">Privacy Policy</button>
+          <button onClick={() => handleNavigate('terms')} className="hover:text-white transition-colors cursor-pointer">Terms of Service</button>
+          <button onClick={() => handleNavigate('support')} className="hover:text-white transition-colors cursor-pointer">Support</button>
           <a id="footer-link-github" href={AMAL_INFO.github} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
           <a id="footer-link-linkedin" href={AMAL_INFO.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
-          <a id="footer-link-email" href={`mailto:${AMAL_INFO.email}`} className="hover:text-white transition-colors">Email</a>
         </div>
         <div className="text-[10px] uppercase tracking-[0.1em] text-white/30 text-center">
-          © 2026 {AMAL_INFO.name} — Founder of DZt — All Rights Reserved
+          © 2026 {AMAL_INFO.name} — WebDev / Devzoft — All Rights Reserved
         </div>
         <div className="flex items-center gap-3 text-xs font-mono text-white/40 hidden md:flex">
           <span>BALAGRAM_NODE</span>
