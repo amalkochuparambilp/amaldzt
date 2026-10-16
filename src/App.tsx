@@ -10,12 +10,9 @@ import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import MiniApps from './components/MiniApps';
-import Privacy from './components/Privacy';
-import Terms from './components/Terms';
-import Support from './components/Support';
 import { AMAL_INFO } from './data';
 
-type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact' | 'privacy' | 'terms' | 'support';
+type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact';
 
 export default function App() {
   const getInitialTab = (): Tab => {
@@ -23,10 +20,6 @@ export default function App() {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search;
-
-      if (path.startsWith('/privacy') || hash.includes('privacy')) return 'privacy';
-      if (path.startsWith('/terms') || hash.includes('terms')) return 'terms';
-      if (path.startsWith('/support') || hash.includes('support')) return 'support';
 
       if (
         path.startsWith('/apps') ||
@@ -38,21 +31,14 @@ export default function App() {
         path.startsWith('/files') ||
         path.startsWith('/watermark') ||
         path.startsWith('/gemini-watermark-remover') ||
-        path.startsWith('/phone') ||
-        path.startsWith('/call') ||
-        path.startsWith('/dialer') ||
         hash.startsWith('#apps') ||
         hash.startsWith('#miniapp') ||
         hash.startsWith('#drop') ||
         hash.startsWith('#share') ||
         hash.startsWith('#watermark') ||
-        hash.startsWith('#phone') ||
-        hash.startsWith('#call') ||
         hash.includes('/apps') ||
         hash.includes('/drop') ||
         hash.includes('/watermark') ||
-        hash.includes('/phone') ||
-        hash.includes('/call') ||
         search.includes('room=') ||
         search.includes('app=')
       ) {
@@ -61,7 +47,7 @@ export default function App() {
 
       // Check standard section hashes
       const cleanHash = hash.replace('#', '') as Tab;
-      const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact', 'privacy', 'terms', 'support'];
+      const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact'];
       if (validTabs.includes(cleanHash)) {
         return cleanHash;
       }
@@ -76,16 +62,6 @@ export default function App() {
       if (appParam) return appParam;
 
       const path = window.location.pathname.toLowerCase();
-      if (
-        path.startsWith('/phone') ||
-        path.startsWith('/call') ||
-        path.startsWith('/dialer') ||
-        window.location.hash.includes('phone') ||
-        window.location.hash.includes('call')
-      ) {
-        return 'phone';
-      }
-
       if (
         path.startsWith('/watermark') ||
         path.startsWith('/gemini-watermark-remover') ||
@@ -218,12 +194,6 @@ export default function App() {
 
     if (targetTab === 'apps') {
       window.history.pushState(null, '', '/apps');
-    } else if (targetTab === 'privacy') {
-      window.history.pushState(null, '', '/privacy');
-    } else if (targetTab === 'terms') {
-      window.history.pushState(null, '', '/terms');
-    } else if (targetTab === 'support') {
-      window.history.pushState(null, '', '/support');
     } else if (targetTab === 'home') {
       window.history.pushState(null, '', '/');
     } else {
@@ -307,10 +277,10 @@ export default function App() {
 
         {/* Header CTA Right */}
         <div className="flex items-center gap-2 sm:gap-3 no-print shrink-0">
-          {/* Header Battery Status Tracker */}
+          {/* Header Battery Status Tracker (Static Badge) */}
           <div 
             id="header-battery-tracker"
-            className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-xs font-mono text-[11px] text-white/80 select-none hover:bg-white/10 transition-colors shrink-0"
+            className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-xs font-mono text-[11px] text-white/80 select-none shrink-0"
             title={batteryStatus.charging ? 'Battery: Charging' : 'Battery: Discharging'}
           >
             {batteryStatus.charging ? (
@@ -423,27 +393,16 @@ export default function App() {
             {activeTab === 'contact' && (
               <Contact />
             )}
-            {activeTab === 'privacy' && (
-              <Privacy onNavigate={handleNavigate} />
-            )}
-            {activeTab === 'terms' && (
-              <Terms onNavigate={handleNavigate} />
-            )}
-            {activeTab === 'support' && (
-              <Support onNavigate={handleNavigate} />
-            )}
           </motion.div>
         </AnimatePresence>
       </main>
 
       {/* Sleek Minimalist Footer */}
       <footer id="portfolio-minimal-footer" className="py-5 px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between bg-[#080808] border-t border-white/10 gap-3 no-print select-none z-10">
-        <div className="flex items-center gap-5 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold flex-wrap">
-          <button onClick={() => handleNavigate('privacy')} className="hover:text-white transition-colors cursor-pointer">Privacy Policy</button>
-          <button onClick={() => handleNavigate('terms')} className="hover:text-white transition-colors cursor-pointer">Terms of Service</button>
-          <button onClick={() => handleNavigate('support')} className="hover:text-white transition-colors cursor-pointer">Support</button>
+        <div className="flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">
           <a id="footer-link-github" href={AMAL_INFO.github} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
           <a id="footer-link-linkedin" href={AMAL_INFO.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+          <a id="footer-link-email" href={`mailto:${AMAL_INFO.email}`} className="hover:text-white transition-colors">Email</a>
         </div>
         <div className="text-[10px] uppercase tracking-[0.1em] text-white/30 text-center">
           © 2026 {AMAL_INFO.name} — WebDev / Devzoft — All Rights Reserved
