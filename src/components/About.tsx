@@ -1,4 +1,4 @@
-import { AMAL_INFO } from '../data';
+import { useCMS } from '../context/CMSContext';
 import {
   UserCheck,
   GraduationCap,
@@ -8,7 +8,8 @@ import {
 } from 'lucide-react';
 
 export default function About() {
-  const profile = AMAL_INFO;
+  const { cms } = useCMS();
+  const { profile } = cms;
 
   return (
     <section className="py-12 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto space-y-12">

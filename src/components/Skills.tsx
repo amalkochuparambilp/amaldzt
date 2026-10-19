@@ -1,8 +1,11 @@
 import { motion } from 'motion/react';
-import { SKILLS, AMAL_INFO } from '../data';
+import { useCMS } from '../context/CMSContext';
 import * as Icons from 'lucide-react';
 
 export default function Skills() {
+  const { cms } = useCMS();
+  const { skills, profile } = cms;
+
   const renderIcon = (iconName: string) => {
     const LucideIcon = (Icons as any)[iconName];
     if (LucideIcon) {
@@ -47,7 +50,7 @@ export default function Skills() {
       <div className="space-y-3">
         <span className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono">Core Stack Overview</span>
         <div className="flex flex-wrap gap-2">
-          {AMAL_INFO.skillsList.map((skill) => (
+          {profile.skillsList.map((skill) => (
             <span key={skill} className="px-3 py-1.5 bg-[#111] border border-white/10 text-xs font-mono text-white/90">
               {skill}
             </span>
@@ -58,7 +61,7 @@ export default function Skills() {
       {/* Grid of Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {categories.map((category) => {
-          const categorySkills = SKILLS.filter((s) => s.category === category);
+          const categorySkills = skills.filter((s) => s.category === category);
           if (categorySkills.length === 0) return null;
 
           return (

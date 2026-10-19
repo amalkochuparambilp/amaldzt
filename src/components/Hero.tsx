@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { ArrowRight, Cpu, FileText, Mail, UserCheck } from 'lucide-react';
 import { AMAL_INFO } from '../data';
+import HeroTelemetry from './HeroTelemetry';
 import PartnershipMarquee from './PartnershipMarquee';
 
 interface HeroProps {
@@ -158,7 +159,10 @@ export default function Hero({ onNavigate }: HeroProps) {
           <PartnershipMarquee onNavigate={onNavigate} />
         </motion.div>
 
-        
+        {/* Live Interactive Telemetry Dashboard */}
+        <motion.div variants={itemVariants} className="pt-2">
+          <HeroTelemetry />
+        </motion.div>
       </motion.div>
     </section>
   );

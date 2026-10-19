@@ -30,21 +30,14 @@ export default function App() {
         path.startsWith('/files') ||
         path.startsWith('/watermark') ||
         path.startsWith('/gemini-watermark-remover') ||
-        path.startsWith('/phone') ||
-        path.startsWith('/call') ||
-        path.startsWith('/dialer') ||
         hash.startsWith('#apps') ||
         hash.startsWith('#miniapp') ||
         hash.startsWith('#drop') ||
         hash.startsWith('#share') ||
         hash.startsWith('#watermark') ||
-        hash.startsWith('#phone') ||
-        hash.startsWith('#call') ||
         hash.includes('/apps') ||
         hash.includes('/drop') ||
         hash.includes('/watermark') ||
-        hash.includes('/phone') ||
-        hash.includes('/call') ||
         search.includes('room=') ||
         search.includes('app=')
       ) {
@@ -68,16 +61,6 @@ export default function App() {
       if (appParam) return appParam;
 
       const path = window.location.pathname.toLowerCase();
-      if (
-        path.startsWith('/phone') ||
-        path.startsWith('/call') ||
-        path.startsWith('/dialer') ||
-        window.location.hash.includes('phone') ||
-        window.location.hash.includes('call')
-      ) {
-        return 'phone';
-      }
-
       if (
         path.startsWith('/watermark') ||
         path.startsWith('/gemini-watermark-remover') ||
@@ -197,15 +180,6 @@ export default function App() {
       setIsMobileMenuOpen(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       window.history.pushState({ appId: 'watermark' }, '', '/apps?app=watermark');
-      return;
-    }
-    if (tab === 'phone' || tab === 'call' || tab === 'dialer') {
-      targetTab = 'apps';
-      setInitialAppId('phone');
-      setActiveTab(targetTab);
-      setIsMobileMenuOpen(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      window.history.pushState({ appId: 'phone' }, '', '/apps?app=phone');
       return;
     }
     if (tab === 'miniapp' || tab === 'apps') {

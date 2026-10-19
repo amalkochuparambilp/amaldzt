@@ -1,0 +1,162 @@
+// Prisma PostgreSQL Schema for Amal K P — DZt Full-Control CMS
+// Connected to Prisma Postgres (pooled.db.prisma.io)
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SiteProfile {
+  id                  String   @id @default("default")
+  name                String   @default("Amal K P")
+  title               String   @default("BCA Candidate & Founder of DZt")
+  tagline             String
+  heroHeadingLine1    String   @default("Crafting digital")
+  heroHeadingItalic   String   @default("ecosystems")
+  heroHeadingLine2    String   @default("with precision & purpose.")
+  heroBio             String
+  availabilityText    String   @default("AVAILABLE FOR COLLABORATIONS")
+  availabilityActive  Boolean  @default(true)
+  campusBadge         String   @default("JNIAS BALAGRAM (BCA 2026)")
+  founderBadge        String   @default("Founder / Lead @ DZt")
+  location            String
+  email               String
+  phone               String
+  linkedin            String
+  github              String
+  summary             String
+  resumeSummary       String
+  aboutBioParagraph1  String
+  aboutBioParagraph2  String
+  eduDegree           String
+  eduInstitution      String
+  eduLocation         String
+  eduPeriod           String
+  eduStatus           String
+  skillsList          String[]
+  languages           String[]
+  ecosystemNode       String   @default("BALAGRAM_NODE")
+  buildVersion        String   @default("STABLE_BUILD_v2.0")
+  updatedAt           DateTime @updatedAt
+}
+
+model SiteSettings {
+  id                     String   @id @default("default")
+  showHeroMarquee        Boolean  @default(true)
+  showHeroTelemetry      Boolean  @default(true)
+  showHeroHighlights     Boolean  @default(true)
+  showBatteryTracker     Boolean  @default(true)
+  announcementActive     Boolean  @default(false)
+  announcementText       String   @default("")
+  announcementLinkText   String   @default("")
+  announcementLinkTarget String   @default("projects")
+  navConfig              Json
+  seoTitle               String
+  seoDescription         String
+  seoKeywords            String
+  seoCanonicalUrl        String   @default("https://amalkp.online/")
+  seoOgImage             String   @default("https://amalkp.online/logos/openai-wordmark-dark.svg")
+  adminEmail             String   @default("amalkochuparambilp@gmail.com")
+  adminPasscode          String   @default("dzt2026")
+  updatedAt              DateTime @updatedAt
+}
+
+model AdminUser {
+  id          String    @id @default("admin-primary")
+  email       String    @unique @default("amalkochuparambilp@gmail.com")
+  password    String    @default("dzt2026")
+  name        String    @default("Amal K P")
+  role        String    @default("Administrator")
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Project {
+  id              String   @id
+  title           String
+  description     String
+  longDescription String?
+  category        String   @default("system")
+  tech            String[]
+  features        String[]
+  githubUrl       String?
+  liveUrl         String?
+  featured        Boolean  @default(false)
+  published       Boolean  @default(true)
+  highlightLabel  String?
+  highlightStack  String?
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Skill {
+  id        String   @id
+  name      String
+  level     Int      @default(85)
+  category  String   @default("Frontend")
+  icon      String   @default("Code2")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Collaboration {
+  id           String   @id
+  role         String
+  organization String
+  badge        String
+  logoType     String   @default("libcode")
+  description  String
+  highlights   String[]
+  tags         String[]
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PartnerLogo {
+  id        String   @id
+  name      String
+  src       String
+  alt       String
+  fileName  String
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model KnowledgeRelationship {
+  id            String   @id
+  types         String[]
+  name          String
+  alternateName String[]
+  url           String?
+  status        String   @default("confirmed")
+  createdAt     DateTime @default(now())
+}
+
+model ContactMessage {
+  id                String   @id
+  name              String
+  email             String
+  message           String
+  status            String   @default("unread")
+  telegramDelivered Boolean  @default(false)
+  ipAddress         String?
+  createdAt         DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id
+  action    String
+  section   String
+  summary   String
+  timestamp DateTime @default(now())
+}
