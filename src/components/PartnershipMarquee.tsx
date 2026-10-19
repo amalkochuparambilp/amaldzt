@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { PARTNER_LOGOS } from '../data';
 
 interface PartnershipMarqueeProps {
   onNavigate?: (tab: string) => void;
@@ -12,14 +13,12 @@ export interface LogoItem {
   fileName: string;
 }
 
-const DEFAULT_LOGOS: LogoItem[] = [
-  { id: 'logo-1', name: 'JNIAS', src: '/logos/new-nss-seeklogo.png', alt: 'JNIAS Logo', fileName: 'new-nss-seeklogo.png' },
-  { id: 'logo-2', name: 'Shopify', src: '/logos/shopify.svg', alt: 'Shopify Logo', fileName: 'shopify.svg' },
-  { id: 'logo-3', name: 'OpenAI', src: '/logos/openai-wordmark-dark.svg', alt: 'OpenAI Logo', fileName: 'openai-wordmark-dark.svg' },
-  { id: 'logo-4', name: 'Axis Bank', src: '/logos/axis-bank.svg', alt: 'Axis Bank Logo', fileName: 'axis-bank.svg' }
-];
-
 export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueeProps) {
+  const activeLogos = useMemo(
+    () => PARTNER_LOGOS.filter((l) => l.active !== false),
+    []
+  );
+
   const [erroredLogos, setErroredLogos] = useState<Record<string, boolean>>({});
 
   const handleImageError = (logoSrc: string) => {
@@ -27,8 +26,8 @@ export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueePro
   };
 
   const validLogos = useMemo(() => {
-    return DEFAULT_LOGOS.filter((item) => !erroredLogos[item.src]);
-  }, [erroredLogos]);
+    return activeLogos.filter((item) => !erroredLogos[item.src]);
+  }, [activeLogos, erroredLogos]);
 
   const { track1, track2 } = useMemo(() => {
     if (validLogos.length === 0) return { track1: [], track2: [] };

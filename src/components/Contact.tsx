@@ -79,7 +79,6 @@ export default function Contact() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error on user edit
     if (formErrors[name as keyof FormErrors]) {
       setFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -92,7 +91,6 @@ export default function Contact() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Client-side validation check
     if (!validate()) {
       return;
     }
@@ -105,14 +103,12 @@ export default function Contact() {
     const message = formData.message.trim();
     const honeypot = formData.honeypot.trim();
 
-    // Honeypot spam interceptor
     if (honeypot) {
       setStatus('success');
       setFormData({ name: '', email: '', message: '', honeypot: '' });
       return;
     }
 
-    // Attempt transmission via backend /api/contact
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -133,7 +129,7 @@ export default function Contact() {
         }
       }
 
-      if (response.ok && data?.success) {
+      if (response.ok && (data?.success || response.status === 200)) {
         setStatus('success');
         setFormData({ name: '', email: '', message: '', honeypot: '' });
         setFormErrors({});
@@ -143,12 +139,6 @@ export default function Contact() {
       setStatus('error');
       if (data?.error) {
         setErrorMessage(data.error);
-      } else if (response.status === 404) {
-        setErrorMessage('The contact server route was not found. Please contact directly via email.');
-      } else if (response.status === 429) {
-        setErrorMessage('Please wait a moment before sending another message.');
-      } else if (response.status >= 500) {
-        setErrorMessage('The message dispatch service is temporarily unavailable. Please email directly.');
       } else {
         setErrorMessage('Unable to deliver message at this time. Please use direct email below.');
       }
@@ -156,7 +146,7 @@ export default function Contact() {
       console.error('Contact submission error:', networkErr);
       setStatus('error');
       setErrorMessage(
-        'Network error: Failed to connect to the messaging server. Please check your internet connection or use direct email.'
+        'Network error: Failed to connect to messaging server. Please use direct email.'
       );
     }
   };

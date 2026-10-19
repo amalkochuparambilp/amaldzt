@@ -2,7 +2,6 @@ import { motion } from 'motion/react';
 import { ArrowRight, Cpu, FileText, Mail, UserCheck } from 'lucide-react';
 import { AMAL_INFO } from '../data';
 import PartnershipMarquee from './PartnershipMarquee';
-import LiveTelemetryWidget from './LiveTelemetryWidget';
 
 interface HeroProps {
   onNavigate: (tab: string) => void;
@@ -154,16 +153,12 @@ export default function Hero({ onNavigate }: HeroProps) {
           </div>
         </motion.div>
 
-        {/* Live Telemetry & Network Widget */}
-        <motion.div variants={itemVariants} className="pt-2">
-          <LiveTelemetryWidget />
-        </motion.div>
-
         {/* Partnership and Colab Logo Marquee */}
         <motion.div variants={itemVariants} className="pt-2">
           <PartnershipMarquee onNavigate={onNavigate} />
         </motion.div>
 
+        
       </motion.div>
     </section>
   );
