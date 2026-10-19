@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, UserCheck, Handshake, Battery, BatteryCharging, LayoutGrid } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Radio, LayoutGrid, Boxes, AppWindow } from 'lucide-react';
 
 import Hero from './components/Hero';
 import About from './components/About';
@@ -20,7 +20,6 @@ export default function App() {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       const search = window.location.search;
-
       if (
         path.startsWith('/apps') ||
         path.startsWith('/miniapp') ||
@@ -31,14 +30,18 @@ export default function App() {
         path.startsWith('/files') ||
         path.startsWith('/watermark') ||
         path.startsWith('/gemini-watermark-remover') ||
+        path.startsWith('/photobooth') ||
+        path.startsWith('/booth') ||
         hash.startsWith('#apps') ||
         hash.startsWith('#miniapp') ||
         hash.startsWith('#drop') ||
         hash.startsWith('#share') ||
         hash.startsWith('#watermark') ||
+        hash.startsWith('#photobooth') ||
         hash.includes('/apps') ||
         hash.includes('/drop') ||
         hash.includes('/watermark') ||
+        hash.includes('/photobooth') ||
         search.includes('room=') ||
         search.includes('app=')
       ) {
@@ -68,6 +71,15 @@ export default function App() {
         window.location.hash.includes('watermark')
       ) {
         return 'watermark';
+      }
+
+      if (
+        path.startsWith('/photobooth') ||
+        path.startsWith('/booth') ||
+        window.location.hash.includes('photobooth') ||
+        window.location.hash.includes('booth')
+      ) {
+        return 'photobooth';
       }
 
       if (
@@ -194,8 +206,6 @@ export default function App() {
 
     if (targetTab === 'apps') {
       window.history.pushState(null, '', '/apps');
-    } else if (targetTab === 'home') {
-      window.history.pushState(null, '', '/');
     } else {
       window.history.pushState(null, '', `/#${targetTab}`);
     }
@@ -208,7 +218,7 @@ export default function App() {
     { id: 'projects', label: 'Projects', icon: Layers },
     { id: 'skills', label: 'Skills', icon: Cpu },
     { id: 'resume', label: 'Resume', icon: BookOpen },
-    { id: 'apps', label: 'WebDev', icon: LayoutGrid, isLive: true },
+    { id: 'apps', label: 'DZt MiniApp', icon: LayoutGrid, isLive: true },
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 
@@ -237,9 +247,9 @@ export default function App() {
           <div className="space-y-0.5">
             <h1 className="text-sm font-bold tracking-tight uppercase leading-none text-white flex items-center gap-1.5 whitespace-nowrap">
               <span>Amal K P</span>
-              <span className="text-[9px] font-mono text-white/30 border border-white/20 px-1 py-0.2 rounded-xs font-normal">Devzoft</span>
+              <span className="text-[9px] font-mono text-white/30 border border-white/20 px-1 py-0.2 rounded-xs font-normal">DZt</span>
             </h1>
-            <p className="text-[10px] text-white/40 tracking-[0.08em] uppercase leading-none whitespace-nowrap">WebDev &bull; JNIAS Balagram</p>
+            <p className="text-[10px] text-white/40 tracking-[0.08em] uppercase leading-none whitespace-nowrap">BCA Candidate • JNIAS Balagram</p>
           </div>
         </button>
 
@@ -277,10 +287,10 @@ export default function App() {
 
         {/* Header CTA Right */}
         <div className="flex items-center gap-2 sm:gap-3 no-print shrink-0">
-          {/* Header Battery Status Tracker (Static Badge) */}
+          {/* Header Battery Status Tracker */}
           <div 
             id="header-battery-tracker"
-            className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-xs font-mono text-[11px] text-white/80 select-none shrink-0"
+            className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-xs font-mono text-[11px] text-white/80 select-none hover:bg-white/10 transition-colors shrink-0"
             title={batteryStatus.charging ? 'Battery: Charging' : 'Battery: Discharging'}
           >
             {batteryStatus.charging ? (
@@ -298,8 +308,8 @@ export default function App() {
 
           <div className="hidden 2xl:flex items-center text-right pr-1 shrink-0 whitespace-nowrap">
             <div>
-              <span className="block text-[10px] text-white/30 uppercase tracking-widest font-mono">Brand</span>
-              <span className="text-xs font-medium tracking-tight text-white">Devzoft Publisher</span>
+              <span className="block text-[10px] text-white/30 uppercase tracking-widest font-mono">Ecosystem</span>
+              <span className="text-xs font-medium tracking-tight text-white">Founder / Lead at <span className="italic font-serif">DZt</span></span>
             </div>
           </div>
 
@@ -349,7 +359,7 @@ export default function App() {
                   <span className="flex-1 text-left">{item.label}</span>
                   {item.isLive && (
                     <span className="text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-xs border border-emerald-500/30">
-                      WEBDEV
+                      P2P LIVE
                     </span>
                   )}
                 </button>
@@ -405,7 +415,7 @@ export default function App() {
           <a id="footer-link-email" href={`mailto:${AMAL_INFO.email}`} className="hover:text-white transition-colors">Email</a>
         </div>
         <div className="text-[10px] uppercase tracking-[0.1em] text-white/30 text-center">
-          © 2026 {AMAL_INFO.name} — WebDev / Devzoft — All Rights Reserved
+          © 2026 {AMAL_INFO.name} — Founder of DZt — All Rights Reserved
         </div>
         <div className="flex items-center gap-3 text-xs font-mono text-white/40 hidden md:flex">
           <span>BALAGRAM_NODE</span>
