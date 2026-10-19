@@ -1,2 +1,5 @@
-export { default } from './HeroTelemetry';
-export * from './HeroTelemetry';
+import HeroTelemetry from './HeroTelemetry';
+
+export default HeroTelemetry;
+export { HeroTelemetry };
+export const LiveTelemetryWidget = HeroTelemetry;
