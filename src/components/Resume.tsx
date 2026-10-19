@@ -4,8 +4,10 @@ import { Printer, Mail, MapPin, Linkedin, Phone } from 'lucide-react';
 
 export default function Resume() {
   const profile = AMAL_INFO;
-  const publishedProjects = PROJECTS.filter((p) => p.published !== false);
+  const projects = PROJECTS;
   const resumeRef = useRef<HTMLDivElement>(null);
+
+  const publishedProjects = projects.filter((p) => p.published !== false);
 
   const handlePrint = () => {
     window.print();
@@ -73,7 +75,7 @@ export default function Resume() {
             PROFESSIONAL SUMMARY
           </h3>
           <p className="text-sm text-white/80 leading-relaxed font-light">
-            {profile.resumeSummary}
+            {profile.summary}
           </p>
         </div>
 

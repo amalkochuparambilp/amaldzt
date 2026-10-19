@@ -21,6 +21,7 @@ interface CollaborateProps {
 }
 
 export default function Collaborate({ onNavigate }: CollaborateProps) {
+  const collaborations = COLLABORATIONS;
   const [selectedCollab, setSelectedCollab] = useState<Collaboration | null>(null);
 
   const renderLogo = (logoType: Collaboration['logoType']) => {
@@ -91,7 +92,7 @@ export default function Collaborate({ onNavigate }: CollaborateProps) {
 
       {/* Main Collaborations Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {COLLABORATIONS.map((collab) => (
+        {collaborations.map((collab) => (
           <motion.div
             key={collab.id}
             whileHover={{ y: -5 }}
