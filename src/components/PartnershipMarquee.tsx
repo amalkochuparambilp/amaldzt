@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useCMS } from '../context/CMSContext';
+import { useState, useMemo } from 'react';
 
 interface PartnershipMarqueeProps {
   onNavigate?: (tab: string) => void;
@@ -13,43 +12,23 @@ export interface LogoItem {
   fileName: string;
 }
 
+const DEFAULT_LOGOS: LogoItem[] = [
+  { id: 'logo-1', name: 'JNIAS', src: '/logos/new-nss-seeklogo.png', alt: 'JNIAS Logo', fileName: 'new-nss-seeklogo.png' },
+  { id: 'logo-2', name: 'Shopify', src: '/logos/shopify.svg', alt: 'Shopify Logo', fileName: 'shopify.svg' },
+  { id: 'logo-3', name: 'OpenAI', src: '/logos/openai-wordmark-dark.svg', alt: 'OpenAI Logo', fileName: 'openai-wordmark-dark.svg' },
+  { id: 'logo-4', name: 'Axis Bank', src: '/logos/axis-bank.svg', alt: 'Axis Bank Logo', fileName: 'axis-bank.svg' }
+];
+
 export default function PartnershipMarquee({ onNavigate }: PartnershipMarqueeProps) {
-  const { cms } = useCMS();
-  const cmsActiveLogos = useMemo(
-    () => cms.logos.filter((l) => l.active !== false),
-    [cms.logos]
-  );
-
-  const [serverLogos, setServerLogos] = useState<LogoItem[] | null>(null);
   const [erroredLogos, setErroredLogos] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchDynamicLogos = async () => {
-      try {
-        const response = await fetch(`/api/logos?t=${Date.now()}`);
-        if (!response.ok) return;
-        const data = await response.json();
-        if (isMounted && data.logos && Array.isArray(data.logos)) {
-          setServerLogos(data.logos);
-        }
-      } catch {
-        // Fallback to CMS context state
-      }
-    };
-
-    fetchDynamicLogos();
-  }, [cms.logos]);
 
   const handleImageError = (logoSrc: string) => {
     setErroredLogos((prev) => ({ ...prev, [logoSrc]: true }));
   };
 
   const validLogos = useMemo(() => {
-    const sourceList = cmsActiveLogos.length > 0 ? cmsActiveLogos : serverLogos || [];
-    return sourceList.filter((item) => !erroredLogos[item.src]);
-  }, [cmsActiveLogos, serverLogos, erroredLogos]);
+    return DEFAULT_LOGOS.filter((item) => !erroredLogos[item.src]);
+  }, [erroredLogos]);
 
   const { track1, track2 } = useMemo(() => {
     if (validLogos.length === 0) return { track1: [], track2: [] };

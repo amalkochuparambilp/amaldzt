@@ -23,9 +23,11 @@ import {
   Sliders,
   CheckCircle2,
   AlertCircle,
-  Wand2
+  Wand2,
+  Camera
 } from 'lucide-react';
 import FileShareRoom from './p2p/FileShareRoom';
+import PhotoBoothRoom from './p2p/PhotoBoothRoom';
 import QRCodeDisplay from './QRCodeDisplay';
 import WatermarkRemoverApp from './WatermarkRemoverApp';
 
@@ -118,6 +120,20 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
   };
 
   const miniAppsList: MiniAppItem[] = [
+    {
+      id: 'photobooth',
+      title: 'P2P Live PhotoBooth',
+      tagline: 'Webcam Photo Strips & Instant P2P Room Beam',
+      category: 'communication',
+      categoryLabel: 'Live P2P & Media',
+      badge: 'WebRTC • Live',
+      badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+      icon: Camera,
+      description: 'Real-time peer-to-peer webcam photobooth with live CSS filters, countdown timers, 3-shot photo strips, and instant WebRTC DataChannel beam to all peers in the room.',
+      features: ['Live Camera Filters & Noir', '3-Shot Vertical PhotoStrips', 'WebRTC DataChannel Room Beam', 'Instant Peer Gallery Stream'],
+      techStack: ['WebRTC DataChannel', 'MediaStream API', 'Canvas API', 'TypeScript'],
+      directUrl: '/apps?app=photobooth'
+    },
     {
       id: 'watermark',
       title: 'Gemini & Veo Watermark Remover',
@@ -262,6 +278,12 @@ export default function MiniApps({ initialAppId, initialRoomId, onExitToHome }: 
 
           {(activeApp === 'watermark' || activeApp === 'gemini-watermark-remover') && (
             <WatermarkRemoverApp onBack={handleBackToCatalog} />
+          )}
+
+
+
+          {activeApp === 'photobooth' && (
+            <PhotoBoothRoom initialRoomId={initialRoomId} onExit={handleBackToCatalog} />
           )}
 
           {activeApp === 'libcode' && <LibCodeApp onBack={handleBackToCatalog} />}

@@ -754,3 +754,5 @@ export default function HeroTelemetry() {
     </div>
   );
 }
+
+export { HeroTelemetry };

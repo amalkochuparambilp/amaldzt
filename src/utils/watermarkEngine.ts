@@ -21,6 +21,7 @@ export interface TunerSettings {
   offsetY: number;
   sizeScale: number;
   mode?: 'veo' | 'gemini';
+  customBgImg?: HTMLImageElement;
 }
 
 export interface DetectionResult {
@@ -114,10 +115,13 @@ export function getRoi(width: number, height: number, wm: WatermarkBox): RoiBox 
 
 export function resolveBox(base: WatermarkBox, width: number, height: number, opts: Partial<TunerSettings> = {}): WatermarkBox {
   const sizeScale = opts.sizeScale || 1;
-  const size = Math.max(8, Math.min(Math.round(base.size * sizeScale), Math.min(width, height)));
-  const x = Math.max(0, Math.min(base.x + Math.round(opts.offsetX || 0), width - size));
-  const y = Math.max(0, Math.min(base.y + Math.round(opts.offsetY || 0), height - size));
-  return { size, x, y, width: size, height: size };
+  const baseW = base.width || base.size;
+  const baseH = base.height || base.size;
+  const w = Math.max(8, Math.min(Math.round(baseW * sizeScale), width));
+  const h = Math.max(8, Math.min(Math.round(baseH * sizeScale), height));
+  const x = Math.max(0, Math.min(base.x + Math.round(opts.offsetX || 0), width - w));
+  const y = Math.max(0, Math.min(base.y + Math.round(opts.offsetY || 0), height - h));
+  return { size: Math.max(w, h), x, y, width: w, height: h };
 }
 
 export function buildAlpha(bgImg: HTMLImageElement, roi: RoiBox, wm: WatermarkBox, gain: number): Float32Array {
@@ -125,22 +129,41 @@ export function buildAlpha(bgImg: HTMLImageElement, roi: RoiBox, wm: WatermarkBo
   const alphaMap = new Float32Array(count);
   const offX = wm.x - roi.x;
   const offY = wm.y - roi.y;
+  const wmW = wm.width || wm.size;
+  const wmH = wm.height || wm.size;
 
   const c = document.createElement('canvas');
-  c.width = wm.size;
-  c.height = wm.size;
+  c.width = wmW;
+  c.height = wmH;
   const cx = c.getContext('2d', { willReadFrequently: true })!;
   cx.imageSmoothingEnabled = true;
   cx.imageSmoothingQuality = 'high';
-  cx.drawImage(bgImg, 0, 0, wm.size, wm.size);
-  const data = cx.getImageData(0, 0, wm.size, wm.size).data;
+  cx.drawImage(bgImg, 0, 0, wmW, wmH);
+  const data = cx.getImageData(0, 0, wmW, wmH).data;
 
-  for (let row = 0; row < wm.size; row++) {
-    for (let col = 0; col < wm.size; col++) {
+  // Detect whether image has transparency
+  let hasAlphaChannel = false;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 250) {
+      hasAlphaChannel = true;
+      break;
+    }
+  }
+
+  for (let row = 0; row < wmH; row++) {
+    for (let col = 0; col < wmW; col++) {
       const ri = (offY + row) * roi.width + (offX + col);
       if (ri < 0 || ri >= count) continue;
-      const o = (row * wm.size + col) * 4;
-      const a = (Math.max(data[o], data[o + 1], data[o + 2]) / 255) * gain;
+      const o = (row * wmW + col) * 4;
+      let rawA: number;
+      if (hasAlphaChannel) {
+        const aChan = data[o + 3] / 255.0;
+        const lum = Math.max(data[o], data[o + 1], data[o + 2]) / 255.0;
+        rawA = aChan * (lum > 0.05 ? lum : 1.0);
+      } else {
+        rawA = Math.max(data[o], data[o + 1], data[o + 2]) / 255.0;
+      }
+      const a = rawA * gain;
       alphaMap[ri] = a > 0 ? Math.min(a, 0.99) : 0;
     }
   }
@@ -155,9 +178,10 @@ export function cleanFrame(
   base: WatermarkBox,
   opts: Partial<TunerSettings> = {}
 ): { wm: WatermarkBox; roi: RoiBox } {
+  const activeBg = opts.customBgImg || bgImg;
   const wm = resolveBox(base, width, height, opts);
   const roi = getRoi(width, height, wm);
-  const alpha = buildAlpha(bgImg, roi, wm, opts.gain ?? 1);
+  const alpha = buildAlpha(activeBg, roi, wm, opts.gain ?? 1);
   removeWatermark(imageData, alpha, {
     x: roi.x,
     y: roi.y,
@@ -216,11 +240,12 @@ export function getAdaptiveVideoPreset(presetKey: string, width = 720, height = 
 }
 
 // ── Advanced Watermark Auto-Detection System (Fused Multi-Scale, Gradient & Dual-Polarity) ──
-const alphaTemplateCache = new Map<number, { raw: Uint8ClampedArray; alphas: Float32Array; gradMag: Float32Array; size: number }>();
+const alphaTemplateCache = new Map<string, { raw: Uint8ClampedArray; alphas: Float32Array; gradMag: Float32Array; size: number }>();
 
 function getAlphaTemplateData(bgImg: HTMLImageElement, size: number) {
-  if (alphaTemplateCache.has(size)) {
-    return alphaTemplateCache.get(size)!;
+  const cacheKey = `${bgImg.src.slice(-32)}_${size}`;
+  if (alphaTemplateCache.has(cacheKey)) {
+    return alphaTemplateCache.get(cacheKey)!;
   }
   const c = document.createElement('canvas');
   c.width = size;
@@ -231,10 +256,24 @@ function getAlphaTemplateData(bgImg: HTMLImageElement, size: number) {
   cx.drawImage(bgImg, 0, 0, size, size);
   const raw = cx.getImageData(0, 0, size, size).data;
 
+  let hasAlphaChannel = false;
+  for (let i = 3; i < raw.length; i += 4) {
+    if (raw[i] < 250) {
+      hasAlphaChannel = true;
+      break;
+    }
+  }
+
   const alphas = new Float32Array(size * size);
   for (let i = 0; i < alphas.length; i++) {
     const o = i * 4;
-    alphas[i] = Math.max(raw[o], raw[o + 1], raw[o + 2]) / 255.0;
+    if (hasAlphaChannel) {
+      const aChan = raw[o + 3] / 255.0;
+      const lum = Math.max(raw[o], raw[o + 1], raw[o + 2]) / 255.0;
+      alphas[i] = aChan * (lum > 0.05 ? lum : 1.0);
+    } else {
+      alphas[i] = Math.max(raw[o], raw[o + 1], raw[o + 2]) / 255.0;
+    }
   }
 
   const gradMag = new Float32Array(size * size);
@@ -248,7 +287,7 @@ function getAlphaTemplateData(bgImg: HTMLImageElement, size: number) {
   }
 
   const template = { raw, alphas, gradMag, size };
-  alphaTemplateCache.set(size, template);
+  alphaTemplateCache.set(cacheKey, template);
   return template;
 }
 
@@ -825,7 +864,8 @@ export class VideoWatermarkEngine {
     const base = opts.mode === 'gemini' ? getWatermarkInfo(width, height) : this.getVeoWatermark(width, height);
     const wm = resolveBox(base, width, height, opts);
     const roi = getRoi(width, height, wm);
-    const alpha = buildAlpha(this.engine.bg96, roi, wm, gain);
+    const bgImgToUse = opts.customBgImg || this.engine.bg96;
+    const alpha = buildAlpha(bgImgToUse, roi, wm, gain);
     const region = { x: 0, y: 0, width: roi.width, height: roi.height };
 
     const canvas = Object.assign(document.createElement('canvas'), { width, height });
