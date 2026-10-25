@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { prisma, pgPool, getDatabaseEnvMetadata, reloadDatabaseConnection } from './prisma';
-import { DEFAULT_CMS_STATE } from './defaultState';
+import { DEFAULT_CMS_STATE } from '../cms/defaultState';
 import {
   CMSState,
   SiteProfileData,
@@ -29,7 +29,6 @@ export const ALLOWED_DB_TABLES = [
   'PartnerLogo',
   'KnowledgeRelationship',
   'ContactMessage',
-  'CourseRegistration',
   'AuditLog',
   '_prisma_migrations'
 ] as const;
@@ -272,31 +271,6 @@ export async function ensureDatabaseSeeded(forceCheck = false): Promise<void> {
       }
     } catch {
       // ignore fs scan errors
-    }
-
-    // Ensure CourseRegistration table exists in PostgreSQL
-    try {
-      await pgPool.query(`
-        CREATE TABLE IF NOT EXISTS "CourseRegistration" (
-          "id" TEXT NOT NULL,
-          "courseId" TEXT,
-          "course" TEXT NOT NULL,
-          "fullName" TEXT NOT NULL,
-          "countryCode" TEXT NOT NULL DEFAULT '+91',
-          "phoneNumber" TEXT NOT NULL,
-          "email" TEXT NOT NULL,
-          "collegeName" TEXT,
-          "location" TEXT,
-          "additionalNotes" TEXT,
-          "status" TEXT NOT NULL DEFAULT 'New',
-          "telegramDelivered" BOOLEAN NOT NULL DEFAULT false,
-          "ipAddress" TEXT,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "CourseRegistration_pkey" PRIMARY KEY ("id")
-        );
-      `);
-    } catch (tblErr) {
-      console.warn('[Prisma Repository] Notice creating CourseRegistration table:', tblErr);
     }
 
     isSeeded = true;

@@ -365,13 +365,6 @@ export const prisma = {
     hasTimestamp: false,
     jsonCols: []
   }),
-  courseRegistration: createPgModelDelegate({
-    tableName: 'CourseRegistration',
-    hasUpdatedAt: false,
-    hasCreatedAt: true,
-    hasTimestamp: false,
-    jsonCols: []
-  }),
   auditLog: createPgModelDelegate({
     tableName: 'AuditLog',
     hasUpdatedAt: false,

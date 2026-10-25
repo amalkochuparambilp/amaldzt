@@ -10,11 +10,6 @@ export const AMAL_INFO = {
   linkedin: 'https://linkedin.com/in/amalkochuparambilp',
   github: 'https://github.com/amalkochuparambilp',
   summary: 'BCA candidate at Jawaharlal Nehru Institute of Arts and Science (JNIAS) with strong technical expertise in React, Python, Django, PHP, MySQL, and modern web architectures. Founder and Lead at DZt digital platform, developer of LibCode JNIAS, Co-operative Bank Exam Portal, and Hrdiya health analytics application.',
-  resumeSummary: 'Dynamic BCA student and full-stack software engineer with hands-on expertise in building production applications using React, Python, Django, PHP, and MySQL. Proven track record leading digital innovation initiatives under the DZt ecosystem, including library automation systems, financial examination portals, and healthcare diagnostics.',
-  campusBadge: 'BCA @ JNIAS Balagram • Batch 2026',
-  ecosystemNode: 'BALAGRAM_CORE_NODE',
-  aboutBioParagraph1: 'I am a dedicated Bachelor of Computer Applications (BCA) candidate graduating in March 2026 from Jawaharlal Nehru Institute of Arts and Science (JNIAS), Balagram. My passion lies in architecting high-performance web applications, secure database systems, and robust developer tools.',
-  aboutBioParagraph2: 'As the founder and lead developer of the DZt technology ecosystem, I have engineered practical software solutions including LibCode library automation, Co-operative Bank examination portals, and the Hrdiya cardiac risk diagnostic platform. I combine clean frontend design with robust backend engineering to deliver seamless user experiences.',
   education: {
     degree: 'Bachelor of Computer Application (BCA)',
     institution: 'Jawaharlal Nehru Institute of Arts and Science (JNIAS)',

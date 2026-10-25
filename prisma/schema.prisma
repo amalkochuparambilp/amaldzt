@@ -153,23 +153,6 @@ model ContactMessage {
   createdAt         DateTime @default(now())
 }
 
-model CourseRegistration {
-  id                String   @id
-  courseId          String?
-  course            String
-  fullName          String
-  countryCode       String   @default("+91")
-  phoneNumber       String
-  email             String
-  collegeName       String?
-  location          String?
-  additionalNotes   String?
-  status            String   @default("New")
-  telegramDelivered Boolean  @default(false)
-  ipAddress         String?
-  createdAt         DateTime @default(now())
-}
-
 model AuditLog {
   id        String   @id
   action    String

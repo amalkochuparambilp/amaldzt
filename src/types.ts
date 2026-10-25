@@ -88,7 +88,7 @@ export interface NavItemConfig {
 
 export interface SiteSettingsData {
   showHeroMarquee: boolean;
-  showHeroTelemetry?: boolean;
+  showHeroTelemetry: boolean;
   showHeroHighlights: boolean;
   showBatteryTracker: boolean;
   announcementActive: boolean;

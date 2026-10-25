@@ -10,7 +10,7 @@ import {
 } from '../types';
 import {
   generatePostgresSqlDump
-} from '../db/prismaGenerators';
+} from '../cms/prismaGenerators';
 import {
   LayoutDashboard,
   UserCheck,

@@ -13,11 +13,9 @@ import {
   Layers,
   Info,
   AlertTriangle,
+  Wand2,
   ShieldCheck,
   RefreshCw,
-  Stamp,
-  FileImage,
-  X,
 } from 'lucide-react';
 import {
   WatermarkEngine,
@@ -32,16 +30,14 @@ import {
   detectVideoWatermarkCandidate,
   grabImageFrame,
   grabVideoPreviewFrame,
-  resolveBox,
 } from '../utils/watermarkEngine';
-import CustomWatermarkStamper from './CustomWatermarkStamper';
 
 interface WatermarkRemoverAppProps {
   onBack?: () => void;
 }
 
 export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps) {
-  const [activeTab, setActiveTab] = useState<'image' | 'video' | 'stamp'>('image');
+  const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
 
   // Engines
   const watermarkEngineRef = useRef<WatermarkEngine | null>(null);
@@ -53,21 +49,13 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
   const [imgBase, setImgBase] = useState<WatermarkBox | null>(null);
   const [imgBitmap, setImgBitmap] = useState<ImageBitmap | null>(null);
   const [imgDetected, setImgDetected] = useState<DetectionResult | null>(null);
-  const [imgPreset, setImgPreset] = useState<'new' | 'classic' | 'custom'>('new');
+  const [imgPreset, setImgPreset] = useState<'new' | 'classic'>('new');
   const [imgSettings, setImgSettings] = useState<TunerSettings>({
     gain: 0.6,
     offsetX: -128,
     offsetY: -128,
     sizeScale: 1.0,
   });
-
-  // Custom Watermark Image for Unblending
-  const [customWmFile, setCustomWmFile] = useState<File | null>(null);
-  const [customWmImg, setCustomWmImg] = useState<HTMLImageElement | null>(null);
-  const [customWmPreviewUrl, setCustomWmPreviewUrl] = useState<string | null>(null);
-  const [customWmWidth, setCustomWmWidth] = useState<number>(0);
-  const [customWmHeight, setCustomWmHeight] = useState<number>(0);
-  const customWmInputRef = useRef<HTMLInputElement | null>(null);
   const [isImgLoading, setIsImgLoading] = useState(false);
   const [imgExportResult, setImgExportResult] = useState<{
     originalUrl: string;
@@ -143,11 +131,7 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
     offscreen.width = width;
     offscreen.height = height;
     const copy = new ImageData(new Uint8ClampedArray(imageData.data), width, height);
-    const activeCustomImg = imgPreset === 'custom' && customWmImg ? customWmImg : undefined;
-    const { wm, roi } = cleanFrame(engine.bg96, copy, width, height, imgBase, {
-      ...imgSettings,
-      customBgImg: activeCustomImg,
-    });
+    const { wm, roi } = cleanFrame(engine.bg96, copy, width, height, imgBase, imgSettings);
     offscreen.getContext('2d')!.putImageData(copy, 0, 0);
 
     const maxW = 380;
@@ -183,7 +167,7 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
       zctx.lineWidth = 2;
       zctx.strokeRect((wm.x - roi.x) * sx, (wm.y - roi.y) * sy, wm.width * sx, wm.height * sy);
     }
-  }, [imgFrame, imgBase, imgSettings, imgBitmap, imgPreset, customWmImg]);
+  }, [imgFrame, imgBase, imgSettings, imgBitmap]);
 
   useEffect(() => {
     if (activeTab === 'image' && imgFrame) {
@@ -267,7 +251,7 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
       setImgBase(base);
       setImgBitmap(bmp);
       setImgDetected(detected);
-      setImgPreset((detected.presetKey as 'new' | 'classic' | 'custom') || 'new');
+      setImgPreset((detected.presetKey as 'new' | 'classic') || 'new');
       setImgSettings({
         gain: detected.gain,
         offsetX: detected.offsetX,
@@ -281,55 +265,21 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
     }
   };
 
-  // Click on main canvas to position watermark removal box directly
-  const handleMainCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!imgFrame || !imgBase || !imgMainCanvasRef.current) return;
-    const rect = imgMainCanvasRef.current.getBoundingClientRect();
-    const clickX = ((e.clientX - rect.left) / rect.width) * imgFrame.width;
-    const clickY = ((e.clientY - rect.top) / rect.height) * imgFrame.height;
-    const currentWm = resolveBox(imgBase, imgFrame.width, imgFrame.height, imgSettings);
-    const newOffX = Math.round(clickX - imgBase.x - currentWm.width / 2);
-    const newOffY = Math.round(clickY - imgBase.y - currentWm.height / 2);
-    setImgSettings((s) => ({ ...s, offsetX: newOffX, offsetY: newOffY }));
-  };
-
-  const handleCustomWatermarkUpload = (file: File) => {
-    if (!file.type.startsWith('image/')) return;
-    setCustomWmFile(file);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        setCustomWmImg(img);
-        setCustomWmWidth(img.naturalWidth);
-        setCustomWmHeight(img.naturalHeight);
-        setCustomWmPreviewUrl(e.target?.result as string);
-        setImgPreset('custom');
-        if (imgFrame) {
-          const aspect = img.naturalHeight / (img.naturalWidth || 1);
-          setImgBase((prev) => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              width: prev.size,
-              height: Math.max(12, Math.round(prev.size * aspect)),
-            };
-          });
-        }
-      };
-      img.src = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleSelectImagePreset = (presetKey: 'new' | 'classic' | 'custom') => {
-    setImgPreset(presetKey);
-    if (presetKey === 'custom') {
-      if (!customWmImg) {
-        customWmInputRef.current?.click();
-      }
-      return;
+  const handleLoadSampleImage = async () => {
+    setIsImgLoading(true);
+    try {
+      const res = await fetch('/watermark/before.webp');
+      const blob = await res.blob();
+      const sampleFile = new File([blob], 'gemini_sample_watermarked.webp', { type: 'image/webp' });
+      await handleImageUpload(sampleFile);
+    } catch (e) {
+      console.error('Failed to load sample image:', e);
+      setIsImgLoading(false);
     }
+  };
+
+  const handleSelectImagePreset = (presetKey: 'new' | 'classic') => {
+    setImgPreset(presetKey);
     const w = imgFrame ? imgFrame.width : 1536;
     const h = imgFrame ? imgFrame.height : 1536;
     const p = getAdaptiveImagePreset(presetKey, w, h);
@@ -338,7 +288,7 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
 
   const handleResetImageSliders = () => {
     if (imgDetected) {
-      setImgPreset((imgDetected.presetKey as 'new' | 'classic' | 'custom') || 'new');
+      setImgPreset((imgDetected.presetKey as 'new' | 'classic') || 'new');
       setImgSettings({
         gain: imgDetected.gain,
         offsetX: imgDetected.offsetX,
@@ -354,11 +304,7 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
     if (!imgFile || !imgFrame || !imgBase || !watermarkEngineRef.current) return;
     const { width, height, imageData } = imgFrame;
     const copy = new ImageData(new Uint8ClampedArray(imageData.data), width, height);
-    const activeCustomImg = imgPreset === 'custom' && customWmImg ? customWmImg : undefined;
-    cleanFrame(watermarkEngineRef.current.bg96, copy, width, height, imgBase, {
-      ...imgSettings,
-      customBgImg: activeCustomImg,
-    });
+    cleanFrame(watermarkEngineRef.current.bg96, copy, width, height, imgBase, imgSettings);
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -490,7 +436,7 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
           <button
             type="button"
             onClick={() => setActiveTab('image')}
-            className={`px-3.5 py-2 text-xs font-mono uppercase tracking-wider rounded-2xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+            className={`px-4 py-2 text-xs font-mono uppercase tracking-wider rounded-2xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'image'
                 ? 'bg-white text-black font-bold shadow-sm'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
@@ -502,26 +448,14 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
           <button
             type="button"
             onClick={() => setActiveTab('video')}
-            className={`px-3.5 py-2 text-xs font-mono uppercase tracking-wider rounded-2xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+            className={`px-4 py-2 text-xs font-mono uppercase tracking-wider rounded-2xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'video'
                 ? 'bg-white text-black font-bold shadow-sm'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
             <Video className="w-3.5 h-3.5" />
-            <span>Video Remover</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('stamp')}
-            className={`px-3.5 py-2 text-xs font-mono uppercase tracking-wider rounded-2xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'stamp'
-                ? 'bg-cyan-400 text-black font-bold shadow-sm'
-                : 'text-white/60 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Stamp className="w-3.5 h-3.5" />
-            <span>Add Custom Watermark</span>
+            <span>Video Remover (Veo/Flow)</span>
           </button>
         </div>
       </div>
@@ -529,62 +463,88 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
       {/* ================= IMAGE REMOVER PANEL ================= */}
       {activeTab === 'image' && (
         <div className="space-y-6">
-          {/* Upload Dropzone */}
-          <div
-            onClick={() => !isImgLoading && imgInputRef.current?.click()}
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (!isImgLoading) setImgDragOver(true);
-            }}
-            onDragLeave={() => setImgDragOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setImgDragOver(false);
-              if (!isImgLoading && e.dataTransfer.files.length) {
-                handleImageUpload(e.dataTransfer.files[0]);
-              }
-            }}
-            className={`w-full border-2 border-dashed rounded-xs p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
-              imgDragOver
-                ? 'border-cyan-400 bg-cyan-500/10'
-                : 'border-white/20 bg-black/40 hover:border-white/40 hover:bg-white/[0.02]'
-            }`}
-          >
-            <input
-              ref={imgInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                if (e.target.files?.length) {
-                  handleImageUpload(e.target.files[0]);
-                  e.target.value = '';
+          {/* Upload Dropzone + Quick Sample Button */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div
+              onClick={() => !isImgLoading && imgInputRef.current?.click()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (!isImgLoading) setImgDragOver(true);
+              }}
+              onDragLeave={() => setImgDragOver(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setImgDragOver(false);
+                if (!isImgLoading && e.dataTransfer.files.length) {
+                  handleImageUpload(e.dataTransfer.files[0]);
                 }
               }}
-            />
-            {isImgLoading ? (
-              <>
-                <RefreshCw className="w-7 h-7 text-cyan-400 animate-spin" />
-                <p className="text-sm font-mono font-bold text-cyan-300 uppercase">
-                  Processing &amp; Detecting Watermark...
+              className={`lg:col-span-3 border-2 border-dashed rounded-xs p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                imgDragOver
+                  ? 'border-cyan-400 bg-cyan-500/10'
+                  : 'border-white/20 bg-black/40 hover:border-white/40 hover:bg-white/[0.02]'
+              }`}
+            >
+              <input
+                ref={imgInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files?.length) {
+                    handleImageUpload(e.target.files[0]);
+                    e.target.value = '';
+                  }
+                }}
+              />
+              {isImgLoading ? (
+                <>
+                  <RefreshCw className="w-7 h-7 text-cyan-400 animate-spin" />
+                  <p className="text-sm font-mono font-bold text-cyan-300 uppercase">
+                    Processing &amp; Detecting Watermark...
+                  </p>
+                  <p className="text-xs font-mono text-white/40">
+                    Running multi-scale NCC &amp; gradient edge analysis...
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="w-11 h-11 rounded-xs bg-white/5 border border-white/15 flex items-center justify-center text-cyan-400">
+                    <Upload className="w-5 h-5" />
+                  </div>
+                  <p className="text-sm font-mono font-bold text-white uppercase">
+                    {imgFile ? `Loaded: ${imgFile.name} (Click or Drop to Replace)` : 'Upload or Drag Your Gemini / Nano Banana Image'}
+                  </p>
+                  <p className="text-xs font-mono text-white/40">
+                    Supports PNG, JPG, WebP • 100% Local Browser Processing
+                  </p>
+                </>
+              )}
+            </div>
+
+            {/* 1-Click Sample Watermarked Image Loader */}
+            <div className="bg-black/50 border border-white/15 p-5 rounded-xs flex flex-col justify-between space-y-3">
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">
+                  Instant Demo Test
+                </span>
+                <h3 className="text-xs font-mono font-bold text-white uppercase">
+                  Don't have a watermarked photo handy?
+                </h3>
+                <p className="text-[11px] text-white/50 font-sans leading-relaxed">
+                  Load the calibrated Gemini sample image to test auto-detection, live zoom alignment, and pixel-perfect unblending immediately.
                 </p>
-                <p className="text-xs font-mono text-white/40">
-                  Running multi-scale NCC &amp; gradient edge analysis...
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="w-11 h-11 rounded-xs bg-white/5 border border-white/15 flex items-center justify-center text-cyan-400">
-                  <Upload className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-mono font-bold text-white uppercase">
-                  {imgFile ? `Loaded: ${imgFile.name} (Click or Drop to Replace)` : 'Upload or Drag Your Gemini / Nano Banana Image'}
-                </p>
-                <p className="text-xs font-mono text-white/40">
-                  Supports PNG, JPG, WebP • 100% Local Browser Processing
-                </p>
-              </>
-            )}
+              </div>
+              <button
+                type="button"
+                onClick={handleLoadSampleImage}
+                disabled={isImgLoading}
+                className="w-full py-2.5 px-3 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold uppercase tracking-wider rounded-xs flex items-center justify-center gap-2 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <Wand2 className="w-3.5 h-3.5" />
+                <span>Load Sample Image</span>
+              </button>
+            </div>
           </div>
 
           {/* Live Image Tuner */}
@@ -627,12 +587,7 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
                     <span className="text-cyan-400">Active ROI Box</span>
                   </div>
                   <div className="w-full flex items-center justify-center bg-black/80 border border-white/5 p-2 rounded-2xs min-h-[220px]">
-                    <canvas
-                      ref={imgMainCanvasRef}
-                      onClick={handleMainCanvasClick}
-                      title="Click anywhere on the preview to position the watermark removal box"
-                      className="max-w-full h-auto rounded-2xs cursor-crosshair"
-                    />
+                    <canvas ref={imgMainCanvasRef} className="max-w-full h-auto rounded-2xs" />
                   </div>
                 </div>
 
@@ -664,9 +619,9 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
                 </div>
               </div>
 
-              {/* Model Presets & Custom Watermark Image Selector */}
+              {/* Model Presets */}
               <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
-                <span className="text-xs font-mono text-white/50 uppercase mr-2">Watermark Template:</span>
+                <span className="text-xs font-mono text-white/50 uppercase mr-2">Model Preset:</span>
                 <button
                   type="button"
                   onClick={() => handleSelectImagePreset('new')}
@@ -689,87 +644,7 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
                 >
                   Classic Corner (Standard)
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleSelectImagePreset('custom')}
-                  className={`px-3.5 py-2 text-xs font-mono rounded-xs border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                    imgPreset === 'custom'
-                      ? 'bg-cyan-400 text-black font-bold border-cyan-400'
-                      : 'bg-white/5 text-white/70 border-white/15 hover:bg-white/10'
-                  }`}
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>Custom Watermark Image {customWmFile ? `(${customWmFile.name.slice(0, 10)}...)` : ''}</span>
-                </button>
               </div>
-
-              {/* Custom Watermark Image Uploader Card */}
-              {imgPreset === 'custom' && (
-                <div className="bg-cyan-950/20 border border-cyan-500/30 p-4 rounded-xs space-y-3 font-mono">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      {customWmPreviewUrl ? (
-                        <div className="w-12 h-12 rounded-2xs bg-black border border-cyan-500/40 p-1 flex items-center justify-center overflow-hidden bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:6px_6px]">
-                          <img
-                            src={customWmPreviewUrl}
-                            alt="Custom Watermark Mask"
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-12 h-12 rounded-2xs bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                          <FileImage className="w-5 h-5" />
-                        </div>
-                      )}
-                      <div>
-                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <span>Custom Watermark Image / Mask</span>
-                          {customWmImg && (
-                            <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-2xs">
-                              {customWmWidth} × {customWmHeight}px
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-white/60">
-                          {customWmFile
-                            ? `Loaded: ${customWmFile.name}`
-                            : 'Upload any PNG logo (with transparency) or B/W mask to subtract mathematically'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        ref={customWmInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          if (e.target.files?.length) {
-                            handleCustomWatermarkUpload(e.target.files[0]);
-                            e.target.value = '';
-                          }
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => customWmInputRef.current?.click()}
-                        className="px-3.5 py-1.5 bg-cyan-400 hover:bg-cyan-300 text-black text-xs font-bold rounded-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>{customWmFile ? 'Replace Watermark' : 'Upload Watermark PNG'}</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] text-cyan-300/80 bg-cyan-950/40 border border-cyan-500/20 p-2 rounded-2xs flex items-center gap-2">
-                    <ScanSearch className="w-3.5 h-3.5 shrink-0" />
-                    <span>
-                      Tip: Click anywhere on the full-frame preview canvas above to instantly jump the unblending box to that position!
-                    </span>
-                  </p>
-                </div>
-              )}
 
               {/* 4 Precision Sliders */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 font-mono text-xs">
@@ -1249,21 +1124,22 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
         </div>
       )}
 
-      {/* ================= ADD CUSTOM WATERMARK (STAMPER) PANEL ================= */}
-      {activeTab === 'stamp' && <CustomWatermarkStamper onBack={onBack} />}
-
-      {/* Mathematical Unblending Reference */}
-      <div className="border-t border-white/10 pt-6 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">
-              Zero-Blur Mathematical Restoration
-            </span>
-            <h3 className="text-base font-mono font-bold text-white uppercase">
-              Why Reverse-Alpha Beats AI Inpainting
-            </h3>
+      {/* Mathematical Unblending Reference & Before/After Showcase */}
+      <div className="border-t border-white/10 pt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div className="lg:col-span-5 space-y-3">
+          <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">
+            Zero-Blur Mathematical Restoration
+          </span>
+          <h3 className="text-base font-mono font-bold text-white uppercase">
+            Why Reverse-Alpha Beats AI Inpainting
+          </h3>
+          <p className="text-xs text-gray-400 font-sans leading-relaxed">
+            Google Gemini, Imagen 3, Nano Banana, Google Flow, and Veo 3 embed visible watermarks using semi-transparent alpha blending. Because original pixel data remains underneath, exact reverse-alpha subtraction restores 100% of original clarity:
+          </p>
+          <div className="bg-black/70 border border-white/15 p-3 rounded-xs font-mono text-xs text-cyan-300 text-center">
+            Original = (Watermarked − Logo × α) / (1 − α)
           </div>
-          <div className="flex flex-wrap gap-3 text-[11px] font-mono text-white/60">
+          <div className="flex flex-wrap gap-3 text-[11px] font-mono text-white/60 pt-1">
             <span>100% Client-Side Privacy</span>
             <span>·</span>
             <span>Zero Quality Loss</span>
@@ -1271,11 +1147,32 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
             <span>WebCodecs GPU Muxing</span>
           </div>
         </div>
-        <p className="text-xs text-gray-400 font-sans leading-relaxed max-w-3xl">
-          Google Gemini, Imagen 3, Nano Banana, Google Flow, and Veo 3 embed visible watermarks using semi-transparent alpha blending. Because original pixel data remains underneath, exact reverse-alpha subtraction restores 100% of original clarity:
-        </p>
-        <div className="bg-black/70 border border-white/15 p-3 rounded-xs font-mono text-xs text-cyan-300 text-center max-w-xl">
-          Original = (Watermarked − Logo × α) / (1 − α)
+
+        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-black/50 border border-white/10 p-3 rounded-xs space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-rose-400 font-bold uppercase">Before (Gemini Sparkle)</span>
+              <span className="text-white/40">Visible Watermark</span>
+            </div>
+            <img
+              src="/watermark/before.webp"
+              alt="Before Gemini watermark removal"
+              referrerPolicy="no-referrer"
+              className="w-full h-48 object-cover rounded-2xs border border-white/10"
+            />
+          </div>
+          <div className="bg-black/50 border border-emerald-500/25 p-3 rounded-xs space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-mono">
+              <span className="text-emerald-400 font-bold uppercase">After (Alpha Unblended)</span>
+              <span className="text-emerald-400/60">100% Pixel Recovery</span>
+            </div>
+            <img
+              src="/watermark/after.webp"
+              alt="After Gemini watermark removal"
+              referrerPolicy="no-referrer"
+              className="w-full h-48 object-cover rounded-2xs border border-emerald-500/20"
+            />
+          </div>
         </div>
       </div>
     </div>

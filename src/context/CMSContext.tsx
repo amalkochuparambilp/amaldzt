@@ -11,7 +11,7 @@ import {
   KnowledgeLayerData,
   ContactSubmissionItem
 } from '../types';
-import { DEFAULT_CMS_STATE } from '../db/defaultState';
+import { DEFAULT_CMS_STATE } from '../cms/defaultState';
 
 export interface AdminUserSession {
   email: string;

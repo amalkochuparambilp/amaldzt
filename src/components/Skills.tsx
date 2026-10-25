@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
-import { SKILLS, AMAL_INFO } from '../data';
+import { useCMS } from '../context/CMSContext';
 import * as Icons from 'lucide-react';
 
 export default function Skills() {
-  const skills = SKILLS;
-  const profile = AMAL_INFO;
+  const { cms } = useCMS();
+  const { skills, profile } = cms;
 
   const renderIcon = (iconName: string) => {
     const LucideIcon = (Icons as any)[iconName];
@@ -80,7 +80,7 @@ export default function Skills() {
               >
                 {categorySkills.map((skill) => (
                   <motion.div
-                    key={skill.name}
+                    key={skill.id || skill.name}
                     variants={cardVariants}
                     className="bg-[#111] border border-white/10 rounded-sm p-4 flex flex-col gap-3 hover:border-white/30 transition-colors"
                   >

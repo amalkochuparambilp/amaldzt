@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import { Download, Copy, Check, QrCode as QrIcon, AlertCircle, RefreshCw } from 'lucide-react';
-import { copyToClipboard } from '../utils/clipboard';
 
 interface QRCodeDisplayProps {
   value: string;
@@ -91,12 +90,10 @@ export default function QRCodeDisplay({
 
   const handleCopyLink = () => {
     if (!value) return;
-    copyToClipboard(value).then((ok) => {
-      if (ok) {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    }).catch(() => {});
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const handleDownload = () => {

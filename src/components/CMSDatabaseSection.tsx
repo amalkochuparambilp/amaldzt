@@ -4,7 +4,7 @@ import {
   PRISMA_SCHEMA_SOURCE,
   generatePostgresSqlDump,
   generatePrismaSeedScript
-} from '../db/prismaGenerators';
+} from '../cms/prismaGenerators';
 import {
   Database,
   RefreshCw,

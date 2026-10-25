@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { COLLABORATIONS } from '../data';
+import { useCMS } from '../context/CMSContext';
 import { Collaboration } from '../types';
 import {
   Heart,
@@ -21,7 +21,8 @@ interface CollaborateProps {
 }
 
 export default function Collaborate({ onNavigate }: CollaborateProps) {
-  const collaborations = COLLABORATIONS;
+  const { cms } = useCMS();
+  const { collaborations } = cms;
   const [selectedCollab, setSelectedCollab] = useState<Collaboration | null>(null);
 
   const renderLogo = (logoType: Collaboration['logoType']) => {

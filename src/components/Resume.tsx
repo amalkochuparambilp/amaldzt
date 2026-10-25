@@ -1,10 +1,10 @@
 import { useRef } from 'react';
-import { AMAL_INFO, PROJECTS } from '../data';
+import { useCMS } from '../context/CMSContext';
 import { Printer, Mail, MapPin, Linkedin, Phone } from 'lucide-react';
 
 export default function Resume() {
-  const profile = AMAL_INFO;
-  const projects = PROJECTS;
+  const { cms } = useCMS();
+  const { profile, projects } = cms;
   const resumeRef = useRef<HTMLDivElement>(null);
 
   const publishedProjects = projects.filter((p) => p.published !== false);
@@ -20,7 +20,7 @@ export default function Resume() {
         <div className="space-y-1 text-center sm:text-left">
           <h2 className="text-3xl font-bold tracking-tight text-white uppercase">Curriculum Vitae</h2>
           <p className="text-xs text-white/50 font-sans">
-            Formal resume record derived from academic & project records.
+            Formal resume record derived from live CMS academic & project records.
           </p>
         </div>
         <button
@@ -75,7 +75,7 @@ export default function Resume() {
             PROFESSIONAL SUMMARY
           </h3>
           <p className="text-sm text-white/80 leading-relaxed font-light">
-            {profile.summary}
+            {profile.resumeSummary}
           </p>
         </div>
 
