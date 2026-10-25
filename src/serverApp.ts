@@ -20,7 +20,7 @@ import {
   deleteTableRowInPostgres,
   executeSqlQueryInPostgres
 } from './db/cmsRepository';
-import { DEFAULT_CMS_STATE } from './cms/defaultState';
+import { DEFAULT_CMS_STATE } from './db/defaultState';
 import {
   CMSState,
   Project,

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { prisma, pgPool, getDatabaseEnvMetadata, reloadDatabaseConnection } from './prisma';
-import { DEFAULT_CMS_STATE } from '../cms/defaultState';
+import { DEFAULT_CMS_STATE } from './defaultState';
 import {
   CMSState,
   SiteProfileData,
