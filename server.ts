@@ -287,7 +287,7 @@ async function startServer() {
   }
 
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`DZt Server & PostgreSQL CMS running on http://0.0.0.0:${PORT}`);
+    console.log(`DZt Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

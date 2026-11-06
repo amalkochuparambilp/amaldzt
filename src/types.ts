@@ -80,32 +80,6 @@ export interface SiteProfileData {
   buildVersion: string;
 }
 
-export interface NavItemConfig {
-  id: 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact';
-  label: string;
-  visible: boolean;
-}
-
-export interface SiteSettingsData {
-  showHeroMarquee: boolean;
-  showHeroTelemetry: boolean;
-  showHeroHighlights: boolean;
-  showBatteryTracker: boolean;
-  announcementActive: boolean;
-  announcementText: string;
-  announcementLinkText: string;
-  announcementLinkTarget: string;
-  navConfig: NavItemConfig[];
-}
-
-export interface SeoSettingsData {
-  title: string;
-  description: string;
-  keywords: string;
-  canonicalUrl: string;
-  ogImage: string;
-}
-
 export interface PartnerLogoItem {
   id: string;
   name: string;
@@ -114,64 +88,4 @@ export interface PartnerLogoItem {
   fileName: string;
   active: boolean;
   sortOrder: number;
-}
-
-export interface KnowledgeRelationshipItem {
-  id: string;
-  type: string | string[];
-  name: string;
-  alternateName?: string[];
-  url?: string;
-  status: 'confirmed' | 'pending' | 'archived';
-}
-
-export interface KnowledgeLayerData {
-  schema_version: string;
-  entity: {
-    id: string;
-    '@type': string;
-    name: string;
-    alternateName: string[];
-    url: string;
-    jobTitle: string;
-    description: string;
-    public_profiles: { platform: string; url: string }[];
-  };
-  relationships: KnowledgeRelationshipItem[];
-  relationship_policy: string;
-  official_sources: { type: string; url: string }[];
-  last_updated: string;
-}
-
-export interface ContactSubmissionItem {
-  id: string;
-  name: string;
-  email: string;
-  message: string;
-  status: 'unread' | 'read' | 'replied' | 'archived';
-  telegramDelivered: boolean;
-  ipAddress?: string;
-  createdAt: string;
-}
-
-export interface AuditLogItem {
-  id: string;
-  action: string;
-  section: string;
-  summary: string;
-  timestamp: string;
-}
-
-export interface CMSState {
-  profile: SiteProfileData;
-  settings: SiteSettingsData;
-  seo: SeoSettingsData;
-  projects: Project[];
-  skills: Skill[];
-  collaborations: Collaboration[];
-  logos: PartnerLogoItem[];
-  knowledge: KnowledgeLayerData;
-  messages: ContactSubmissionItem[];
-  auditLogs: AuditLogItem[];
-  lastUpdated: string;
 }

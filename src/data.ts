@@ -10,6 +10,19 @@ export const AMAL_INFO = {
   linkedin: 'https://linkedin.com/in/amalkochuparambilp',
   github: 'https://github.com/amalkochuparambilp',
   summary: 'BCA candidate at Jawaharlal Nehru Institute of Arts and Science (JNIAS) with strong technical expertise in React, Python, Django, PHP, MySQL, and modern web architectures. Founder and Lead at DZt digital platform, developer of LibCode JNIAS, Co-operative Bank Exam Portal, and Hrdiya health analytics application.',
+  heroHeadingLine1: 'Crafting digital',
+  heroHeadingItalic: 'ecosystems',
+  heroHeadingLine2: 'with precision & purpose.',
+  heroBio: 'Founder & Lead of DZt. A full-stack developer and BCA candidate passionate about building high-performance web systems, intuitive interfaces, and scalable digital platforms.',
+  availabilityText: 'AVAILABLE FOR COLLABORATIONS',
+  availabilityActive: true,
+  campusBadge: 'JNIAS BALAGRAM (BCA 2026)',
+  founderBadge: 'Founder / Lead @ DZt',
+  resumeSummary: 'Recent BCA graduate seeking entry-level opportunity to apply foundational skills and grow professionally. Passionate developer specializing in high-performance user interfaces, Python/Django health analytics platforms, and co-operative bank portal solutions.',
+  aboutBioParagraph1: 'I am a passionate software developer and Founder/Lead at DZt, currently pursuing my Bachelor of Computer Application (BCA) degree at Jawaharlal Nehru Institute of Arts and Science (JNIAS) in Balagram, Idukki.',
+  aboutBioParagraph2: 'My technical expertise bridges full-stack application development, database design, and creative media. I specialize in building robust web applications with React, TypeScript, Python, Django, PHP, and MySQL. From engineering specialized college management software to crafting AI-assisted health diagnostic platforms, my goal is to deliver clean, scalable, and high-impact digital solutions.',
+  ecosystemNode: 'BALAGRAM_NODE',
+  buildVersion: 'STABLE_BUILD_v2.0',
   education: {
     degree: 'Bachelor of Computer Application (BCA)',
     institution: 'Jawaharlal Nehru Institute of Arts and Science (JNIAS)',
@@ -20,6 +33,81 @@ export const AMAL_INFO = {
   skillsList: ['Team Work', 'Computer Literacy', 'PHP', 'React', 'Python', 'Django', 'SQLite', 'JavaScript', 'TypeScript', 'Tailwind CSS', 'Git', 'Node.js'],
   languages: ['English', 'Malayalam']
 };
+
+export const PARTNER_LOGOS = [
+  {
+    id: 'logo-openai',
+    name: 'OPENAI',
+    src: '/logos/openai-wordmark-dark.svg',
+    alt: 'OpenAI Logo',
+    fileName: 'openai-wordmark-dark.svg',
+    active: true,
+    sortOrder: 0
+  },
+  {
+    id: 'logo-axis-bank',
+    name: 'AXIS BANK',
+    src: '/logos/axis-bank.svg',
+    alt: 'Axis Bank Logo',
+    fileName: 'axis-bank.svg',
+    active: true,
+    sortOrder: 1
+  },
+  {
+    id: 'logo-shopify',
+    name: 'SHOPIFY',
+    src: '/logos/shopify.svg',
+    alt: 'Shopify Logo',
+    fileName: 'shopify.svg',
+    active: true,
+    sortOrder: 2
+  },
+  {
+    id: 'logo-nss',
+    name: 'NSS',
+    src: '/logos/new-nss-seeklogo.png',
+    alt: 'National Service Scheme',
+    fileName: 'new-nss-seeklogo.png',
+    active: true,
+    sortOrder: 3
+  },
+  {
+    id: 'logo-uxbjxoi',
+    name: 'PARTNER LOGO',
+    src: '/logos/idUxbjXOi-_logos.svg',
+    alt: 'Partner Logo',
+    fileName: 'idUxbjXOi-_logos.svg',
+    active: true,
+    sortOrder: 4
+  },
+  {
+    id: 'logo-hf5lcjo',
+    name: 'TECH PARTNER',
+    src: '/logos/idhf5lcjoR_1789676848779.svg',
+    alt: 'Tech Partner Logo',
+    fileName: 'idhf5lcjoR_1789676848779.svg',
+    active: true,
+    sortOrder: 5
+  },
+  {
+    id: 'logo-jps0yq',
+    name: 'CLOUD ECOSYSTEM',
+    src: '/logos/idJPs0Yq7Y_1789677081540.svg',
+    alt: 'Cloud Ecosystem Logo',
+    fileName: 'idJPs0Yq7Y_1789677081540.svg',
+    active: true,
+    sortOrder: 6
+  },
+  {
+    id: 'logo-jsce-imz',
+    name: 'DZT NETWORK',
+    src: '/logos/idJsCe_Imz_1789677158066.png',
+    alt: 'DZt Network Logo',
+    fileName: 'idJsCe_Imz_1789677158066.png',
+    active: true,
+    sortOrder: 7
+  }
+];
 
 export const PROJECTS: Project[] = [
   {

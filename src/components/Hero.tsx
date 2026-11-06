@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Cpu, FileText, Mail, UserCheck } from 'lucide-react';
+import { ArrowRight, Cpu, FileText, Mail, UserCheck, GraduationCap } from 'lucide-react';
 import { AMAL_INFO } from '../data';
 import HeroTelemetry from './HeroTelemetry';
 import PartnershipMarquee from './PartnershipMarquee';
@@ -70,6 +70,15 @@ export default function Hero({ onNavigate }: HeroProps) {
 
         {/* Action button CTA cluster */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
+          <button
+            id="btn-hero-sta-courses"
+            onClick={() => onNavigate('sta')}
+            className="w-full sm:w-auto min-h-[44px] px-6 py-3 border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer rounded-xs"
+          >
+            <GraduationCap className="w-4 h-4 text-emerald-400" />
+            <span>DZt STA Courses (35)</span>
+          </button>
+
           <button
             id="btn-hero-projects"
             onClick={() => onNavigate('projects')}

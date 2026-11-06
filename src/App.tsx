@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Radio, LayoutGrid, Boxes, AppWindow } from 'lucide-react';
+import { Menu, X, Cpu, Layers, Mail, BookOpen, Sparkles, Brain, Bot, Zap, Activity, UserCheck, Handshake, Battery, BatteryCharging, Radio, LayoutGrid, Boxes, AppWindow, GraduationCap } from 'lucide-react';
 
 import Hero from './components/Hero';
 import About from './components/About';
@@ -10,9 +10,10 @@ import Skills from './components/Skills';
 import Resume from './components/Resume';
 import Contact from './components/Contact';
 import MiniApps from './components/MiniApps';
+import CourseRegistration from './components/CourseRegistration';
 import { AMAL_INFO } from './data';
 
-type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'contact';
+type Tab = 'home' | 'about' | 'collaborate' | 'projects' | 'skills' | 'resume' | 'apps' | 'sta' | 'contact';
 
 export default function App() {
   const getInitialTab = (): Tab => {
@@ -44,9 +45,24 @@ export default function App() {
         return 'apps';
       }
 
+      if (
+        path.startsWith('/sta') ||
+        path.startsWith('/courses') ||
+        path.startsWith('/register') ||
+        path.startsWith('/course-registration') ||
+        hash.startsWith('#sta') ||
+        hash.startsWith('#courses') ||
+        hash.startsWith('#register') ||
+        hash.includes('/sta') ||
+        hash.includes('/courses') ||
+        hash.includes('/register')
+      ) {
+        return 'sta';
+      }
+
       // Check standard section hashes
       const cleanHash = hash.replace('#', '') as Tab;
-      const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'contact'];
+      const validTabs: Tab[] = ['home', 'about', 'collaborate', 'projects', 'skills', 'resume', 'apps', 'sta', 'contact'];
       if (validTabs.includes(cleanHash)) {
         return cleanHash;
       }
@@ -186,6 +202,9 @@ export default function App() {
       targetTab = 'apps';
       setInitialAppId(undefined);
     }
+    if (tab === 'sta' || tab === 'courses' || tab === 'register' || tab === 'course-registration') {
+      targetTab = 'sta';
+    }
 
     setActiveTab(targetTab);
     setIsMobileMenuOpen(false);
@@ -193,6 +212,8 @@ export default function App() {
 
     if (targetTab === 'apps') {
       window.history.pushState(null, '', '/apps');
+    } else if (targetTab === 'sta') {
+      window.history.pushState(null, '', '/#sta');
     } else {
       window.history.pushState(null, '', `/#${targetTab}`);
     }
@@ -205,7 +226,8 @@ export default function App() {
     { id: 'projects', label: 'Projects', icon: Layers },
     { id: 'skills', label: 'Skills', icon: Cpu },
     { id: 'resume', label: 'Resume', icon: BookOpen },
-    { id: 'apps', label: 'DZt MiniApp', icon: LayoutGrid, isLive: true },
+    { id: 'sta', label: 'DZt STA', icon: GraduationCap, isLive: true },
+    { id: 'apps', label: 'DZt MiniApp', icon: LayoutGrid },
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 
@@ -386,6 +408,9 @@ export default function App() {
             )}
             {activeTab === 'apps' && (
               <MiniApps initialAppId={initialAppId} initialRoomId={initialRoomId} onExitToHome={() => handleNavigate('home')} />
+            )}
+            {activeTab === 'sta' && (
+              <CourseRegistration />
             )}
             {activeTab === 'contact' && (
               <Contact />

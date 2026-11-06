@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
-import { useCMS } from '../context/CMSContext';
+import { SKILLS, AMAL_INFO } from '../data';
 import * as Icons from 'lucide-react';
 
 export default function Skills() {
-  const { cms } = useCMS();
-  const { skills, profile } = cms;
+  const skills = SKILLS;
+  const profile = AMAL_INFO;
 
   const renderIcon = (iconName: string) => {
     const LucideIcon = (Icons as any)[iconName];
