@@ -15,7 +15,6 @@ import {
   AlertTriangle,
   ShieldCheck,
   RefreshCw,
-  Stamp,
   FileImage,
   X,
 } from 'lucide-react';
@@ -34,14 +33,13 @@ import {
   grabVideoPreviewFrame,
   resolveBox,
 } from '../utils/watermarkEngine';
-import CustomWatermarkStamper from './CustomWatermarkStamper';
 
 interface WatermarkRemoverAppProps {
   onBack?: () => void;
 }
 
 export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps) {
-  const [activeTab, setActiveTab] = useState<'image' | 'video' | 'stamp'>('image');
+  const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
 
   // Engines
   const watermarkEngineRef = useRef<WatermarkEngine | null>(null);
@@ -510,18 +508,6 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
           >
             <Video className="w-3.5 h-3.5" />
             <span>Video Remover</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('stamp')}
-            className={`px-3.5 py-2 text-xs font-mono uppercase tracking-wider rounded-2xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === 'stamp'
-                ? 'bg-cyan-400 text-black font-bold shadow-sm'
-                : 'text-white/60 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Stamp className="w-3.5 h-3.5" />
-            <span>Add Custom Watermark</span>
           </button>
         </div>
       </div>
@@ -1248,9 +1234,6 @@ export default function WatermarkRemoverApp({ onBack }: WatermarkRemoverAppProps
           )}
         </div>
       )}
-
-      {/* ================= ADD CUSTOM WATERMARK (STAMPER) PANEL ================= */}
-      {activeTab === 'stamp' && <CustomWatermarkStamper onBack={onBack} />}
 
       {/* Mathematical Unblending Reference */}
       <div className="border-t border-white/10 pt-6 space-y-3">
